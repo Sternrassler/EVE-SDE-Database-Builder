@@ -1,3 +1,4 @@
+# === VB.NET Legacy (Legacy Branch only) ===
 *bin/*
 *obj/*
 Service References/*
@@ -16,12 +17,58 @@ Root Directory/*
 #!**/packages/repositories.config
 # NuGet v3's project.json files produces more ignoreable files
 *.nuget.props
-<<<<<<< HEAD
 *.nuget.targets
 *.vsidx
-*.json
-.vs/EVE-SDE-Database-Builder/v17/.wsuo
-.vs/slnx.sqlite
-=======
-*.nuget.targets
->>>>>>> parent of fdde43b (Updating to VS 2022)
+
+# === Go Edition (Master Branch) ===
+
+# Binaries
+/esdedb
+*.exe
+*.dll
+*.so
+*.dylib
+
+# Go Test / Coverage
+*.test
+*.out
+coverage.txt
+coverage.html
+
+# Go Build Cache
+/bin/
+/dist/
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Application Data
+*.db
+*.db-shm
+*.db-wal
+/sde-JSONL/
+/eve_sde.db*
+
+# Config (user-specific)
+/config.toml
+!config.toml.example
+
+# Logs
+*.log
+/logs/
+
+# Temporary Files
+/tmp/
+*.tmp
+
+# Generated Code (commit placeholder, not actual generated files)
+# internal/parser/generated/*.go wird committed (Code-Gen Output)
+
