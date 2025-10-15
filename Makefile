@@ -23,6 +23,7 @@ help: ## Zeigt verfügbare Targets
 	@echo "  commit-lint     - Validiert Commit Messages (RANGE oder COMMIT_FILE nötig)"
 	@echo "  release-check   - VERSION/CHANGELOG Synchronität prüfen"
 	@echo "  security-blockers - Prüft kritische Security Findings"
+	@echo "  secrets-check   - Prüft auf Secrets mit Gitleaks"
 	@echo ""
 	@echo "Composite Targets:"
 	@echo "  check-hooks   - Governance-Checks für Git Hooks (normative + adr)"
@@ -78,6 +79,9 @@ release-check: ## Prüft VERSION/CHANGELOG Synchronität
 
 security-blockers: ## Prüft kritische Security Findings (benötigt scan vorher)
 	@bash scripts/common/check-security-blockers.sh
+
+secrets-check: ## Prüft auf Secrets mit Gitleaks (staged Files)
+	@bash scripts/common/check-secrets.sh
 
 # === Composite Targets ===
 
