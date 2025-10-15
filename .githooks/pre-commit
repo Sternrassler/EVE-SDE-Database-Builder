@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+# pre-commit – Lokale Pre-Commit Validierung
+# Aktivierung: git config core.hooksPath .githooks
+# Referenz: copilot-instructions.md Abschnitt 4
+
+set -euo pipefail
+
+echo "[pre-commit] Führe lokale Validierungen aus..."
+
+# Nutze Make Target für Governance-Checks
+if [ -f Makefile ]; then
+    echo "[pre-commit] Führe 'make check-hooks' aus..."
+    make check-hooks || exit 1
+else
+    echo "[pre-commit] WARNING: Makefile nicht gefunden – überspringe Validierung"
+fi
+
+# Commit Message Check (wird von Git Hook commit-msg erledigt – hier nur Info)
+echo "[pre-commit] Hinweis: Commit Message wird nach diesem Hook geprüft (commit-msg Hook)"
+
+# Keine Secrets im Commit (einfache Heuristik)
+echo "[pre-commit] Prüfe auf potenzielle Secrets..."
+if git diff --cached --name-only | xargs grep -HnE "(password|secret|api[_-]?key|token|bearer)" -- 2>/dev/null; then
+    echo "[pre-commit] ⚠️  WARNUNG: Potenzielle Secrets gefunden – bitte Review durchführen"
+    echo "Falls gewollt, commit mit --no-verify überspringen (nicht empfohlen)"
+    # Nicht blockieren, nur Warnung
+fi
+
+echo "[pre-commit] ✅ Pre-Commit Checks erfolgreich"
+exit 0

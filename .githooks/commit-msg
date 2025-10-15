@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+# commit-msg – Validiert Commit Message Konventionen
+# Aktivierung: git config core.hooksPath .githooks
+# Referenz: copilot-instructions.md Abschnitt 2.7
+
+set -euo pipefail
+
+COMMIT_MSG_FILE="$1"
+
+if [ ! -f "$COMMIT_MSG_FILE" ]; then
+    echo "[commit-msg] ERROR: Commit Message Datei nicht gefunden: $COMMIT_MSG_FILE" >&2
+    exit 1
+fi
+
+# Nutze Make Target für Commit Message Validierung
+if [ -f Makefile ]; then
+    echo "[commit-msg] Führe 'make commit-lint' aus..."
+    COMMIT_FILE="$COMMIT_MSG_FILE" make commit-lint || exit 1
+else
+    echo "[commit-msg] WARNING: Makefile nicht gefunden – überspringe Validierung"
+fi
+
+exit 0
