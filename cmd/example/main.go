@@ -2,6 +2,8 @@ package main
 
 import (
 	"context"
+	"errors"
+	"time"
 
 	"github.com/Sternrassler/EVE-SDE-Database-Builder/internal/logger"
 )
@@ -33,4 +35,32 @@ func main() {
 
 	ctxLogger := globalLogger.WithContext(ctx)
 	ctxLogger.Info("Request processed", logger.Field{Key: "duration_ms", Value: 150})
+
+	// Example 5: Helper functions - HTTP Request Logging
+	jsonLogger.LogHTTPRequest("GET", "/api/types", 200, 45*time.Millisecond)
+	jsonLogger.LogHTTPRequest("POST", "/api/users", 201, 120*time.Millisecond)
+	jsonLogger.LogHTTPRequest("GET", "/api/missing", 404, 15*time.Millisecond)
+
+	// Example 6: Helper functions - Database Query Logging
+	jsonLogger.LogDBQuery("SELECT * FROM types WHERE id = ?", []interface{}{123}, 2*time.Millisecond)
+	jsonLogger.LogDBQuery("INSERT INTO items (name, value) VALUES (?, ?)", []interface{}{"test", 42}, 5*time.Millisecond)
+
+	// Example 7: Helper functions - Error Logging with Context
+	err := errors.New("failed to parse file")
+	jsonLogger.LogError(err, map[string]interface{}{
+		"file": "types.jsonl",
+		"line": 42,
+		"type": "parse_error",
+	})
+
+	// Example 8: Helper functions - Application Lifecycle
+	jsonLogger.LogAppStart("0.1.0", "abc123def")
+	jsonLogger.LogAppShutdown("graceful shutdown")
+
+	// Example 9: Using global helper functions
+	logger.LogHTTPRequest("GET", "/api/health", 200, 5*time.Millisecond)
+	logger.LogDBQuery("SELECT COUNT(*) FROM types", []interface{}{}, 10*time.Millisecond)
+	logger.LogErrorGlobal(errors.New("unexpected error"), map[string]interface{}{"context": "example"})
+	logger.LogAppStart("1.0.0", "xyz789")
+	logger.LogAppShutdown("normal exit")
 }
