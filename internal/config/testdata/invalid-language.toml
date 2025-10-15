@@ -1,0 +1,14 @@
+# Test Config - Invalid Language
+version = "1.0.0"
+
+[database]
+path = "./test.db"
+
+[import]
+sde_path = "./sde"
+language = "invalid"  # Invalid language code
+workers = 4
+
+[logging]
+level = "info"
+format = "text"

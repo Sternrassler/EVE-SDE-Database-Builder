@@ -1,0 +1,20 @@
+# Test Config - Valid
+version = "1.0.0"
+
+[database]
+path = "./test_eve.db"
+journal_mode = "WAL"
+cache_size_mb = 128
+
+[import]
+sde_path = "./test-sde"
+language = "de"
+workers = 8
+
+[logging]
+level = "debug"
+format = "json"
+
+[update]
+enabled = true
+check_url = "https://test.example.com/version.json"

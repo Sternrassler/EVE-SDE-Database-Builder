@@ -1,0 +1,14 @@
+# Test Config - Invalid Log Level
+version = "1.0.0"
+
+[database]
+path = "./test.db"
+
+[import]
+sde_path = "./sde"
+language = "en"
+workers = 4
+
+[logging]
+level = "invalid"  # Invalid log level
+format = "text"
