@@ -1,0 +1,20 @@
+# EVE SDE Database Builder Configuration
+version = "1.0.0"
+
+[database]
+path = "./eve_sde.db"
+journal_mode = "WAL"
+cache_size_mb = 64
+
+[import]
+sde_path = "./sde-JSONL"
+language = "en"  # en, de, fr, ja, ru, zh, es, ko
+workers = 4      # 0 = auto (runtime.NumCPU())
+
+[logging]
+level = "info"   # debug, info, warn, error
+format = "text"  # text, json
+
+[update]
+enabled = false
+check_url = ""
