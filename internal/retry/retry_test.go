@@ -497,66 +497,66 @@ func TestDifferentErrorTypes(t *testing.T) {
 
 // BenchmarkRetry_Success benchmarks successful retry without delays
 func BenchmarkRetry_Success(b *testing.B) {
-policy := NewPolicy(3, 1*time.Nanosecond, 10*time.Nanosecond)
-policy.Jitter = false
+	policy := NewPolicy(3, 1*time.Nanosecond, 10*time.Nanosecond)
+	policy.Jitter = false
 
-b.ResetTimer()
-for i := 0; i < b.N; i++ {
-_ = policy.Do(context.Background(), func() error {
-return nil
-})
-}
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		_ = policy.Do(context.Background(), func() error {
+			return nil
+		})
+	}
 }
 
 // BenchmarkRetry_OneRetry benchmarks retry with one failure
 func BenchmarkRetry_OneRetry(b *testing.B) {
-policy := NewPolicy(3, 1*time.Nanosecond, 10*time.Nanosecond)
-policy.Jitter = false
+	policy := NewPolicy(3, 1*time.Nanosecond, 10*time.Nanosecond)
+	policy.Jitter = false
 
-b.ResetTimer()
-for i := 0; i < b.N; i++ {
-attempts := 0
-_ = policy.Do(context.Background(), func() error {
-attempts++
-if attempts == 1 {
-return apperrors.NewRetryable("retry", nil)
-}
-return nil
-})
-}
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		attempts := 0
+		_ = policy.Do(context.Background(), func() error {
+			attempts++
+			if attempts == 1 {
+				return apperrors.NewRetryable("retry", nil)
+			}
+			return nil
+		})
+	}
 }
 
 // BenchmarkRetry_NonRetryable benchmarks non-retryable error path
 func BenchmarkRetry_NonRetryable(b *testing.B) {
-policy := DefaultPolicy()
+	policy := DefaultPolicy()
 
-b.ResetTimer()
-for i := 0; i < b.N; i++ {
-_ = policy.Do(context.Background(), func() error {
-return apperrors.NewFatal("fatal", nil)
-})
-}
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		_ = policy.Do(context.Background(), func() error {
+			return apperrors.NewFatal("fatal", nil)
+		})
+	}
 }
 
 // BenchmarkCalculateBackoff benchmarks backoff calculation
 func BenchmarkCalculateBackoff(b *testing.B) {
-policy := DefaultPolicy()
+	policy := DefaultPolicy()
 
-b.ResetTimer()
-for i := 0; i < b.N; i++ {
-_ = calculateBackoff(5, policy)
-}
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		_ = calculateBackoff(5, policy)
+	}
 }
 
 // BenchmarkDoWithResult_Success benchmarks successful generic retry
 func BenchmarkDoWithResult_Success(b *testing.B) {
-policy := NewPolicy(3, 1*time.Nanosecond, 10*time.Nanosecond)
-policy.Jitter = false
+	policy := NewPolicy(3, 1*time.Nanosecond, 10*time.Nanosecond)
+	policy.Jitter = false
 
-b.ResetTimer()
-for i := 0; i < b.N; i++ {
-_, _ = DoWithResult(context.Background(), policy, func() (int, error) {
-return 42, nil
-})
-}
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		_, _ = DoWithResult(context.Background(), policy, func() (int, error) {
+			return 42, nil
+		})
+	}
 }

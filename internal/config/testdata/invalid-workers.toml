@@ -1,0 +1,14 @@
+# Test Config - Invalid Workers
+version = "1.0.0"
+
+[database]
+path = "./test.db"
+
+[import]
+sde_path = "./sde"
+language = "en"
+workers = 50  # Invalid: > 32
+
+[logging]
+level = "info"
+format = "text"

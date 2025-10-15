@@ -1,0 +1,11 @@
+# Test Config - Invalid (missing required fields)
+version = "1.0.0"
+
+[database]
+path = ""  # Empty (required)
+journal_mode = "WAL"
+
+[import]
+sde_path = ""  # Empty (required)
+language = "en"
+workers = 4
