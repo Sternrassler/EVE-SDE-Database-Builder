@@ -87,8 +87,6 @@ func TestGlobalLogger(t *testing.T) {
 	mu.Unlock()
 }
 
-
-
 func TestLoggerDebug(t *testing.T) {
 	var buf bytes.Buffer
 	zl := zerolog.New(&buf).With().Timestamp().Logger()
