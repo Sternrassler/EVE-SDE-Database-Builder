@@ -1,7 +1,10 @@
 package logger
 
 import (
+	"errors"
 	"time"
+
+	apperrors "github.com/Sternrassler/EVE-SDE-Database-Builder/internal/errors"
 )
 
 // LogHTTPRequest logs an HTTP request with method, URL, status code, and duration
@@ -37,6 +40,32 @@ func (l *Logger) LogError(err error, context map[string]interface{}) {
 	l.Error("Error occurred", fields...)
 }
 
+// LogAppError logs an AppError with automatic context extraction
+func (l *Logger) LogAppError(err error) {
+	var appErr *apperrors.AppError
+	if errors.As(err, &appErr) {
+		fields := []Field{
+			{Key: "error_type", Value: appErr.Type.String()},
+			{Key: "message", Value: appErr.Message},
+		}
+
+		// Add all context fields from the error
+		for key, value := range appErr.Context {
+			fields = append(fields, Field{Key: key, Value: value})
+		}
+
+		// Add the cause if present
+		if appErr.Cause != nil {
+			fields = append(fields, Field{Key: "cause", Value: appErr.Cause.Error()})
+		}
+
+		l.Error("Application error", fields...)
+	} else {
+		// Fallback for non-AppError types
+		l.Error("Error occurred", Field{Key: "error", Value: err.Error()})
+	}
+}
+
 // LogAppStart logs application startup with version and commit information
 func (l *Logger) LogAppStart(version, commit string) {
 	l.Info("Application started",
@@ -65,6 +94,11 @@ func LogDBQuery(query string, args []interface{}, duration time.Duration) {
 // LogErrorGlobal logs an error with context using the global logger
 func LogErrorGlobal(err error, context map[string]interface{}) {
 	GetGlobalLogger().LogError(err, context)
+}
+
+// LogAppError logs an AppError with automatic context extraction using the global logger
+func LogAppError(err error) {
+	GetGlobalLogger().LogAppError(err)
 }
 
 // LogAppStartGlobal logs application startup using the global logger
