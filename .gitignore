@@ -33,6 +33,5 @@ Root Directory/*
 coverage.out
 vendor/
 
-# Generated/Downloaded data
-schemas/
+# Generated code (regenerated via make generate-parsers)
 internal/parser/generated/
