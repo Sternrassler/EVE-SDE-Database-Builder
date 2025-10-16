@@ -2,6 +2,7 @@ package parser_test
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -17,6 +18,26 @@ type TypeRow struct {
 	TypeName map[string]string `json:"typeName"`
 	Mass     float64           `json:"mass,omitempty"`
 	Volume   float64           `json:"volume,omitempty"`
+}
+
+// Validate implements the Validator interface for TypeRow
+func (t TypeRow) Validate() error {
+	if t.TypeID <= 0 {
+		return fmt.Errorf("typeID must be positive, got %d", t.TypeID)
+	}
+	if len(t.TypeName) == 0 {
+		return errors.New("typeName is required")
+	}
+	if _, ok := t.TypeName["en"]; !ok {
+		return errors.New("typeName must contain English (en) translation")
+	}
+	if t.Mass < 0 {
+		return fmt.Errorf("mass cannot be negative, got %f", t.Mass)
+	}
+	if t.Volume < 0 {
+		return fmt.Errorf("volume cannot be negative, got %f", t.Volume)
+	}
+	return nil
 }
 
 // ExampleJSONLParser_ParseFile demonstrates basic JSONL file parsing
@@ -101,4 +122,54 @@ func ExampleNewJSONLParser() {
 	// Output:
 	// Parser for table: invTypes
 	// Number of columns: 3
+}
+
+// ExampleValidateBatch demonstrates validating parsed data
+func ExampleValidateBatch() {
+	// Sample data with some invalid entries
+	items := []TypeRow{
+		{
+			TypeID:   34,
+			GroupID:  18,
+			TypeName: map[string]string{"en": "Tritanium", "de": "Tritanium"},
+			Mass:     0.01,
+			Volume:   0.01,
+		},
+		{
+			TypeID:   -1, // Invalid: negative ID
+			GroupID:  18,
+			TypeName: map[string]string{"en": "Invalid"},
+			Mass:     0.01,
+		},
+		{
+			TypeID:   35,
+			GroupID:  18,
+			TypeName: map[string]string{"de": "Pyerit"}, // Invalid: missing English
+			Mass:     0.01,
+		},
+		{
+			TypeID:   36,
+			GroupID:  18,
+			TypeName: map[string]string{"en": "Mexallon"},
+			Mass:     0.01,
+			Volume:   0.01,
+		},
+	}
+
+	// Validate the batch
+	validItems, errs := parser.ValidateBatch(items)
+
+	fmt.Printf("Valid items: %d\n", len(validItems))
+	fmt.Printf("Invalid items: %d\n", len(errs))
+
+	// Process valid items
+	for _, item := range validItems {
+		fmt.Printf("Type %d: %s\n", item.TypeID, item.TypeName["en"])
+	}
+
+	// Output:
+	// Valid items: 2
+	// Invalid items: 2
+	// Type 34: Tritanium
+	// Type 36: Mexallon
 }
