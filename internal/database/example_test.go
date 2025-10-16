@@ -277,3 +277,166 @@ func ExampleWithTransaction_withOptions() {
 	fmt.Printf("User count: %d\n", count)
 	// Output: User count: 2
 }
+
+// ExampleQueryRow demonstrates querying a single row into a struct
+func ExampleQueryRow() {
+	// Create an in-memory database
+	db, err := database.NewDB(":memory:")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer database.Close(db)
+
+	// Create and populate table
+	_, err = db.Exec(`
+		CREATE TABLE users (id INTEGER, name TEXT, active BOOLEAN);
+		INSERT INTO users (id, name, active) VALUES (1, 'Alice', 1), (2, 'Bob', 0);
+	`)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// Define a struct for the result
+	type User struct {
+		ID     int    `db:"id"`
+		Name   string `db:"name"`
+		Active bool   `db:"active"`
+	}
+
+	// Query a single user
+	ctx := context.Background()
+	user, err := database.QueryRow[User](ctx, db, "SELECT id, name, active FROM users WHERE id = ?", 1)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Printf("User: %s (ID: %d, Active: %t)\n", user.Name, user.ID, user.Active)
+	// Output: User: Alice (ID: 1, Active: true)
+}
+
+// ExampleQueryAll demonstrates querying multiple rows into a slice of structs
+func ExampleQueryAll() {
+	// Create an in-memory database
+	db, err := database.NewDB(":memory:")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer database.Close(db)
+
+	// Create and populate table
+	_, err = db.Exec(`
+		CREATE TABLE products (id INTEGER, name TEXT, price REAL);
+		INSERT INTO products (id, name, price) VALUES 
+			(1, 'Tritanium', 5.5),
+			(2, 'Pyerite', 8.2),
+			(3, 'Mexallon', 45.0);
+	`)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// Define a struct for the results
+	type Product struct {
+		ID    int     `db:"id"`
+		Name  string  `db:"name"`
+		Price float64 `db:"price"`
+	}
+
+	// Query all products with price > 6
+	ctx := context.Background()
+	products, err := database.QueryAll[Product](ctx, db, "SELECT id, name, price FROM products WHERE price > ? ORDER BY price", 6.0)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Printf("Found %d products:\n", len(products))
+	for _, p := range products {
+		fmt.Printf("- %s: %.2f ISK\n", p.Name, p.Price)
+	}
+	// Output:
+	// Found 2 products:
+	// - Pyerite: 8.20 ISK
+	// - Mexallon: 45.00 ISK
+}
+
+// ExampleExists demonstrates checking for row existence
+func ExampleExists() {
+	// Create an in-memory database
+	db, err := database.NewDB(":memory:")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer database.Close(db)
+
+	// Create and populate table
+	_, err = db.Exec(`
+		CREATE TABLE users (id INTEGER PRIMARY KEY, email TEXT UNIQUE);
+		INSERT INTO users (id, email) VALUES (1, 'alice@example.com');
+	`)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	ctx := context.Background()
+
+	// Check if email already exists
+	emailExists, err := database.Exists(ctx, db, "SELECT 1 FROM users WHERE email = ?", "alice@example.com")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	if emailExists {
+		fmt.Println("Email is already registered")
+	}
+
+	// Check if different email exists
+	newEmailExists, err := database.Exists(ctx, db, "SELECT 1 FROM users WHERE email = ?", "bob@example.com")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	if !newEmailExists {
+		fmt.Println("Email is available")
+	}
+
+	// Output:
+	// Email is already registered
+	// Email is available
+}
+
+// ExampleNewTestDB demonstrates using the testing utility
+func ExampleNewTestDB() {
+	// Note: This example uses a mock testing.T for demonstration
+	// In real tests, use the actual *testing.T from your test function
+
+	// This is a simplified demonstration - in actual test code:
+	// func TestMyFeature(t *testing.T) {
+	//     db := database.NewTestDB(t)
+	//     // Database is automatically migrated and cleaned up
+	// }
+
+	// For demonstration, we'll create a regular in-memory database
+	db, err := database.NewDB(":memory:")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer database.Close(db)
+
+	// In NewTestDB, migrations are automatically applied
+	// Here we manually apply them for demonstration
+	err = database.ApplyMigrations(db)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// Now we can use the database with schema already set up
+	// Check if invTypes table exists (created by migration 001)
+	var tableName string
+	err = db.QueryRow("SELECT name FROM sqlite_master WHERE type='table' AND name='invTypes'").Scan(&tableName)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Printf("Table exists: %s\n", tableName)
+	// Output: Table exists: invTypes
+}
