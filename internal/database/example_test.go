@@ -152,4 +152,3 @@ func ExampleBatchInsertWithProgress() {
 	// Progress: 2000/2500 rows inserted
 	// Progress: 2500/2500 rows inserted
 }
-
