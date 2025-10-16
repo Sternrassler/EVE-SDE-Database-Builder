@@ -3,8 +3,10 @@ package main
 import (
 	"context"
 	"errors"
+	"fmt"
 	"time"
 
+	apperrors "github.com/Sternrassler/EVE-SDE-Database-Builder/internal/errors"
 	"github.com/Sternrassler/EVE-SDE-Database-Builder/internal/logger"
 )
 
@@ -63,4 +65,37 @@ func main() {
 	logger.LogErrorGlobal(errors.New("unexpected error"), map[string]interface{}{"context": "example"})
 	logger.LogAppStart("1.0.0", "xyz789")
 	logger.LogAppShutdown("normal exit")
+
+	// Example 10: Error Context Management (NEW)
+	fmt.Println("\n=== Error Context Management Demo ===")
+
+	// Create an error with context
+	dbErr := apperrors.NewRetryable("DB locked", errors.New("database is locked")).
+		WithContext("table", "invTypes").
+		WithContext("operation", "batch_insert").
+		WithContext("retry_attempt", 3)
+
+	fmt.Printf("\n1. Error with context (text): %s\n", dbErr.Error())
+
+	// Log the error with automatic context extraction
+	jsonLogger.LogAppError(dbErr)
+
+	// Validation error with context
+	validationErr := apperrors.NewValidation("invalid input", nil).
+		WithContext("field", "email").
+		WithContext("value", "not-an-email").
+		WithContext("line_number", 42)
+
+	fmt.Printf("\n2. Validation error: %s\n", validationErr.Error())
+
+	// Fatal error with context
+	fatalErr := apperrors.NewFatal("connection failed", errors.New("timeout")).
+		WithContext("host", "localhost").
+		WithContext("port", 5432).
+		WithContext("timeout_ms", 5000)
+
+	fmt.Printf("\n3. Fatal error: %s\n", fatalErr.Error())
+	jsonLogger.LogAppError(fatalErr)
+
+	fmt.Println("\n=== Demo Complete ===")
 }

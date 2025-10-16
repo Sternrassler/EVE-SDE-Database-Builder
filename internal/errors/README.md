@@ -36,13 +36,36 @@ err := errors.NewSkippable("optional field missing", nil)
 
 ### Adding Context
 
-```go
-err := errors.NewValidation("invalid input", nil)
-err = err.WithContext("field", "email")
-err = err.WithContext("value", "invalid-email")
-err = err.WithContext("rule", "rfc5322")
+The `WithContext()` method provides a fluent, chainable API for adding debugging information:
 
-// Access context
+```go
+err := errors.NewRetryable("DB locked", errors.New("database is locked")).
+    WithContext("table", "invTypes").
+    WithContext("operation", "batch_insert").
+    WithContext("retry_attempt", 3)
+
+// Error output includes context:
+// [Retryable] DB locked (table=invTypes, operation=batch_insert, retry_attempt=3): database is locked
+fmt.Println(err.Error())
+```
+
+**Context in Error Messages:**
+- Context appears in parentheses after the message
+- Multiple entries are comma-separated
+- Map iteration order is non-deterministic (Go behavior)
+- Empty context results in no parentheses
+
+**Supported Value Types:**
+```go
+err := errors.NewValidation("invalid data", nil).
+    WithContext("field", "email").           // string
+    WithContext("line", 42).                 // int
+    WithContext("required", true).           // bool
+    WithContext("value", 3.14).              // float
+    WithContext("tags", []string{"a", "b"}). // slice
+    WithContext("metadata", map[string]int{"x": 1}) // map
+
+// Access context directly
 fmt.Printf("Field: %v\n", err.Context["field"])
 ```
 
@@ -84,23 +107,39 @@ if errors.As(wrapped, &unwrapped) {
 
 ### Integration with Logger
 
+The logger package provides automatic context extraction from `AppError` instances:
+
 ```go
 import (
     "github.com/Sternrassler/EVE-SDE-Database-Builder/internal/errors"
     "github.com/Sternrassler/EVE-SDE-Database-Builder/internal/logger"
 )
 
-log := logger.GetGlobalLogger()
+log := logger.NewLogger("info", "json")
 
-err := errors.NewFatal("critical failure", cause)
-err = err.WithContext("component", "database")
+err := errors.NewRetryable("DB locked", errors.New("database is locked")).
+    WithContext("table", "invTypes").
+    WithContext("operation", "batch_insert").
+    WithContext("retry_attempt", 3)
 
-// Log with error details
-log.Error("Operation failed",
-    logger.Field{Key: "error", Value: err.Error()},
-    logger.Field{Key: "type", Value: err.Type.String()},
-    logger.Field{Key: "context", Value: err.Context},
-)
+// Automatically extracts and logs all context fields
+log.LogAppError(err)
+
+// JSON output:
+// {
+//   "level": "error",
+//   "error_type": "Retryable",
+//   "message": "DB locked",
+//   "table": "invTypes",
+//   "operation": "batch_insert",
+//   "retry_attempt": 3,
+//   "cause": "database is locked"
+// }
+```
+
+**Available Logger Methods:**
+- `LogAppError(err error)` - Automatically extracts context from AppError
+- `LogError(err error, context map[string]interface{})` - Manual context passing
 ```
 
 ## API Reference
