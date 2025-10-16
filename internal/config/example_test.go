@@ -10,7 +10,7 @@ import (
 // ExampleDefaultConfig demonstrates getting default configuration
 func ExampleDefaultConfig() {
 	cfg := config.DefaultConfig()
-	
+
 	fmt.Printf("Database Path: %s\n", cfg.Database.Path)
 	fmt.Printf("Journal Mode: %s\n", cfg.Database.JournalMode)
 	fmt.Printf("Language: %s\n", cfg.Import.Language)
@@ -27,7 +27,7 @@ func ExampleLoad() {
 	// Create a temporary config file for demonstration
 	tmpfile, _ := os.CreateTemp("", "config-*.toml")
 	defer os.Remove(tmpfile.Name())
-	
+
 	content := `version = "1.0.0"
 
 [database]
@@ -46,13 +46,13 @@ format = "json"
 `
 	tmpfile.WriteString(content)
 	tmpfile.Close()
-	
+
 	cfg, err := config.Load(tmpfile.Name())
 	if err != nil {
 		fmt.Printf("Error: %v\n", err)
 		return
 	}
-	
+
 	fmt.Printf("Database Path: %s\n", cfg.Database.Path)
 	fmt.Printf("Language: %s\n", cfg.Import.Language)
 	fmt.Printf("Workers: %d\n", cfg.Import.Workers)
@@ -68,7 +68,7 @@ format = "json"
 func ExampleLoad_nonexistent() {
 	// Load from a non-existent file (should use defaults)
 	cfg, err := config.Load("/nonexistent/config.toml")
-	
+
 	if err == nil {
 		fmt.Printf("Database Path: %s\n", cfg.Database.Path)
 		fmt.Printf("Language: %s\n", cfg.Import.Language)
@@ -96,7 +96,7 @@ func ExampleConfig_Validate() {
 			Format: "json",
 		},
 	}
-	
+
 	err := cfg.Validate()
 	if err == nil {
 		fmt.Println("Configuration is valid")
@@ -114,7 +114,7 @@ func ExampleConfig_Validate_invalid() {
 			SDEPath: "./sde",
 		},
 	}
-	
+
 	err := cfg.Validate()
 	if err != nil {
 		fmt.Println("Validation failed: database.path is required")
@@ -126,7 +126,7 @@ func ExampleConfig_Validate_invalid() {
 func ExampleConfig_Validate_autoWorkers() {
 	cfg := config.DefaultConfig()
 	cfg.Import.Workers = 0 // Auto mode
-	
+
 	err := cfg.Validate()
 	if err == nil {
 		// After validation, Workers is set to runtime.NumCPU()
@@ -142,7 +142,7 @@ func Example_envOverride() {
 	os.Setenv("ESDEDB_LANGUAGE", "de")
 	defer os.Unsetenv("ESDEDB_DATABASE_PATH")
 	defer os.Unsetenv("ESDEDB_LANGUAGE")
-	
+
 	// Load config (env vars will override defaults)
 	cfg, err := config.Load("/nonexistent/config.toml")
 	if err == nil {
@@ -157,7 +157,7 @@ func Example_envOverride() {
 // ExampleDatabaseConfig demonstrates database configuration
 func ExampleDatabaseConfig() {
 	cfg := config.DefaultConfig()
-	
+
 	fmt.Printf("Path: %s\n", cfg.Database.Path)
 	fmt.Printf("Journal Mode: %s\n", cfg.Database.JournalMode)
 	fmt.Printf("Cache Size: %dMB\n", cfg.Database.CacheSizeMB)
@@ -170,7 +170,7 @@ func ExampleDatabaseConfig() {
 // ExampleImportConfig demonstrates import configuration
 func ExampleImportConfig() {
 	cfg := config.DefaultConfig()
-	
+
 	fmt.Printf("SDE Path: %s\n", cfg.Import.SDEPath)
 	fmt.Printf("Language: %s\n", cfg.Import.Language)
 	fmt.Printf("Workers (0=auto): %d\n", cfg.Import.Workers)
@@ -183,7 +183,7 @@ func ExampleImportConfig() {
 // ExampleLoggingConfig demonstrates logging configuration
 func ExampleLoggingConfig() {
 	cfg := config.DefaultConfig()
-	
+
 	fmt.Printf("Level: %s\n", cfg.Logging.Level)
 	fmt.Printf("Format: %s\n", cfg.Logging.Format)
 	// Output:
