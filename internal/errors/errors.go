@@ -47,10 +47,24 @@ type AppError struct {
 
 // Error implements the error interface
 func (e *AppError) Error() string {
-	if e.Cause != nil {
-		return fmt.Sprintf("[%s] %s: %v", e.Type.String(), e.Message, e.Cause)
+	var contextStr string
+	if len(e.Context) > 0 {
+		contextStr = " ("
+		first := true
+		for k, v := range e.Context {
+			if !first {
+				contextStr += ", "
+			}
+			contextStr += fmt.Sprintf("%s=%v", k, v)
+			first = false
+		}
+		contextStr += ")"
 	}
-	return fmt.Sprintf("[%s] %s", e.Type.String(), e.Message)
+
+	if e.Cause != nil {
+		return fmt.Sprintf("[%s] %s%s: %v", e.Type.String(), e.Message, contextStr, e.Cause)
+	}
+	return fmt.Sprintf("[%s] %s%s", e.Type.String(), e.Message, contextStr)
 }
 
 // Unwrap returns the underlying cause error for error chain support

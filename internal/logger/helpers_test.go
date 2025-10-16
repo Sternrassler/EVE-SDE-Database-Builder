@@ -8,6 +8,7 @@ import (
 	"testing"
 	"time"
 
+	apperrors "github.com/Sternrassler/EVE-SDE-Database-Builder/internal/errors"
 	"github.com/rs/zerolog"
 )
 
@@ -332,6 +333,117 @@ func TestGlobalHelperFunctions(t *testing.T) {
 	output = buf.String()
 	if !strings.Contains(output, "Application shutting down") {
 		t.Error("Global LogAppShutdown did not produce expected output")
+	}
+
+	// Clean up
+	mu.Lock()
+	globalLogger = nil
+	mu.Unlock()
+}
+
+// TestLogAppError tests logging AppError with automatic context extraction
+func TestLogAppError(t *testing.T) {
+	var buf bytes.Buffer
+	zl := zerolog.New(&buf).With().Timestamp().Logger()
+	logger := &Logger{logger: zl}
+
+	// Create an AppError with context
+	cause := errors.New("database is locked")
+	appErr := apperrors.NewRetryable("DB locked", cause).
+		WithContext("table", "invTypes").
+		WithContext("operation", "batch_insert").
+		WithContext("retry_attempt", 3)
+
+	logger.LogAppError(appErr)
+
+	output := buf.String()
+
+	// Parse JSON output
+	var logEntry map[string]interface{}
+	if err := json.Unmarshal([]byte(output), &logEntry); err != nil {
+		t.Fatalf("Failed to parse JSON output: %v, output: %s", err, output)
+	}
+
+	// Verify level is error
+	if logEntry["level"] != "error" {
+		t.Errorf("Expected level='error', got: %v", logEntry["level"])
+	}
+
+	// Verify message
+	if logEntry["message"] != "Application error" {
+		t.Errorf("Expected message='Application error', got: %v", logEntry["message"])
+	}
+
+	// Verify error type
+	if logEntry["error_type"] != "Retryable" {
+		t.Errorf("Expected error_type='Retryable', got: %v", logEntry["error_type"])
+	}
+
+	// Verify error message
+	if !strings.Contains(logEntry["message"].(string), "Application error") {
+		t.Errorf("Expected message to contain 'Application error', got: %v", logEntry["message"])
+	}
+
+	// Verify context fields are automatically extracted
+	if logEntry["table"] != "invTypes" {
+		t.Errorf("Expected table='invTypes', got: %v", logEntry["table"])
+	}
+	if logEntry["operation"] != "batch_insert" {
+		t.Errorf("Expected operation='batch_insert', got: %v", logEntry["operation"])
+	}
+	if logEntry["retry_attempt"] != float64(3) {
+		t.Errorf("Expected retry_attempt=3, got: %v", logEntry["retry_attempt"])
+	}
+
+	// Verify cause is logged
+	if logEntry["cause"] != "database is locked" {
+		t.Errorf("Expected cause='database is locked', got: %v", logEntry["cause"])
+	}
+}
+
+// TestLogAppErrorStandardError tests LogAppError with a standard error (not AppError)
+func TestLogAppErrorStandardError(t *testing.T) {
+	var buf bytes.Buffer
+	zl := zerolog.New(&buf).With().Timestamp().Logger()
+	logger := &Logger{logger: zl}
+
+	// Use a standard error
+	stdErr := errors.New("standard error")
+	logger.LogAppError(stdErr)
+
+	output := buf.String()
+
+	// Parse JSON output
+	var logEntry map[string]interface{}
+	if err := json.Unmarshal([]byte(output), &logEntry); err != nil {
+		t.Fatalf("Failed to parse JSON output: %v", err)
+	}
+
+	// Should still log the error, but without AppError fields
+	if logEntry["level"] != "error" {
+		t.Errorf("Expected level='error', got: %v", logEntry["level"])
+	}
+
+	if logEntry["error"] != "standard error" {
+		t.Errorf("Expected error='standard error', got: %v", logEntry["error"])
+	}
+}
+
+// TestLogAppErrorGlobal tests the global LogAppError function
+func TestLogAppErrorGlobal(t *testing.T) {
+	var buf bytes.Buffer
+	zl := zerolog.New(&buf).With().Timestamp().Logger()
+	logger := &Logger{logger: zl}
+	SetGlobalLogger(logger)
+
+	appErr := apperrors.NewValidation("invalid input", nil).
+		WithContext("field", "email")
+
+	LogAppError(appErr)
+
+	output := buf.String()
+	if !strings.Contains(output, "Application error") {
+		t.Error("Global LogAppError did not produce expected output")
 	}
 
 	// Clean up
