@@ -9,6 +9,8 @@ Dieses Verzeichnis enthält SQL-Migrationsskripte für die EVE SDE SQLite-Datenb
 | Nr. | Datei | Beschreibung | Status |
 |-----|-------|--------------|--------|
 | 001 | `001_inv_types.sql` | invTypes Tabelle (häufigste SDE-Tabelle) | ✅ Implementiert |
+| 002 | `002_inv_groups.sql` | invGroups Tabelle (Item Groups Kategorisierung) | ✅ Implementiert |
+| 003 | `003_blueprints.sql` | Industry Blueprints (Blueprints, Activities, Materials, Products) | ✅ Implementiert |
 
 ## Migration-Format
 
