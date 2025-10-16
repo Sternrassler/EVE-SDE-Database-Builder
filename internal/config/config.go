@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"os"
 	"runtime"
+	"strconv"
 
 	"github.com/BurntSushi/toml"
 )
@@ -145,5 +146,14 @@ func applyEnvVars(cfg *Config) {
 	}
 	if level := os.Getenv("ESDEDB_LOG_LEVEL"); level != "" {
 		cfg.Logging.Level = level
+	}
+	if format := os.Getenv("ESDEDB_LOGGING_FORMAT"); format != "" {
+		cfg.Logging.Format = format
+	}
+	if workers := os.Getenv("ESDEDB_IMPORT_WORKER_COUNT"); workers != "" {
+		// Note: Type conversion handled here, validation happens in Validate()
+		if w, err := strconv.Atoi(workers); err == nil {
+			cfg.Import.Workers = w
+		}
 	}
 }
