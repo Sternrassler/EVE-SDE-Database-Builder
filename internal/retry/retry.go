@@ -43,6 +43,13 @@ func (p *Policy) Do(ctx context.Context, fn RetryFunc) error {
 	var lastErr error
 
 	for attempt := 0; attempt <= p.MaxRetries; attempt++ {
+		// Check context before attempting (except first attempt)
+		if attempt > 0 {
+			if err := checkContext(ctx); err != nil {
+				return err
+			}
+		}
+
 		// Execute the function
 		err := fn()
 
@@ -67,11 +74,8 @@ func (p *Policy) Do(ctx context.Context, fn RetryFunc) error {
 		delay := calculateBackoff(attempt, p)
 
 		// Wait for backoff duration or context cancellation
-		select {
-		case <-ctx.Done():
-			return ctx.Err()
-		case <-time.After(delay):
-			// Continue to next attempt
+		if err := waitWithContext(ctx, delay); err != nil {
+			return err
 		}
 	}
 
@@ -85,6 +89,13 @@ func DoWithResult[T any](ctx context.Context, policy *Policy, fn func() (T, erro
 	var lastErr error
 
 	for attempt := 0; attempt <= policy.MaxRetries; attempt++ {
+		// Check context before attempting (except first attempt)
+		if attempt > 0 {
+			if err := checkContext(ctx); err != nil {
+				return result, err
+			}
+		}
+
 		// Execute the function
 		res, err := fn()
 
@@ -109,11 +120,8 @@ func DoWithResult[T any](ctx context.Context, policy *Policy, fn func() (T, erro
 		delay := calculateBackoff(attempt, policy)
 
 		// Wait for backoff duration or context cancellation
-		select {
-		case <-ctx.Done():
-			return result, ctx.Err()
-		case <-time.After(delay):
-			// Continue to next attempt
+		if err := waitWithContext(ctx, delay); err != nil {
+			return result, err
 		}
 	}
 
