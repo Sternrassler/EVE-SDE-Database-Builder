@@ -59,7 +59,7 @@ Vollständige Architektur-Dokumentation: [docs/migration/architecture-analysis.m
 # Install Dependencies
 go mod download
 
-# Run Tests (when implemented)
+# Run Tests
 make test
 
 # Lint
@@ -68,6 +68,32 @@ make lint
 # Security Scan
 make scan
 ```
+
+### Database Migrations
+
+```bash
+# Show migration status
+make migrate-status
+
+# Apply all migrations (creates eve_sde.db)
+make migrate-up
+
+# Drop all tables (destructive - requires confirmation)
+make migrate-down
+
+# Delete database file (destructive - requires confirmation)
+make migrate-clean
+
+# Reset database (clean + migrate-up)
+make migrate-reset
+```
+
+**Database File:** `eve_sde.db` (default, can be overridden with `DB_FILE=custom.db make migrate-up`)
+
+**Performance:**
+- 10k rows: ~14ms
+- 100k rows: ~134ms
+- 500k rows: ~664ms
 
 ### Project Structure
 
