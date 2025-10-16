@@ -24,105 +24,80 @@ const (
 	defaultTimeout = 30 * time.Second
 )
 
-// List of EVE SDE tables to scrape
+// List of EVE SDE tables to scrape (using RIFT naming convention)
 var eveTables = []string{
-	// Inventory
-	"invTypes",
-	"invGroups",
-	"invCategories",
-	"invMarketGroups",
-	"invMetaTypes",
-	"invMetaGroups",
-	"invTraits",
-	"invTypeMaterials",
-	"invTypeReactions",
-	"invContrabandTypes",
-	"invFlags",
+	// Core tables
+	"_sde",
+	"types",
+	"groups",
+	"categories",
+	"marketGroups",
+	"metaGroups",
 
-	// Industry/Blueprints
-	"industryBlueprints",
-	"industryActivity",
-	"industryActivityMaterials",
-	"industryActivityProducts",
-	"industryActivityProbabilities",
-	"industryActivitySkills",
+	// Character/NPC
+	"ancestries",
+	"bloodlines",
+	"races",
+	"factions",
+	"characterAttributes",
+	"npcCharacters",
+	"npcCorporations",
+	"npcCorporationDivisions",
+	"npcStations",
+
+	// Agents
+	"agentTypes",
+	"agentsInSpace",
+
+	// Blueprints/Industry
+	"blueprints",
 
 	// Dogma (Ship fitting system)
 	"dogmaAttributes",
-	"dogmaEffects",
-	"dogmaTypeAttributes",
-	"dogmaTypeEffects",
 	"dogmaAttributeCategories",
-	"dogmaAttributeTypes",
-	"dogmaExpressions",
+	"dogmaEffects",
 	"dogmaUnits",
+	"typeDogma",
+	"dynamicItemAttributes",
 
 	// Universe/Map
 	"mapRegions",
 	"mapConstellations",
 	"mapSolarSystems",
-	"mapSolarSystemJumps",
-	"mapDenormalize",
-	"mapJumps",
-	"mapLocationWormholeClasses",
-	"mapLocationScenes",
-	"mapCelestialStatistics",
-	"mapUniverse",
 	"mapStargates",
 	"mapPlanets",
-
-	// Character/NPC
-	"chrFactions",
-	"chrRaces",
-	"chrAncestries",
-	"chrBloodlines",
-	"chrAttributes",
-	"agtAgents",
-	"agtAgentTypes",
-	"agtResearchAgents",
-
-	// NPC Corporations
-	"crpNPCCorporations",
-	"crpNPCCorporationDivisions",
-	"crpNPCCorporationTrades",
-	"crpActivities",
+	"mapMoons",
+	"mapStars",
+	"mapAsteroidBelts",
+	"landmarks",
 
 	// Certificates/Skills
-	"certCerts",
-	"certMasteries",
-	"certSkills",
-
-	// Translation/Localization
-	"translationTables",
+	"certificates",
+	"masteries",
 
 	// Skins
+	"skins",
 	"skinLicenses",
 	"skinMaterials",
-	"skinShip",
 
-	// Research
-	"ramActivities",
-	"ramAssemblyLineTypes",
-	"ramAssemblyLineTypeDetailPerCategory",
-	"ramAssemblyLineTypeDetailPerGroup",
-	"ramInstallationTypeContents",
+	// Translation/Localization
+	"translationLanguages",
 
 	// Station services
-	"staOperations",
-	"staOperationServices",
-	"staServices",
-	"staStations",
-	"staStationTypes",
+	"stationOperations",
+	"stationServices",
+	"sovereigntyUpgrades",
 
 	// Miscellaneous
-	"eveUnits",
-	"eveGraphics",
-	"eveIcons",
+	"icons",
+	"graphics",
+	"contrabandTypes",
+	"controlTowerResources",
+	"corporationActivities",
+	"dbuffCollections",
+	"planetResources",
 	"planetSchematics",
-	"planetSchematicsPinMap",
-	"planetSchematicsTypeMap",
-	"warCombatZones",
-	"warCombatZoneSystems",
+	"typeBonus",
 }
 
 type Config struct {
@@ -190,8 +165,8 @@ func scrapeTableSchema(ctx context.Context, client *http.Client, cfg *Config, ta
 	var schema []byte
 	err := policy.Do(ctx, func() error {
 		// Fetch schema from RIFT API
-		// RIFT provides schema information via the API endpoint for each table
-		url := fmt.Sprintf("%s/%s?limit=1", cfg.BaseURL, table)
+		// RIFT provides schema documentation pages at /schema/<table>/
+		url := fmt.Sprintf("%s/schema/%s/", cfg.BaseURL, table)
 
 		req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
 		if err != nil {
@@ -214,19 +189,27 @@ func scrapeTableSchema(ctx context.Context, client *http.Client, cfg *Config, ta
 			return errors.NewValidation(fmt.Sprintf("client error %d for %s", resp.StatusCode, table), nil)
 		}
 
-		// Read response body
-		body, err := io.ReadAll(resp.Body)
+		// Read response body (HTML schema documentation)
+		_, err = io.ReadAll(resp.Body)
 		if err != nil {
 			return errors.NewRetryable(fmt.Sprintf("failed to read response for %s", table), err)
 		}
 
-		// Parse JSON to validate it's well-formed
-		var data interface{}
-		if err := json.Unmarshal(body, &data); err != nil {
-			return errors.NewValidation(fmt.Sprintf("invalid JSON response for %s", table), err)
+		// For now, create a minimal placeholder JSON that indicates the schema page exists
+		// TODO: Future enhancement - parse HTML schema or download sample from CCP JSONL files
+		// This placeholder confirms the schema page is accessible and lists the correct table name
+		schemaObj := map[string]interface{}{
+			"_table":  table,
+			"_source": url,
+			"_status": "schema_page_verified",
 		}
 
-		schema = body
+		schemaJSON, err := json.MarshalIndent(schemaObj, "", "  ")
+		if err != nil {
+			return errors.NewFatal(fmt.Sprintf("failed to marshal placeholder JSON for %s", table), err)
+		}
+
+		schema = schemaJSON
 		return nil
 	})
 

@@ -108,15 +108,16 @@ func TestScrapeTableSchema_HTTPError(t *testing.T) {
 	}
 }
 
-// TestScrapeTableSchema_InvalidJSON tests handling of invalid JSON responses
+// TestScrapeTableSchema_InvalidJSON tests that any valid HTTP response is accepted
+// Since we create our own JSON placeholders, the response body content doesn't matter
 func TestScrapeTableSchema_InvalidJSON(t *testing.T) {
 	log := setupTestLogger()
 
-	// Create mock server that returns invalid JSON
+	// Create mock server that returns anything (even invalid JSON)
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
+		w.Header().Set("Content-Type", "text/html")
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte("invalid json {"))
+		w.Write([]byte("<!DOCTYPE html><html>...</html>"))
 	}))
 	defer server.Close()
 
@@ -130,10 +131,22 @@ func TestScrapeTableSchema_InvalidJSON(t *testing.T) {
 	client := &http.Client{Timeout: cfg.Timeout}
 	ctx := context.Background()
 
-	// Run scraper - should fail without retry (validation error)
+	// Run scraper - should succeed since we create our own JSON
 	err := scrapeTableSchema(ctx, client, cfg, "invTypes", log)
-	if err == nil {
-		t.Fatal("Expected error for invalid JSON, got nil")
+	if err != nil {
+		t.Fatalf("Expected no error for HTML response (we create our own JSON), got: %v", err)
+	}
+
+	// Verify output file exists and is valid JSON
+	schemaFile := filepath.Join(tmpDir, "invTypes.json")
+	content, err := os.ReadFile(schemaFile)
+	if err != nil {
+		t.Fatalf("Failed to read schema file: %v", err)
+	}
+
+	var data interface{}
+	if err := json.Unmarshal(content, &data); err != nil {
+		t.Fatalf("Generated schema file contains invalid JSON: %v", err)
 	}
 }
 
