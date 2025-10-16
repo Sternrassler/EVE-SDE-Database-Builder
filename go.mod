@@ -4,6 +4,8 @@ go 1.24.7
 
 require (
 	github.com/BurntSushi/toml v1.5.0
+	github.com/jmoiron/sqlx v1.4.0
+	github.com/mattn/go-sqlite3 v1.14.32
 	github.com/rs/zerolog v1.34.0
 	github.com/spf13/cobra v1.10.1
 )
