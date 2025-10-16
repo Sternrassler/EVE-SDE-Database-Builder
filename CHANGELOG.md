@@ -9,6 +9,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Migration für `invTypes` Tabelle (`migrations/sqlite/001_inv_types.sql`)
+  - CREATE TABLE Statement mit allen Spalten aus RIFT SDE Schema
+  - Indizes für typeID (PRIMARY KEY), groupID, marketGroupID
+  - Idempotente Migration (CREATE IF NOT EXISTS)
+- Umfassende Tests für invTypes Migration
+  - Schema-Validierung (alle Spalten, Constraints)
+  - Index-Überprüfung
+  - Datenoperationen (Insert, Query)
+  - Idempotenz-Test (wiederholbare Ausführung)
 - Integration Tests für Foundation-Komponenten (Logger, Errors, Retry)
   - Scenario: Retry mit Logging bei jedem Versuch
   - Scenario: Error Context wird geloggt
