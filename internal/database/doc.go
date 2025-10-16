@@ -13,6 +13,7 @@
 //   - Health checks via Ping
 //   - Graceful connection closure
 //   - High-performance batch insert for large datasets (50k+ rows)
+//   - Transaction wrapper with automatic rollback and panic recovery
 //
 // # Basic Usage
 //
@@ -57,4 +58,32 @@
 //   - 100k rows: ~130ms
 //   - Automatic transaction management with rollback on error
 //   - Configurable batch size (recommended: 1000 rows per statement)
+//
+// # Transaction Wrapper
+//
+// The package provides a safe transaction wrapper that handles commit, rollback,
+// and panic recovery automatically. This ensures transactional safety for all database operations.
+//
+//	err = database.WithTransaction(ctx, db, func(tx *sqlx.Tx) error {
+//		_, err := tx.Exec("INSERT INTO users (id, name) VALUES (?, ?)", 1, "Alice")
+//		if err != nil {
+//			return err // Transaction will be rolled back
+//		}
+//		_, err = tx.Exec("INSERT INTO roles (user_id, role) VALUES (?, ?)", 1, "admin")
+//		return err // Transaction will be committed if no error
+//	})
+//
+// Transaction options can be specified using functional options:
+//
+//	// Read-only transaction with serializable isolation
+//	err = database.WithTransaction(ctx, db, func(tx *sqlx.Tx) error {
+//		var count int
+//		return tx.QueryRow("SELECT COUNT(*) FROM users").Scan(&count)
+//	}, database.WithReadOnly(), database.WithIsolationLevel(sql.LevelSerializable))
+//
+// The transaction wrapper automatically:
+//   - Commits on successful completion
+//   - Rolls back on error return
+//   - Rolls back and re-raises panic
+//   - Respects context cancellation
 package database
