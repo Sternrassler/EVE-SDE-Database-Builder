@@ -116,6 +116,34 @@ generate_parsers() {
     return 0
 }
 
+# Add ToMap methods to generated structs
+add_tomap_methods() {
+    log_info "Adding ToMap methods to generated structs..."
+    
+    if [ ! -d "$OUTPUT_DIR" ]; then
+        log_warn "Output directory not found: $OUTPUT_DIR"
+        return 0
+    fi
+    
+    local go_files
+    go_files=$(find "$OUTPUT_DIR" -name "*.go" -type f)
+    
+    if [ -z "$go_files" ]; then
+        log_warn "No Go files found in $OUTPUT_DIR"
+        return 0
+    fi
+    
+    # Run add-tomap-methods tool
+    if go run tools/add-tomap-methods.go $go_files; then
+        log_info "ToMap methods added successfully"
+    else
+        log_error "Failed to add ToMap methods"
+        return 1
+    fi
+    
+    return 0
+}
+
 # Format generated code
 format_code() {
     log_info "Formatting generated code..."
@@ -155,12 +183,14 @@ main() {
     check_prerequisites
     setup_output_dir
     generate_parsers
+    add_tomap_methods
     format_code
     verify_code
     
     echo
     log_info "✓ Parser generation complete!"
     log_info "Generated Go structs are in: $OUTPUT_DIR"
+    log_info "All structs include ToMap() methods for database operations"
 }
 
 # Run main function

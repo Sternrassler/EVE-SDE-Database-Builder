@@ -12,6 +12,14 @@ Tool zum Scrapen aller Schema-Definitionen von der RIFT SDE API.
 **Epic:** #3 JSONL Parser Migration  
 **Source:** https://sde.riftforeve.online/
 
+### 2. ToMap Method Generator (`add-tomap-methods.go`)
+
+AST-basiertes Post-Processing Tool zur automatischen Generierung von `ToMap()` Methoden für generierte Structs.
+
+**ADR Reference:** ADR-003 (Custom Post-Processing)  
+**Epic:** #3 JSONL Parser Migration  
+**Purpose:** Converts structs to `map[string]interface{}` for database operations
+
 ## Usage
 
 ### Basic Usage
@@ -84,6 +92,72 @@ The tool verifies that RIFT schema documentation pages are accessible and create
 
 **Future Enhancement:** Parse HTML schema documentation or download sample JSONL data from CCP to generate proper JSON schema files for use with code generation tools like `quicktype`.
 
+## Usage: ToMap Method Generator
+
+### Basic Usage
+
+```bash
+# Add ToMap methods to generated files
+go run tools/add-tomap-methods.go internal/parser/generated/*.go
+```
+
+### Options
+
+Available flags:
+- `-dry-run`: Print output to stdout instead of modifying files
+- `-verbose`: Enable verbose logging
+- `-force`: Force update even if ToMap methods already exist
+
+### Examples
+
+```bash
+# Add ToMap methods to all generated files
+go run tools/add-tomap-methods.go internal/parser/generated/*.go
+
+# Dry run (preview changes)
+go run tools/add-tomap-methods.go -dry-run -verbose internal/parser/generated/types.go
+
+# Force update (regenerate existing methods)
+go run tools/add-tomap-methods.go -force internal/parser/generated/*.go
+```
+
+## Features: ToMap Method Generator
+
+- **AST-based Parsing**: Uses Go's `go/parser` and `go/ast` for accurate struct analysis
+- **Type-aware**: Handles pointers, nested structs, maps, slices, and builtin types
+- **JSON Tag Support**: Respects `json:` struct tags for map keys
+- **Nil-safe**: Generates nil checks for pointer fields
+- **Nested Struct Support**: Detects and calls `ToMap()` on nested structs that implement the method
+- **Safety Checks**: Only processes files with "Code generated" marker (configurable with `-force`)
+- **Idempotent**: Skips files that already have ToMap methods (unless `-force` is used)
+
+## Generated Code Example
+
+Input struct:
+```go
+type TypeRow struct {
+    TypeID    int      `json:"typeID"`
+    Mass      *float64 `json:"mass,omitempty"`
+    Published bool     `json:"published"`
+}
+```
+
+Generated ToMap method:
+```go
+// ToMap converts TypeRow to map[string]interface{} for database operations
+func (t *TypeRow) ToMap() map[string]interface{} {
+    m := make(map[string]interface{})
+    
+    m["typeID"] = t.TypeID
+    if t.Mass != nil {
+        m["mass"] = *t.Mass
+    }
+    m["published"] = t.Published
+    
+    return m
+}
+```
+
 ## Testing
 
 Run tests:
@@ -93,11 +167,23 @@ go test -v ./tools/...
 ```
 
 Tests include:
+
+**Schema Scraper:**
 - Mock HTTP client test for successful downloads
 - Retry behavior on HTTP errors
 - HTML response handling (creates valid JSON output)
 - Client error (4xx) handling
 - File I/O tests
+
+**ToMap Generator:**
+- JSON tag extraction
+- Struct field parsing
+- Type analysis (pointers, nested structs, maps, slices)
+- Method generation with various field types
+- Existing method detection
+- Full integration tests with file processing
+- Force update behavior
+- Safety checks for non-generated code
 
 ## Implementation Details
 
