@@ -3,7 +3,10 @@ package database
 import (
 	"os"
 	"path/filepath"
+	"sort"
 	"testing"
+
+	"github.com/jmoiron/sqlx"
 )
 
 // TestMigration_001_InvTypes tests the 001_inv_types.sql migration
@@ -2570,4 +2573,348 @@ func TestMigration_005_Universe_Idempotence(t *testing.T) {
 	if count != 7 {
 		t.Errorf("Expected 7 indexes, got %d", count)
 	}
+}
+
+// =============================================================================
+// Integration Tests for All Migrations
+// =============================================================================
+
+// TestMigrationsApply tests that all migrations can be applied in correct order
+// and verifies that all expected tables and indexes exist.
+//
+// This is the main integration test that validates:
+// - All 5 migrations execute successfully
+// - All tables are created
+// - All indexes are created
+// - Schema structure is correct
+func TestMigrationsApply(t *testing.T) {
+	// Create in-memory database using NewTestDB which automatically applies all migrations
+	db := NewTestDB(t)
+
+	// Verify all expected tables exist
+	expectedTables := []string{
+		// Migration 001: invTypes
+		"invTypes",
+		// Migration 002: invGroups
+		"invGroups",
+		// Migration 003: Blueprints
+		"industryBlueprints",
+		"industryActivities",
+		"industryActivityMaterials",
+		"industryActivityProducts",
+		// Migration 004: Dogma
+		"dogmaAttributes",
+		"dogmaEffects",
+		"dogmaTypeAttributes",
+		"dogmaTypeEffects",
+		// Migration 005: Universe
+		"mapRegions",
+		"mapConstellations",
+		"mapSolarSystems",
+		"mapStargates",
+		"mapPlanets",
+	}
+
+	for _, table := range expectedTables {
+		exists, err := TableExists(db, table)
+		if err != nil {
+			t.Errorf("Error checking table %s: %v", table, err)
+		}
+		if !exists {
+			t.Errorf("Table %s should exist after migrations", table)
+		}
+	}
+
+	// Verify all expected indexes exist
+	expectedIndexes := []string{
+		// Migration 001: invTypes indexes
+		"idx_invTypes_groupID",
+		"idx_invTypes_marketGroupID",
+		// Migration 002: invGroups indexes
+		"idx_invGroups_categoryID",
+		// Migration 003: Blueprints indexes
+		"idx_industryActivities_blueprintTypeID",
+		"idx_industryActivities_activityID",
+		"idx_industryActivityMaterials_blueprintTypeID",
+		"idx_industryActivityMaterials_materialTypeID",
+		"idx_industryActivityProducts_blueprintTypeID",
+		"idx_industryActivityProducts_productTypeID",
+		// Migration 004: Dogma indexes
+		"idx_dogmaAttributes_attributeName",
+		"idx_dogmaEffects_effectName",
+		"idx_dogmaEffects_effectCategory",
+		"idx_dogmaTypeAttributes_typeID",
+		"idx_dogmaTypeAttributes_attributeID",
+		"idx_dogmaTypeEffects_typeID",
+		"idx_dogmaTypeEffects_effectID",
+		// Migration 005: Universe indexes
+		"idx_mapConstellations_regionID",
+		"idx_mapSolarSystems_regionID",
+		"idx_mapSolarSystems_constellationID",
+		"idx_mapStargates_solarSystemID",
+		"idx_mapStargates_destinationID",
+		"idx_mapPlanets_solarSystemID",
+		"idx_mapPlanets_typeID",
+	}
+
+	for _, index := range expectedIndexes {
+		exists, err := IndexExists(db, index)
+		if err != nil {
+			t.Errorf("Error checking index %s: %v", index, err)
+		}
+		if !exists {
+			t.Errorf("Index %s should exist after migrations", index)
+		}
+	}
+}
+
+// TestMigrationsApply_Idempotence tests that migrations can be applied multiple times
+// without errors (idempotence).
+//
+// This validates that:
+// - CREATE TABLE IF NOT EXISTS works correctly
+// - CREATE INDEX IF NOT EXISTS works correctly
+// - Double execution doesn't corrupt the schema
+func TestMigrationsApply_Idempotence(t *testing.T) {
+	// Create in-memory database
+	db, err := NewDB(":memory:")
+	if err != nil {
+		t.Fatalf("Failed to create database: %v", err)
+	}
+	defer Close(db)
+
+	// Apply migrations first time
+	if err := ApplyMigrations(db); err != nil {
+		t.Fatalf("Failed to apply migrations first time: %v", err)
+	}
+
+	// Verify tables exist after first application
+	tables := []string{"invTypes", "invGroups", "dogmaAttributes"}
+	for _, table := range tables {
+		exists, err := TableExists(db, table)
+		if err != nil {
+			t.Fatalf("Error checking table %s after first migration: %v", table, err)
+		}
+		if !exists {
+			t.Fatalf("Table %s should exist after first migration", table)
+		}
+	}
+
+	// Apply migrations second time (idempotence test)
+	if err := ApplyMigrations(db); err != nil {
+		t.Fatalf("Failed to apply migrations second time (idempotence test): %v", err)
+	}
+
+	// Verify tables still exist after second application
+	for _, table := range tables {
+		exists, err := TableExists(db, table)
+		if err != nil {
+			t.Fatalf("Error checking table %s after second migration: %v", table, err)
+		}
+		if !exists {
+			t.Fatalf("Table %s should still exist after second migration", table)
+		}
+	}
+
+	// Verify indexes still exist
+	indexes := []string{
+		"idx_invTypes_groupID",
+		"idx_invGroups_categoryID",
+		"idx_dogmaAttributes_attributeName",
+	}
+	for _, index := range indexes {
+		exists, err := IndexExists(db, index)
+		if err != nil {
+			t.Fatalf("Error checking index %s after second migration: %v", index, err)
+		}
+		if !exists {
+			t.Fatalf("Index %s should still exist after second migration", index)
+		}
+	}
+
+	// Verify no duplicate tables were created
+	var tableCount int
+	err = db.QueryRow("SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name IN ('invTypes', 'invGroups', 'dogmaAttributes')").Scan(&tableCount)
+	if err != nil {
+		t.Fatalf("Failed to count tables: %v", err)
+	}
+	if tableCount != 3 {
+		t.Errorf("Expected 3 tables, got %d (possible duplicates)", tableCount)
+	}
+}
+
+// TestMigrationsApply_CorrectOrder tests that migrations are applied in the correct order
+// by verifying the sorted file names.
+func TestMigrationsApply_CorrectOrder(t *testing.T) {
+	// Read migration files
+	migrationsDir := filepath.Join("..", "..", "migrations", "sqlite")
+	entries, err := os.ReadDir(migrationsDir)
+	if err != nil {
+		t.Fatalf("Failed to read migrations directory: %v", err)
+	}
+
+	// Filter SQL files
+	var migrationFiles []string
+	for _, entry := range entries {
+		if !entry.IsDir() && filepath.Ext(entry.Name()) == ".sql" {
+			migrationFiles = append(migrationFiles, entry.Name())
+		}
+	}
+
+	// Verify we have exactly 5 migration files
+	if len(migrationFiles) != 5 {
+		t.Errorf("Expected 5 migration files, got %d", len(migrationFiles))
+	}
+
+	// Verify correct order (should be sorted numerically)
+	expectedOrder := []string{
+		"001_inv_types.sql",
+		"002_inv_groups.sql",
+		"003_blueprints.sql",
+		"004_dogma.sql",
+		"005_universe.sql",
+	}
+
+	// Sort the files (as ApplyMigrations does)
+	sort.Strings(migrationFiles)
+
+	// Verify order matches expected
+	for i, expected := range expectedOrder {
+		if i >= len(migrationFiles) {
+			t.Errorf("Missing migration file: %s", expected)
+			continue
+		}
+		if migrationFiles[i] != expected {
+			t.Errorf("Migration order mismatch at position %d: expected %s, got %s", i, expected, migrationFiles[i])
+		}
+	}
+}
+
+// TestMigrationsApply_SchemaValidation performs detailed schema validation
+// for critical tables to ensure correct structure.
+func TestMigrationsApply_SchemaValidation(t *testing.T) {
+	db := NewTestDB(t)
+
+	// Test invTypes table structure
+	t.Run("invTypes_schema", func(t *testing.T) {
+		// Verify primary key
+		var pkCount int
+		err := db.QueryRow("SELECT COUNT(*) FROM pragma_table_info('invTypes') WHERE pk = 1").Scan(&pkCount)
+		if err != nil {
+			t.Fatalf("Failed to check primary key: %v", err)
+		}
+		if pkCount != 1 {
+			t.Errorf("invTypes should have 1 primary key column, got %d", pkCount)
+		}
+
+		// Verify NOT NULL constraints
+		var notNullCount int
+		err = db.QueryRow("SELECT COUNT(*) FROM pragma_table_info('invTypes') WHERE name = 'typeName' AND \"notnull\" = 1").Scan(&notNullCount)
+		if err != nil {
+			t.Fatalf("Failed to check NOT NULL constraint: %v", err)
+		}
+		if notNullCount != 1 {
+			t.Errorf("typeName should be NOT NULL")
+		}
+	})
+
+	// Test dogmaTypeAttributes composite key
+	t.Run("dogmaTypeAttributes_composite_key", func(t *testing.T) {
+		var pkCount int
+		err := db.QueryRow("SELECT COUNT(*) FROM pragma_table_info('dogmaTypeAttributes') WHERE pk > 0").Scan(&pkCount)
+		if err != nil {
+			t.Fatalf("Failed to check composite key: %v", err)
+		}
+		if pkCount != 2 {
+			t.Errorf("dogmaTypeAttributes should have 2 primary key columns (composite), got %d", pkCount)
+		}
+	})
+
+	// Test industryActivities composite key
+	t.Run("industryActivities_composite_key", func(t *testing.T) {
+		var pkCount int
+		err := db.QueryRow("SELECT COUNT(*) FROM pragma_table_info('industryActivities') WHERE pk > 0").Scan(&pkCount)
+		if err != nil {
+			t.Fatalf("Failed to check composite key: %v", err)
+		}
+		if pkCount != 2 {
+			t.Errorf("industryActivities should have 2 primary key columns (composite), got %d", pkCount)
+		}
+	})
+}
+
+// TestMigrationsApply_DataInsertion tests that data can be inserted into all tables
+// after migrations are applied.
+func TestMigrationsApply_DataInsertion(t *testing.T) {
+	db := NewTestDB(t)
+
+	// Test insert into invTypes
+	t.Run("insert_invTypes", func(t *testing.T) {
+		_, err := db.Exec("INSERT INTO invTypes (typeID, typeName, groupID) VALUES (?, ?, ?)", 1, "Test Item", 10)
+		if err != nil {
+			t.Errorf("Failed to insert into invTypes: %v", err)
+		}
+	})
+
+	// Test insert into invGroups
+	t.Run("insert_invGroups", func(t *testing.T) {
+		_, err := db.Exec("INSERT INTO invGroups (groupID, groupName, categoryID) VALUES (?, ?, ?)", 10, "Test Group", 1)
+		if err != nil {
+			t.Errorf("Failed to insert into invGroups: %v", err)
+		}
+	})
+
+	// Test insert into dogmaAttributes
+	t.Run("insert_dogmaAttributes", func(t *testing.T) {
+		_, err := db.Exec("INSERT INTO dogmaAttributes (attributeID, attributeName, defaultValue, published) VALUES (?, ?, ?, ?)", 1, "testAttr", 1.0, 1)
+		if err != nil {
+			t.Errorf("Failed to insert into dogmaAttributes: %v", err)
+		}
+	})
+
+	// Test insert into mapRegions
+	t.Run("insert_mapRegions", func(t *testing.T) {
+		_, err := db.Exec("INSERT INTO mapRegions (regionID, regionName, x, y, z) VALUES (?, ?, ?, ?, ?)", 1, "Test Region", 0.0, 0.0, 0.0)
+		if err != nil {
+			t.Errorf("Failed to insert into mapRegions: %v", err)
+		}
+	})
+
+	// Test insert into industryBlueprints
+	t.Run("insert_industryBlueprints", func(t *testing.T) {
+		_, err := db.Exec("INSERT INTO industryBlueprints (blueprintTypeID, maxProductionLimit) VALUES (?, ?)", 1, 10)
+		if err != nil {
+			t.Errorf("Failed to insert into industryBlueprints: %v", err)
+		}
+	})
+}
+
+// =============================================================================
+// Helper Functions
+// =============================================================================
+
+// TableExists checks if a table exists in the SQLite database.
+func TableExists(db *sqlx.DB, tableName string) (bool, error) {
+	var name string
+	err := db.QueryRow("SELECT name FROM sqlite_master WHERE type='table' AND name=?", tableName).Scan(&name)
+	if err != nil {
+		if err.Error() == "sql: no rows in result set" {
+			return false, nil
+		}
+		return false, err
+	}
+	return true, nil
+}
+
+// IndexExists checks if an index exists in the SQLite database.
+func IndexExists(db *sqlx.DB, indexName string) (bool, error) {
+	var name string
+	err := db.QueryRow("SELECT name FROM sqlite_master WHERE type='index' AND name=?", indexName).Scan(&name)
+	if err != nil {
+		if err.Error() == "sql: no rows in result set" {
+			return false, nil
+		}
+		return false, err
+	}
+	return true, nil
 }
