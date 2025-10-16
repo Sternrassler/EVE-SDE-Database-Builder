@@ -32,3 +32,7 @@ Root Directory/*
 *.out
 coverage.out
 vendor/
+
+# Generated/Downloaded data
+schemas/
+internal/parser/generated/
