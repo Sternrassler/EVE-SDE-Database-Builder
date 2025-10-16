@@ -10,6 +10,8 @@ This package provides a generic, type-safe parser interface for JSONL (JSON Line
 - **Error Handling**: Line-number-based error reporting for easy debugging
 - **Large Line Support**: Handles JSON lines up to 10MB in size
 - **Empty Line Handling**: Automatically skips empty lines
+- **Data Validation**: Built-in validation interface for parsed data with batch processing
+- **Streaming API**: Memory-efficient streaming parser for large files
 
 ## Architecture
 
@@ -83,6 +85,80 @@ tableName := p.TableName()  // "invTypes"
 columns := p.Columns()      // ["typeID", "groupID", "typeName"]
 ```
 
+## Data Validation
+
+The parser package includes a `Validator` interface for validating parsed data with required fields, ranges, and format constraints.
+
+### Implementing Validation
+
+Implement the `Validator` interface on your data structures:
+
+```go
+type TypeRow struct {
+    TypeID   int               `json:"typeID"`
+    TypeName map[string]string `json:"typeName"`
+    Mass     float64           `json:"mass,omitempty"`
+}
+
+// Validate implements the Validator interface
+func (t TypeRow) Validate() error {
+    if t.TypeID <= 0 {
+        return fmt.Errorf("typeID must be positive, got %d", t.TypeID)
+    }
+    if len(t.TypeName) == 0 {
+        return errors.New("typeName is required")
+    }
+    if _, ok := t.TypeName["en"]; !ok {
+        return errors.New("typeName must contain English translation")
+    }
+    if t.Mass < 0 {
+        return fmt.Errorf("mass cannot be negative, got %f", t.Mass)
+    }
+    return nil
+}
+```
+
+### Batch Validation
+
+Use `ValidateBatch` to filter invalid items and collect all validation errors:
+
+```go
+// Parse data
+results, err := p.ParseFile(ctx, "types.jsonl")
+if err != nil {
+    log.Fatal(err)
+}
+
+// Convert to typed slice
+items := make([]TypeRow, len(results))
+for i, result := range results {
+    items[i] = result.(TypeRow)
+}
+
+// Validate all items
+validItems, errs := parser.ValidateBatch(items)
+
+fmt.Printf("Valid: %d, Invalid: %d\n", len(validItems), len(errs))
+
+// Process validation errors
+for _, err := range errs {
+    log.Printf("Validation error: %v\n", err)
+}
+
+// Use only valid items
+for _, item := range validItems {
+    // Process valid item
+}
+```
+
+### Validation Features
+
+- **Required Field Checks**: Validate presence and non-empty values
+- **Range Validation**: Ensure numeric values are within valid ranges
+- **Format Validation**: Check nested structures, maps, and custom formats
+- **Batch Processing**: Validate all items and collect all errors at once
+- **Error Context**: Each validation error includes the item index for debugging
+
 ## Error Handling
 
 Errors include line numbers for easy debugging:
@@ -140,11 +216,11 @@ This implementation follows the architecture defined in `docs/adr/ADR-003-jsonl-
 
 Potential improvements for future versions:
 
-- Streaming mode for extremely large files (callback-based)
 - Batch processing for memory-constrained environments
-- Schema validation against JSON Schema
 - Progress reporting for long-running parses
 - Compressed file support (gzip, bzip2)
+- Schema auto-generation from JSON Schema
+- Advanced validation rules (cross-field validation, custom validators)
 
 ## References
 

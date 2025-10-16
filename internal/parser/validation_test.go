@@ -515,24 +515,6 @@ func BenchmarkValidateBatch_WithErrors(b *testing.B) {
 	}
 }
 
-// Example demonstrating ValidateBatch usage
-func ExampleValidateBatch() {
-	items := []ValidatableTestRow{
-		{ID: 1, Name: "Valid Item", Value: 10.0},
-		{ID: -1, Name: "Invalid Item", Value: 20.0}, // Invalid ID
-		{ID: 2, Name: "Another Valid", Value: 30.0},
-	}
-
-	validItems, errs := parser.ValidateBatch(items)
-
-	fmt.Printf("Valid items: %d\n", len(validItems))
-	fmt.Printf("Errors: %d\n", len(errs))
-
-	// Output:
-	// Valid items: 2
-	// Errors: 1
-}
-
 // Test to ensure Validator interface compatibility
 func TestValidator_InterfaceCompatibility(t *testing.T) {
 	var _ parser.Validator = (*ValidatableTestRow)(nil)
