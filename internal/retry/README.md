@@ -10,8 +10,69 @@ Das Package bietet:
 - Context-aware Retry (Unterbrechung via `context.Context`)
 - Intelligente Fehlerklassifikation (nur `ErrorTypeRetryable` wird wiederholt)
 - Generische `DoWithResult` Funktion für Funktionen mit Rückgabewerten
+- **Vordefinierte Policies** für Database, HTTP und File I/O
+- **PolicyBuilder** für flexible Custom Policies
+- **TOML Serialisierung** für Konfigurationsdateien
 
 ## Verwendung
+
+### Vordefinierte Policies
+
+#### DatabasePolicy
+Optimiert für Datenbank-Operationen (5 retries, 50ms initial, 2s max):
+```go
+policy := retry.DatabasePolicy()
+err := policy.Do(ctx, func() error {
+    return db.Query(...)
+})
+```
+
+**Wann nutzen:**
+- Transaktions-Locks (SQLite BUSY)
+- Connection Pool erschöpft
+- Temporäre DB-Latenzen
+
+#### HTTPPolicy
+Optimiert für HTTP-Requests (3 retries, 100ms initial, 5s max):
+```go
+policy := retry.HTTPPolicy()
+resp, err := retry.DoWithResult(ctx, policy, func() (*http.Response, error) {
+    return http.Get(url)
+})
+```
+
+**Wann nutzen:**
+- API Rate Limits (429)
+- Server Errors (5xx)
+- Temporäre Netzwerkprobleme
+
+#### FileIOPolicy
+Optimiert für Datei-I/O (2 retries, 10ms initial, 500ms max):
+```go
+policy := retry.FileIOPolicy()
+err := policy.Do(ctx, func() error {
+    return os.WriteFile(path, data, 0644)
+})
+```
+
+**Wann nutzen:**
+- File Locking Konflikte
+- Temporäre I/O-Fehler
+- NFS/Netzwerk-Dateisysteme
+
+### PolicyBuilder (Custom Policies)
+
+```go
+policy := retry.NewPolicyBuilder().
+    WithMaxRetries(10).
+    WithInitialDelay(200 * time.Millisecond).
+    WithMaxDelay(30 * time.Second).
+    WithMultiplier(3.0).
+    WithJitter(false).
+    Build()
+
+err := policy.Do(ctx, myFunc)
+```
 
 ### Einfaches Retry
 
@@ -65,6 +126,8 @@ err := policy.Do(ctx, func() error {
 
 ## Policy Konfiguration
 
+### Struktur
+
 ```go
 type Policy struct {
     MaxRetries   int           // Anzahl der Wiederholungen (Standard: 3)
@@ -73,6 +136,46 @@ type Policy struct {
     Multiplier   float64       // Multiplikator für Exponential Backoff (Standard: 2.0)
     Jitter       bool          // Jitter aktivieren (Standard: true)
 }
+```
+
+### TOML Konfiguration
+
+Policies können via TOML konfiguriert werden:
+
+```toml
+[retry.database]
+max_retries = 5
+initial_delay_ms = 50
+max_delay_ms = 2000
+multiplier = 2.0
+jitter = true
+
+[retry.http]
+max_retries = 3
+initial_delay_ms = 100
+max_delay_ms = 5000
+multiplier = 2.0
+jitter = true
+```
+
+**Laden aus TOML:**
+```go
+var config retry.PolicyConfig
+if _, err := toml.DecodeFile("config.toml", &config); err != nil {
+    return err
+}
+
+policy := retry.FromConfig(config)
+```
+
+**Speichern als TOML:**
+```go
+policy := retry.DatabasePolicy()
+config := policy.ToConfig()
+
+var buf bytes.Buffer
+encoder := toml.NewEncoder(&buf)
+encoder.Encode(config)
 ```
 
 ### Backoff Berechnung
