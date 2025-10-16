@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Database Layer Implementation (Epic abgeschlossen)**
+  - Migration Automation Make Targets (`migrate-up`, `migrate-down`, `migrate-status`, `migrate-clean`, `migrate-reset`)
+  - Umfassende README für `internal/database/` mit API-Dokumentation
+  - Performance-Dokumentation (10k Rows in ~14ms, 100k in ~134ms, 500k in ~664ms)
+  - Beispiele für Batch Insert, Transactions, Query Helpers
+  - Best Practices und Troubleshooting Guide
 - Migration für `industryBlueprints` Schema (`migrations/sqlite/003_blueprints.sql`)
   - CREATE TABLE für industryBlueprints (blueprintTypeID, maxProductionLimit)
   - CREATE TABLE für industryActivities (blueprintTypeID, activityID, time)

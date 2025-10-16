@@ -1,4 +1,4 @@
-.PHONY: help test lint build clean coverage
+.PHONY: help test lint build clean coverage fmt vet tidy check-hooks secrets-check commit-lint
 
 help: ## Display this help message
 	@echo "Available targets:"
@@ -42,3 +42,52 @@ secrets-check: ## Placeholder for secrets check
 
 commit-lint: ## Placeholder for commit message validation
 	@echo "[commit-lint] Skipping - no commit linting configured yet"
+
+# Database Migration Targets
+DB_FILE ?= eve_sde.db
+
+migrate-status: ## Show current migration status
+	@echo "Migration files in migrations/sqlite/:"
+	@ls -1 migrations/sqlite/*.sql 2>/dev/null || echo "No migration files found"
+	@echo ""
+	@if [ -f "$(DB_FILE)" ]; then \
+		echo "Database file: $(DB_FILE) (exists)"; \
+		sqlite3 $(DB_FILE) "SELECT name FROM sqlite_master WHERE type='table' ORDER BY name;" 2>/dev/null || echo "Failed to read database"; \
+	else \
+		echo "Database file: $(DB_FILE) (does not exist)"; \
+	fi
+
+migrate-up: ## Apply all migrations to database (creates if not exists)
+	@echo "Applying migrations to $(DB_FILE)..."
+	@for migration in migrations/sqlite/*.sql; do \
+		echo "Applying $$migration..."; \
+		sqlite3 $(DB_FILE) < "$$migration" || { echo "Failed to apply $$migration"; exit 1; }; \
+	done
+	@echo "All migrations applied successfully"
+	@$(MAKE) migrate-status
+
+migrate-down: ## Drop all tables (WARNING: destructive)
+	@echo "WARNING: This will drop all tables in $(DB_FILE)"
+	@read -p "Are you sure? (yes/NO): " confirm && [ "$$confirm" = "yes" ] || { echo "Aborted."; exit 1; }
+	@if [ -f "$(DB_FILE)" ]; then \
+		echo "Dropping all tables..."; \
+		sqlite3 $(DB_FILE) "SELECT 'DROP TABLE IF EXISTS ' || name || ';' FROM sqlite_master WHERE type='table';" | sqlite3 $(DB_FILE); \
+		echo "All tables dropped"; \
+	else \
+		echo "Database file $(DB_FILE) does not exist"; \
+	fi
+	@$(MAKE) migrate-status
+
+migrate-clean: ## Delete database file (WARNING: destructive)
+	@echo "WARNING: This will delete $(DB_FILE)"
+	@read -p "Are you sure? (yes/NO): " confirm && [ "$$confirm" = "yes" ] || { echo "Aborted."; exit 1; }
+	@if [ -f "$(DB_FILE)" ]; then \
+		rm -f $(DB_FILE) $(DB_FILE)-shm $(DB_FILE)-wal; \
+		echo "Database files deleted"; \
+	else \
+		echo "Database file $(DB_FILE) does not exist"; \
+	fi
+
+migrate-reset: migrate-clean migrate-up ## Reset database (clean + migrate-up)
+
+.PHONY: migrate-status migrate-up migrate-down migrate-clean migrate-reset
