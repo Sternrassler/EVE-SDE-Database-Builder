@@ -334,8 +334,6 @@ func BenchmarkJSONLParser_ParseFile_SmallFile(b *testing.B) {
 	}
 }
 
-
-
 // Example test demonstrating usage
 func ExampleJSONLParser() {
 	// Create a temporary test file
