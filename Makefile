@@ -1,4 +1,4 @@
-.PHONY: help test lint build clean coverage fmt vet tidy check-hooks secrets-check commit-lint
+.PHONY: help test lint build clean coverage fmt vet tidy check-hooks secrets-check commit-lint generate-parsers
 
 help: ## Display this help message
 	@echo "Available targets:"
@@ -42,6 +42,9 @@ secrets-check: ## Placeholder for secrets check
 
 commit-lint: ## Placeholder for commit message validation
 	@echo "[commit-lint] Skipping - no commit linting configured yet"
+
+generate-parsers: ## Generate Go parsers from JSON schemas (requires quicktype)
+	@bash tools/generate-parsers.sh
 
 # Database Migration Targets
 DB_FILE ?= eve_sde.db
