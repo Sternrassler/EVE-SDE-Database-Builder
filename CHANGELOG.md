@@ -9,6 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Parser Integration Tests (E2E: JSONL → DB)**
+  - Integration Test für invTypes (Parse JSONL → Insert → Verify Row Count)
+  - Integration Test für invGroups (Parse JSONL → Insert → Verify Row Count)
+  - Integration Test für industryBlueprints (Parse JSONL → Insert → Verify Row Count)
+  - Helper-Funktionen für Row-Konvertierung (invTypeToRow, invGroupToRow, blueprintToRow)
+  - Test-Datenstrukturen mit korrekter JSON-Mapping und Nullable-Feldern
+  - Datei: `internal/parser/integration_test.go`
 - **Database Layer Implementation (Epic abgeschlossen)**
   - Migration Automation Make Targets (`migrate-up`, `migrate-down`, `migrate-status`, `migrate-clean`, `migrate-reset`)
   - Umfassende README für `internal/database/` mit API-Dokumentation
