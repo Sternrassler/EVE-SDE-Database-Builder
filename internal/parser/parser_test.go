@@ -334,6 +334,38 @@ func BenchmarkJSONLParser_ParseFile_SmallFile(b *testing.B) {
 	}
 }
 
+// BenchmarkParseJSONL_100k benchmarks parsing 100k lines
+// Target: < 1s for 100k lines
+func BenchmarkParseJSONL_100k(b *testing.B) {
+	tmpDir := b.TempDir()
+	testFile := filepath.Join(tmpDir, "large.jsonl")
+
+	// Create 100k lines of JSONL data
+	var content strings.Builder
+	for i := 1; i <= 100000; i++ {
+		content.WriteString(`{"id":`)
+		content.WriteString(string(rune('0' + i%10)))
+		content.WriteString(`,"name":"Item"}` + "\n")
+	}
+	if err := os.WriteFile(testFile, []byte(content.String()), 0644); err != nil {
+		b.Fatalf("Failed to create test file: %v", err)
+	}
+
+	p := parser.NewJSONLParser[TestRow]("test_table", []string{"id", "name"})
+	ctx := context.Background()
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		results, err := p.ParseFile(ctx, testFile)
+		if err != nil {
+			b.Fatalf("ParseFile failed: %v", err)
+		}
+		if len(results) != 100000 {
+			b.Fatalf("Expected 100000 results, got %d", len(results))
+		}
+	}
+}
+
 // Example test demonstrating usage
 func ExampleJSONLParser() {
 	// Create a temporary test file
