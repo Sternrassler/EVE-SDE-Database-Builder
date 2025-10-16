@@ -9,6 +9,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Migration für `industryBlueprints` Schema (`migrations/sqlite/003_blueprints.sql`)
+  - CREATE TABLE für industryBlueprints (blueprintTypeID, maxProductionLimit)
+  - CREATE TABLE für industryActivities (blueprintTypeID, activityID, time)
+  - CREATE TABLE für industryActivityMaterials (blueprintTypeID, activityID, materialTypeID, quantity)
+  - CREATE TABLE für industryActivityProducts (blueprintTypeID, activityID, productTypeID, quantity)
+  - Composite PRIMARY KEYs für Activities, Materials und Products
+  - 6 Indizes für performante Lookups (blueprintTypeID, activityID, materialTypeID, productTypeID)
+  - Idempotente Migration (CREATE IF NOT EXISTS)
+- Umfassende Tests für Blueprints Migration
+  - Schema-Validierung (alle Tabellen, Spalten, Constraints)
+  - Composite PRIMARY KEY Tests
+  - Index-Überprüfung (6 Indizes)
+  - Datenoperationen (Insert, Query für alle 4 Tabellen)
+  - Index-Performance-Tests
+  - Idempotenz-Test (wiederholbare Ausführung)
 - Migration für `invTypes` Tabelle (`migrations/sqlite/001_inv_types.sql`)
   - CREATE TABLE Statement mit allen Spalten aus RIFT SDE Schema
   - Indizes für typeID (PRIMARY KEY), groupID, marketGroupID
