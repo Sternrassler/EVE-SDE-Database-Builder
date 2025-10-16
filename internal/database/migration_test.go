@@ -308,3 +308,289 @@ func TestMigration_001_InvTypes_Idempotence(t *testing.T) {
 		t.Fatalf("Table invTypes does not exist after second migration: %v", err)
 	}
 }
+
+// TestMigration_002_InvGroups tests the 002_inv_groups.sql migration
+func TestMigration_002_InvGroups(t *testing.T) {
+	// Create in-memory database
+	db, err := NewDB(":memory:")
+	if err != nil {
+		t.Fatalf("NewDB failed: %v", err)
+	}
+	defer Close(db)
+
+	// Read migration file
+	migrationPath := filepath.Join("..", "..", "migrations", "sqlite", "002_inv_groups.sql")
+	migrationSQL, err := os.ReadFile(migrationPath)
+	if err != nil {
+		t.Fatalf("Failed to read migration file: %v", err)
+	}
+
+	// Execute migration
+	_, err = db.Exec(string(migrationSQL))
+	if err != nil {
+		t.Fatalf("Failed to execute migration: %v", err)
+	}
+
+	// Verify table exists
+	var tableName string
+	err = db.QueryRow("SELECT name FROM sqlite_master WHERE type='table' AND name='invGroups'").Scan(&tableName)
+	if err != nil {
+		t.Fatalf("Table invGroups was not created: %v", err)
+	}
+	if tableName != "invGroups" {
+		t.Errorf("Expected table name 'invGroups', got '%s'", tableName)
+	}
+}
+
+// TestMigration_002_InvGroups_Schema verifies the schema structure
+func TestMigration_002_InvGroups_Schema(t *testing.T) {
+	db, err := NewDB(":memory:")
+	if err != nil {
+		t.Fatalf("NewDB failed: %v", err)
+	}
+	defer Close(db)
+
+	// Read and execute migration
+	migrationPath := filepath.Join("..", "..", "migrations", "sqlite", "002_inv_groups.sql")
+	migrationSQL, err := os.ReadFile(migrationPath)
+	if err != nil {
+		t.Fatalf("Failed to read migration file: %v", err)
+	}
+	_, err = db.Exec(string(migrationSQL))
+	if err != nil {
+		t.Fatalf("Failed to execute migration: %v", err)
+	}
+
+	// Verify all expected columns exist
+	expectedColumns := []string{
+		"groupID", "categoryID", "groupName", "iconID", "useBasePrice",
+		"anchored", "anchorable", "fittableNonSingleton", "published",
+	}
+
+	rows, err := db.Query("PRAGMA table_info(invGroups)")
+	if err != nil {
+		t.Fatalf("Failed to get table info: %v", err)
+	}
+	defer rows.Close()
+
+	columnMap := make(map[string]bool)
+	for rows.Next() {
+		var cid int
+		var name, colType string
+		var notNull, pk int
+		var dfltValue interface{}
+
+		err := rows.Scan(&cid, &name, &colType, &notNull, &dfltValue, &pk)
+		if err != nil {
+			t.Fatalf("Failed to scan column info: %v", err)
+		}
+		columnMap[name] = true
+
+		// Verify groupID is PRIMARY KEY
+		if name == "groupID" && pk != 1 {
+			t.Errorf("groupID should be PRIMARY KEY")
+		}
+
+		// Verify groupName is NOT NULL
+		if name == "groupName" && notNull != 1 {
+			t.Errorf("groupName should be NOT NULL")
+		}
+	}
+
+	// Check all expected columns are present
+	for _, col := range expectedColumns {
+		if !columnMap[col] {
+			t.Errorf("Expected column '%s' not found in table", col)
+		}
+	}
+}
+
+// TestMigration_002_InvGroups_Indexes verifies the indexes are created
+func TestMigration_002_InvGroups_Indexes(t *testing.T) {
+	db, err := NewDB(":memory:")
+	if err != nil {
+		t.Fatalf("NewDB failed: %v", err)
+	}
+	defer Close(db)
+
+	// Read and execute migration
+	migrationPath := filepath.Join("..", "..", "migrations", "sqlite", "002_inv_groups.sql")
+	migrationSQL, err := os.ReadFile(migrationPath)
+	if err != nil {
+		t.Fatalf("Failed to read migration file: %v", err)
+	}
+	_, err = db.Exec(string(migrationSQL))
+	if err != nil {
+		t.Fatalf("Failed to execute migration: %v", err)
+	}
+
+	// Verify indexes exist
+	expectedIndexes := map[string]bool{
+		"idx_invGroups_categoryID": false,
+	}
+
+	rows, err := db.Query("SELECT name FROM sqlite_master WHERE type='index' AND tbl_name='invGroups' AND name NOT LIKE 'sqlite_%'")
+	if err != nil {
+		t.Fatalf("Failed to query indexes: %v", err)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var indexName string
+		if err := rows.Scan(&indexName); err != nil {
+			t.Fatalf("Failed to scan index name: %v", err)
+		}
+		if _, exists := expectedIndexes[indexName]; exists {
+			expectedIndexes[indexName] = true
+		}
+	}
+
+	// Check all expected indexes are present
+	for indexName, found := range expectedIndexes {
+		if !found {
+			t.Errorf("Expected index '%s' not found", indexName)
+		}
+	}
+}
+
+// TestMigration_002_InvGroups_DataInsertion tests that data can be inserted
+func TestMigration_002_InvGroups_DataInsertion(t *testing.T) {
+	db, err := NewDB(":memory:")
+	if err != nil {
+		t.Fatalf("NewDB failed: %v", err)
+	}
+	defer Close(db)
+
+	// Execute migration
+	migrationPath := filepath.Join("..", "..", "migrations", "sqlite", "002_inv_groups.sql")
+	migrationSQL, err := os.ReadFile(migrationPath)
+	if err != nil {
+		t.Fatalf("Failed to read migration file: %v", err)
+	}
+	_, err = db.Exec(string(migrationSQL))
+	if err != nil {
+		t.Fatalf("Failed to execute migration: %v", err)
+	}
+
+	// Insert test data
+	testData := []struct {
+		groupID    int
+		groupName  string
+		categoryID int
+	}{
+		{18, "Mineral", 4},
+		{25, "Frigate", 6},
+		{420, "Destroyer", 6},
+	}
+
+	for _, td := range testData {
+		_, err := db.Exec(
+			"INSERT INTO invGroups (groupID, groupName, categoryID) VALUES (?, ?, ?)",
+			td.groupID, td.groupName, td.categoryID,
+		)
+		if err != nil {
+			t.Fatalf("Failed to insert test data: %v", err)
+		}
+	}
+
+	// Verify data was inserted
+	var count int
+	err = db.QueryRow("SELECT COUNT(*) FROM invGroups").Scan(&count)
+	if err != nil {
+		t.Fatalf("Failed to count rows: %v", err)
+	}
+	if count != len(testData) {
+		t.Errorf("Expected %d rows, got %d", len(testData), count)
+	}
+
+	// Verify specific row
+	var groupName string
+	err = db.QueryRow("SELECT groupName FROM invGroups WHERE groupID = ?", 18).Scan(&groupName)
+	if err != nil {
+		t.Fatalf("Failed to query data: %v", err)
+	}
+	if groupName != "Mineral" {
+		t.Errorf("Expected groupName 'Mineral', got '%s'", groupName)
+	}
+}
+
+// TestMigration_002_InvGroups_IndexPerformance tests that indexes are used
+func TestMigration_002_InvGroups_IndexPerformance(t *testing.T) {
+	db, err := NewDB(":memory:")
+	if err != nil {
+		t.Fatalf("NewDB failed: %v", err)
+	}
+	defer Close(db)
+
+	// Execute migration
+	migrationPath := filepath.Join("..", "..", "migrations", "sqlite", "002_inv_groups.sql")
+	migrationSQL, err := os.ReadFile(migrationPath)
+	if err != nil {
+		t.Fatalf("Failed to read migration file: %v", err)
+	}
+	_, err = db.Exec(string(migrationSQL))
+	if err != nil {
+		t.Fatalf("Failed to execute migration: %v", err)
+	}
+
+	// Insert some test data
+	for i := 1; i <= 100; i++ {
+		_, err := db.Exec(
+			"INSERT INTO invGroups (groupID, groupName, categoryID) VALUES (?, ?, ?)",
+			i, "Group"+string(rune(i)), i%10,
+		)
+		if err != nil {
+			t.Fatalf("Failed to insert test data: %v", err)
+		}
+	}
+
+	// Test query using categoryID index
+	rows, err := db.Query("SELECT groupID FROM invGroups WHERE categoryID = 5")
+	if err != nil {
+		t.Fatalf("Failed to query by categoryID: %v", err)
+	}
+	defer rows.Close()
+
+	count := 0
+	for rows.Next() {
+		count++
+	}
+	if count == 0 {
+		t.Error("Expected at least one row with categoryID = 5")
+	}
+}
+
+// TestMigration_002_InvGroups_Idempotence tests that migration can be run multiple times
+func TestMigration_002_InvGroups_Idempotence(t *testing.T) {
+	db, err := NewDB(":memory:")
+	if err != nil {
+		t.Fatalf("NewDB failed: %v", err)
+	}
+	defer Close(db)
+
+	// Read migration file
+	migrationPath := filepath.Join("..", "..", "migrations", "sqlite", "002_inv_groups.sql")
+	migrationSQL, err := os.ReadFile(migrationPath)
+	if err != nil {
+		t.Fatalf("Failed to read migration file: %v", err)
+	}
+
+	// Execute migration first time
+	_, err = db.Exec(string(migrationSQL))
+	if err != nil {
+		t.Fatalf("Failed to execute migration first time: %v", err)
+	}
+
+	// Execute migration second time (should not fail due to CREATE TABLE IF NOT EXISTS)
+	_, err = db.Exec(string(migrationSQL))
+	if err != nil {
+		t.Fatalf("Failed to execute migration second time: %v", err)
+	}
+
+	// Verify table still exists and has correct structure
+	var tableName string
+	err = db.QueryRow("SELECT name FROM sqlite_master WHERE type='table' AND name='invGroups'").Scan(&tableName)
+	if err != nil {
+		t.Fatalf("Table invGroups does not exist after second migration: %v", err)
+	}
+}
