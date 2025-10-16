@@ -1291,3 +1291,725 @@ func TestMigration_003_Blueprints_CompositeKeys(t *testing.T) {
 		}
 	})
 }
+
+// TestMigration_004_Dogma tests the 004_dogma.sql migration
+func TestMigration_004_Dogma(t *testing.T) {
+	// Create in-memory database
+	db, err := NewDB(":memory:")
+	if err != nil {
+		t.Fatalf("NewDB failed: %v", err)
+	}
+	defer Close(db)
+
+	// Read migration file
+	migrationPath := filepath.Join("..", "..", "migrations", "sqlite", "004_dogma.sql")
+	migrationSQL, err := os.ReadFile(migrationPath)
+	if err != nil {
+		t.Fatalf("Failed to read migration file: %v", err)
+	}
+
+	// Execute migration
+	_, err = db.Exec(string(migrationSQL))
+	if err != nil {
+		t.Fatalf("Failed to execute migration: %v", err)
+	}
+
+	// Verify all tables exist
+	expectedTables := []string{
+		"dogmaAttributes",
+		"dogmaEffects",
+		"dogmaTypeAttributes",
+		"dogmaTypeEffects",
+	}
+
+	for _, table := range expectedTables {
+		var tableName string
+		err = db.QueryRow("SELECT name FROM sqlite_master WHERE type='table' AND name=?", table).Scan(&tableName)
+		if err != nil {
+			t.Fatalf("Table %s was not created: %v", table, err)
+		}
+		if tableName != table {
+			t.Errorf("Expected table name '%s', got '%s'", table, tableName)
+		}
+	}
+}
+
+// TestMigration_004_Dogma_Schema verifies the schema structure
+func TestMigration_004_Dogma_Schema(t *testing.T) {
+	db, err := NewDB(":memory:")
+	if err != nil {
+		t.Fatalf("NewDB failed: %v", err)
+	}
+	defer Close(db)
+
+	// Read and execute migration
+	migrationPath := filepath.Join("..", "..", "migrations", "sqlite", "004_dogma.sql")
+	migrationSQL, err := os.ReadFile(migrationPath)
+	if err != nil {
+		t.Fatalf("Failed to read migration file: %v", err)
+	}
+	_, err = db.Exec(string(migrationSQL))
+	if err != nil {
+		t.Fatalf("Failed to execute migration: %v", err)
+	}
+
+	// Verify dogmaAttributes schema
+	t.Run("dogmaAttributes", func(t *testing.T) {
+		expectedColumns := []string{
+			"attributeID", "attributeName", "description", "iconID", "defaultValue",
+			"published", "displayName", "unitID", "stackable", "highIsGood",
+		}
+		rows, err := db.Query("PRAGMA table_info(dogmaAttributes)")
+		if err != nil {
+			t.Fatalf("Failed to get table info: %v", err)
+		}
+		defer rows.Close()
+
+		columnMap := make(map[string]bool)
+		for rows.Next() {
+			var cid int
+			var name, colType string
+			var notNull, pk int
+			var dfltValue interface{}
+
+			err := rows.Scan(&cid, &name, &colType, &notNull, &dfltValue, &pk)
+			if err != nil {
+				t.Fatalf("Failed to scan column info: %v", err)
+			}
+			columnMap[name] = true
+
+			// Verify attributeID is PRIMARY KEY
+			if name == "attributeID" && pk != 1 {
+				t.Errorf("attributeID should be PRIMARY KEY")
+			}
+		}
+
+		for _, col := range expectedColumns {
+			if !columnMap[col] {
+				t.Errorf("Expected column '%s' not found in table", col)
+			}
+		}
+	})
+
+	// Verify dogmaEffects schema
+	t.Run("dogmaEffects", func(t *testing.T) {
+		expectedColumns := []string{
+			"effectID", "effectName", "effectCategory", "preExpression", "postExpression",
+			"description", "guid", "iconID", "isOffensive", "isAssistance",
+			"durationAttributeID", "trackingSpeedAttributeID", "dischargeAttributeID",
+			"rangeAttributeID", "falloffAttributeID", "disallowAutoRepeat", "published",
+			"displayName", "isWarpSafe", "rangeChance", "electronicChance",
+			"propulsionChance", "distribution", "sfxName", "npcUsageChanceAttributeID",
+			"npcActivationChanceAttributeID", "fittingUsageChanceAttributeID", "modifierInfo",
+		}
+		rows, err := db.Query("PRAGMA table_info(dogmaEffects)")
+		if err != nil {
+			t.Fatalf("Failed to get table info: %v", err)
+		}
+		defer rows.Close()
+
+		columnMap := make(map[string]bool)
+		for rows.Next() {
+			var cid int
+			var name, colType string
+			var notNull, pk int
+			var dfltValue interface{}
+
+			err := rows.Scan(&cid, &name, &colType, &notNull, &dfltValue, &pk)
+			if err != nil {
+				t.Fatalf("Failed to scan column info: %v", err)
+			}
+			columnMap[name] = true
+
+			// Verify effectID is PRIMARY KEY
+			if name == "effectID" && pk != 1 {
+				t.Errorf("effectID should be PRIMARY KEY")
+			}
+		}
+
+		for _, col := range expectedColumns {
+			if !columnMap[col] {
+				t.Errorf("Expected column '%s' not found in table", col)
+			}
+		}
+	})
+
+	// Verify dogmaTypeAttributes schema
+	t.Run("dogmaTypeAttributes", func(t *testing.T) {
+		expectedColumns := []string{"typeID", "attributeID", "valueInt", "valueFloat"}
+		rows, err := db.Query("PRAGMA table_info(dogmaTypeAttributes)")
+		if err != nil {
+			t.Fatalf("Failed to get table info: %v", err)
+		}
+		defer rows.Close()
+
+		columnMap := make(map[string]bool)
+		pkCount := 0
+		for rows.Next() {
+			var cid int
+			var name, colType string
+			var notNull, pk int
+			var dfltValue interface{}
+
+			err := rows.Scan(&cid, &name, &colType, &notNull, &dfltValue, &pk)
+			if err != nil {
+				t.Fatalf("Failed to scan column info: %v", err)
+			}
+			columnMap[name] = true
+
+			// Count PRIMARY KEY columns
+			if pk > 0 {
+				pkCount++
+			}
+		}
+
+		for _, col := range expectedColumns {
+			if !columnMap[col] {
+				t.Errorf("Expected column '%s' not found in table", col)
+			}
+		}
+
+		// Verify composite PRIMARY KEY (typeID, attributeID)
+		if pkCount != 2 {
+			t.Errorf("Expected composite PRIMARY KEY with 2 columns, got %d", pkCount)
+		}
+	})
+
+	// Verify dogmaTypeEffects schema
+	t.Run("dogmaTypeEffects", func(t *testing.T) {
+		expectedColumns := []string{"typeID", "effectID", "isDefault"}
+		rows, err := db.Query("PRAGMA table_info(dogmaTypeEffects)")
+		if err != nil {
+			t.Fatalf("Failed to get table info: %v", err)
+		}
+		defer rows.Close()
+
+		columnMap := make(map[string]bool)
+		pkCount := 0
+		for rows.Next() {
+			var cid int
+			var name, colType string
+			var notNull, pk int
+			var dfltValue interface{}
+
+			err := rows.Scan(&cid, &name, &colType, &notNull, &dfltValue, &pk)
+			if err != nil {
+				t.Fatalf("Failed to scan column info: %v", err)
+			}
+			columnMap[name] = true
+
+			// Count PRIMARY KEY columns
+			if pk > 0 {
+				pkCount++
+			}
+		}
+
+		for _, col := range expectedColumns {
+			if !columnMap[col] {
+				t.Errorf("Expected column '%s' not found in table", col)
+			}
+		}
+
+		// Verify composite PRIMARY KEY (typeID, effectID)
+		if pkCount != 2 {
+			t.Errorf("Expected composite PRIMARY KEY with 2 columns, got %d", pkCount)
+		}
+	})
+}
+
+// TestMigration_004_Dogma_Indexes verifies the indexes are created
+func TestMigration_004_Dogma_Indexes(t *testing.T) {
+	db, err := NewDB(":memory:")
+	if err != nil {
+		t.Fatalf("NewDB failed: %v", err)
+	}
+	defer Close(db)
+
+	// Read and execute migration
+	migrationPath := filepath.Join("..", "..", "migrations", "sqlite", "004_dogma.sql")
+	migrationSQL, err := os.ReadFile(migrationPath)
+	if err != nil {
+		t.Fatalf("Failed to read migration file: %v", err)
+	}
+	_, err = db.Exec(string(migrationSQL))
+	if err != nil {
+		t.Fatalf("Failed to execute migration: %v", err)
+	}
+
+	// Test indexes for dogmaAttributes
+	t.Run("dogmaAttributes_indexes", func(t *testing.T) {
+		expectedIndexes := map[string]bool{
+			"idx_dogmaAttributes_attributeName": false,
+		}
+
+		rows, err := db.Query("SELECT name FROM sqlite_master WHERE type='index' AND tbl_name='dogmaAttributes' AND name NOT LIKE 'sqlite_%'")
+		if err != nil {
+			t.Fatalf("Failed to query indexes: %v", err)
+		}
+		defer rows.Close()
+
+		for rows.Next() {
+			var indexName string
+			if err := rows.Scan(&indexName); err != nil {
+				t.Fatalf("Failed to scan index name: %v", err)
+			}
+			if _, exists := expectedIndexes[indexName]; exists {
+				expectedIndexes[indexName] = true
+			}
+		}
+
+		for indexName, found := range expectedIndexes {
+			if !found {
+				t.Errorf("Expected index '%s' not found", indexName)
+			}
+		}
+	})
+
+	// Test indexes for dogmaEffects
+	t.Run("dogmaEffects_indexes", func(t *testing.T) {
+		expectedIndexes := map[string]bool{
+			"idx_dogmaEffects_effectName":     false,
+			"idx_dogmaEffects_effectCategory": false,
+		}
+
+		rows, err := db.Query("SELECT name FROM sqlite_master WHERE type='index' AND tbl_name='dogmaEffects' AND name NOT LIKE 'sqlite_%'")
+		if err != nil {
+			t.Fatalf("Failed to query indexes: %v", err)
+		}
+		defer rows.Close()
+
+		for rows.Next() {
+			var indexName string
+			if err := rows.Scan(&indexName); err != nil {
+				t.Fatalf("Failed to scan index name: %v", err)
+			}
+			if _, exists := expectedIndexes[indexName]; exists {
+				expectedIndexes[indexName] = true
+			}
+		}
+
+		for indexName, found := range expectedIndexes {
+			if !found {
+				t.Errorf("Expected index '%s' not found", indexName)
+			}
+		}
+	})
+
+	// Test indexes for dogmaTypeAttributes
+	t.Run("dogmaTypeAttributes_indexes", func(t *testing.T) {
+		expectedIndexes := map[string]bool{
+			"idx_dogmaTypeAttributes_typeID":      false,
+			"idx_dogmaTypeAttributes_attributeID": false,
+		}
+
+		rows, err := db.Query("SELECT name FROM sqlite_master WHERE type='index' AND tbl_name='dogmaTypeAttributes' AND name NOT LIKE 'sqlite_%'")
+		if err != nil {
+			t.Fatalf("Failed to query indexes: %v", err)
+		}
+		defer rows.Close()
+
+		for rows.Next() {
+			var indexName string
+			if err := rows.Scan(&indexName); err != nil {
+				t.Fatalf("Failed to scan index name: %v", err)
+			}
+			if _, exists := expectedIndexes[indexName]; exists {
+				expectedIndexes[indexName] = true
+			}
+		}
+
+		for indexName, found := range expectedIndexes {
+			if !found {
+				t.Errorf("Expected index '%s' not found", indexName)
+			}
+		}
+	})
+
+	// Test indexes for dogmaTypeEffects
+	t.Run("dogmaTypeEffects_indexes", func(t *testing.T) {
+		expectedIndexes := map[string]bool{
+			"idx_dogmaTypeEffects_typeID":   false,
+			"idx_dogmaTypeEffects_effectID": false,
+		}
+
+		rows, err := db.Query("SELECT name FROM sqlite_master WHERE type='index' AND tbl_name='dogmaTypeEffects' AND name NOT LIKE 'sqlite_%'")
+		if err != nil {
+			t.Fatalf("Failed to query indexes: %v", err)
+		}
+		defer rows.Close()
+
+		for rows.Next() {
+			var indexName string
+			if err := rows.Scan(&indexName); err != nil {
+				t.Fatalf("Failed to scan index name: %v", err)
+			}
+			if _, exists := expectedIndexes[indexName]; exists {
+				expectedIndexes[indexName] = true
+			}
+		}
+
+		for indexName, found := range expectedIndexes {
+			if !found {
+				t.Errorf("Expected index '%s' not found", indexName)
+			}
+		}
+	})
+}
+
+// TestMigration_004_Dogma_DataInsertion tests that data can be inserted
+func TestMigration_004_Dogma_DataInsertion(t *testing.T) {
+	db, err := NewDB(":memory:")
+	if err != nil {
+		t.Fatalf("NewDB failed: %v", err)
+	}
+	defer Close(db)
+
+	// Execute migration
+	migrationPath := filepath.Join("..", "..", "migrations", "sqlite", "004_dogma.sql")
+	migrationSQL, err := os.ReadFile(migrationPath)
+	if err != nil {
+		t.Fatalf("Failed to read migration file: %v", err)
+	}
+	_, err = db.Exec(string(migrationSQL))
+	if err != nil {
+		t.Fatalf("Failed to execute migration: %v", err)
+	}
+
+	// Insert test data into dogmaAttributes
+	_, err = db.Exec(
+		"INSERT INTO dogmaAttributes (attributeID, attributeName, defaultValue, published) VALUES (?, ?, ?, ?)",
+		4, "agility", 0.0, 1,
+	)
+	if err != nil {
+		t.Fatalf("Failed to insert into dogmaAttributes: %v", err)
+	}
+
+	// Insert test data into dogmaEffects
+	_, err = db.Exec(
+		"INSERT INTO dogmaEffects (effectID, effectName, effectCategory, published) VALUES (?, ?, ?, ?)",
+		11, "loPower", 0, 1,
+	)
+	if err != nil {
+		t.Fatalf("Failed to insert into dogmaEffects: %v", err)
+	}
+
+	// Insert test data into dogmaTypeAttributes
+	_, err = db.Exec(
+		"INSERT INTO dogmaTypeAttributes (typeID, attributeID, valueFloat) VALUES (?, ?, ?)",
+		34, 4, 5.0,
+	)
+	if err != nil {
+		t.Fatalf("Failed to insert into dogmaTypeAttributes: %v", err)
+	}
+
+	// Insert test data into dogmaTypeEffects
+	_, err = db.Exec(
+		"INSERT INTO dogmaTypeEffects (typeID, effectID, isDefault) VALUES (?, ?, ?)",
+		34, 11, 1,
+	)
+	if err != nil {
+		t.Fatalf("Failed to insert into dogmaTypeEffects: %v", err)
+	}
+
+	// Verify data was inserted into dogmaAttributes
+	var attributeName string
+	err = db.QueryRow("SELECT attributeName FROM dogmaAttributes WHERE attributeID = ?", 4).Scan(&attributeName)
+	if err != nil {
+		t.Fatalf("Failed to query dogmaAttributes: %v", err)
+	}
+	if attributeName != "agility" {
+		t.Errorf("Expected attributeName 'agility', got '%s'", attributeName)
+	}
+
+	// Verify data was inserted into dogmaEffects
+	var effectName string
+	err = db.QueryRow("SELECT effectName FROM dogmaEffects WHERE effectID = ?", 11).Scan(&effectName)
+	if err != nil {
+		t.Fatalf("Failed to query dogmaEffects: %v", err)
+	}
+	if effectName != "loPower" {
+		t.Errorf("Expected effectName 'loPower', got '%s'", effectName)
+	}
+
+	// Verify data was inserted into dogmaTypeAttributes
+	var valueFloat float64
+	err = db.QueryRow("SELECT valueFloat FROM dogmaTypeAttributes WHERE typeID = ? AND attributeID = ?", 34, 4).Scan(&valueFloat)
+	if err != nil {
+		t.Fatalf("Failed to query dogmaTypeAttributes: %v", err)
+	}
+	if valueFloat != 5.0 {
+		t.Errorf("Expected valueFloat 5.0, got %f", valueFloat)
+	}
+
+	// Verify data was inserted into dogmaTypeEffects
+	var isDefault int
+	err = db.QueryRow("SELECT isDefault FROM dogmaTypeEffects WHERE typeID = ? AND effectID = ?", 34, 11).Scan(&isDefault)
+	if err != nil {
+		t.Fatalf("Failed to query dogmaTypeEffects: %v", err)
+	}
+	if isDefault != 1 {
+		t.Errorf("Expected isDefault 1, got %d", isDefault)
+	}
+}
+
+// TestMigration_004_Dogma_IndexPerformance tests that indexes are used
+func TestMigration_004_Dogma_IndexPerformance(t *testing.T) {
+	db, err := NewDB(":memory:")
+	if err != nil {
+		t.Fatalf("NewDB failed: %v", err)
+	}
+	defer Close(db)
+
+	// Execute migration
+	migrationPath := filepath.Join("..", "..", "migrations", "sqlite", "004_dogma.sql")
+	migrationSQL, err := os.ReadFile(migrationPath)
+	if err != nil {
+		t.Fatalf("Failed to read migration file: %v", err)
+	}
+	_, err = db.Exec(string(migrationSQL))
+	if err != nil {
+		t.Fatalf("Failed to execute migration: %v", err)
+	}
+
+	// Insert test data into dogmaAttributes
+	for i := 1; i <= 100; i++ {
+		_, err := db.Exec(
+			"INSERT INTO dogmaAttributes (attributeID, attributeName, defaultValue, published) VALUES (?, ?, ?, ?)",
+			i, "attribute_"+string(rune(i)), float64(i), i%2,
+		)
+		if err != nil {
+			t.Fatalf("Failed to insert test data: %v", err)
+		}
+	}
+
+	// Insert test data into dogmaEffects
+	for i := 1; i <= 100; i++ {
+		_, err := db.Exec(
+			"INSERT INTO dogmaEffects (effectID, effectName, effectCategory, published) VALUES (?, ?, ?, ?)",
+			i, "effect_"+string(rune(i)), i%5, i%2,
+		)
+		if err != nil {
+			t.Fatalf("Failed to insert effect data: %v", err)
+		}
+	}
+
+	// Insert test data into dogmaTypeAttributes
+	for i := 1; i <= 100; i++ {
+		typeID := i
+		attributeID := (i % 10) + 1
+		_, err := db.Exec(
+			"INSERT INTO dogmaTypeAttributes (typeID, attributeID, valueFloat) VALUES (?, ?, ?)",
+			typeID, attributeID, float64(i*10),
+		)
+		if err != nil {
+			t.Fatalf("Failed to insert type attribute data: %v", err)
+		}
+	}
+
+	// Insert test data into dogmaTypeEffects
+	for i := 1; i <= 100; i++ {
+		typeID := i
+		effectID := (i % 10) + 1
+		_, err := db.Exec(
+			"INSERT INTO dogmaTypeEffects (typeID, effectID, isDefault) VALUES (?, ?, ?)",
+			typeID, effectID, i%2,
+		)
+		if err != nil {
+			t.Fatalf("Failed to insert type effect data: %v", err)
+		}
+	}
+
+	// Test query using attributeName index
+	rows, err := db.Query("SELECT attributeID FROM dogmaAttributes WHERE attributeName LIKE 'attribute_%'")
+	if err != nil {
+		t.Fatalf("Failed to query by attributeName: %v", err)
+	}
+	defer rows.Close()
+
+	count := 0
+	for rows.Next() {
+		count++
+	}
+	if count == 0 {
+		t.Error("Expected at least one row with attributeName like 'attribute_%'")
+	}
+
+	// Test query using effectCategory index
+	rows, err = db.Query("SELECT effectID FROM dogmaEffects WHERE effectCategory = 2")
+	if err != nil {
+		t.Fatalf("Failed to query by effectCategory: %v", err)
+	}
+	defer rows.Close()
+
+	count = 0
+	for rows.Next() {
+		count++
+	}
+	if count == 0 {
+		t.Error("Expected at least one row with effectCategory = 2")
+	}
+
+	// Test query using typeID index on dogmaTypeAttributes
+	rows, err = db.Query("SELECT attributeID FROM dogmaTypeAttributes WHERE typeID = 50")
+	if err != nil {
+		t.Fatalf("Failed to query by typeID: %v", err)
+	}
+	defer rows.Close()
+
+	count = 0
+	for rows.Next() {
+		count++
+	}
+	if count == 0 {
+		t.Error("Expected at least one row with typeID = 50")
+	}
+
+	// Test query using effectID index on dogmaTypeEffects
+	rows, err = db.Query("SELECT typeID FROM dogmaTypeEffects WHERE effectID = 5")
+	if err != nil {
+		t.Fatalf("Failed to query by effectID: %v", err)
+	}
+	defer rows.Close()
+
+	count = 0
+	for rows.Next() {
+		count++
+	}
+	if count == 0 {
+		t.Error("Expected at least one row with effectID = 5")
+	}
+}
+
+// TestMigration_004_Dogma_Idempotence tests that migration can be run multiple times
+func TestMigration_004_Dogma_Idempotence(t *testing.T) {
+	db, err := NewDB(":memory:")
+	if err != nil {
+		t.Fatalf("NewDB failed: %v", err)
+	}
+	defer Close(db)
+
+	// Read migration file
+	migrationPath := filepath.Join("..", "..", "migrations", "sqlite", "004_dogma.sql")
+	migrationSQL, err := os.ReadFile(migrationPath)
+	if err != nil {
+		t.Fatalf("Failed to read migration file: %v", err)
+	}
+
+	// Execute migration first time
+	_, err = db.Exec(string(migrationSQL))
+	if err != nil {
+		t.Fatalf("Failed to execute migration first time: %v", err)
+	}
+
+	// Execute migration second time (should not fail due to CREATE TABLE IF NOT EXISTS)
+	_, err = db.Exec(string(migrationSQL))
+	if err != nil {
+		t.Fatalf("Failed to execute migration second time: %v", err)
+	}
+
+	// Verify all tables still exist after second migration
+	expectedTables := []string{
+		"dogmaAttributes",
+		"dogmaEffects",
+		"dogmaTypeAttributes",
+		"dogmaTypeEffects",
+	}
+
+	for _, table := range expectedTables {
+		var tableName string
+		err = db.QueryRow("SELECT name FROM sqlite_master WHERE type='table' AND name=?", table).Scan(&tableName)
+		if err != nil {
+			t.Fatalf("Table %s does not exist after second migration: %v", table, err)
+		}
+	}
+
+	// Verify indexes still exist after second migration
+	var count int
+	err = db.QueryRow("SELECT COUNT(*) FROM sqlite_master WHERE type='index' AND name LIKE 'idx_dogma%'").Scan(&count)
+	if err != nil {
+		t.Fatalf("Failed to count indexes: %v", err)
+	}
+	if count != 7 {
+		t.Errorf("Expected 7 indexes, got %d", count)
+	}
+}
+
+// TestMigration_004_Dogma_CompositeKeys tests composite primary keys work correctly
+func TestMigration_004_Dogma_CompositeKeys(t *testing.T) {
+	db, err := NewDB(":memory:")
+	if err != nil {
+		t.Fatalf("NewDB failed: %v", err)
+	}
+	defer Close(db)
+
+	// Execute migration
+	migrationPath := filepath.Join("..", "..", "migrations", "sqlite", "004_dogma.sql")
+	migrationSQL, err := os.ReadFile(migrationPath)
+	if err != nil {
+		t.Fatalf("Failed to read migration file: %v", err)
+	}
+	_, err = db.Exec(string(migrationSQL))
+	if err != nil {
+		t.Fatalf("Failed to execute migration: %v", err)
+	}
+
+	// Test dogmaTypeAttributes composite key (typeID, attributeID)
+	t.Run("dogmaTypeAttributes_composite_key", func(t *testing.T) {
+		// Insert first row
+		_, err := db.Exec(
+			"INSERT INTO dogmaTypeAttributes (typeID, attributeID, valueFloat) VALUES (?, ?, ?)",
+			100, 1, 10.0,
+		)
+		if err != nil {
+			t.Fatalf("Failed to insert first row: %v", err)
+		}
+
+		// Insert second row with different attributeID (should succeed)
+		_, err = db.Exec(
+			"INSERT INTO dogmaTypeAttributes (typeID, attributeID, valueFloat) VALUES (?, ?, ?)",
+			100, 2, 20.0,
+		)
+		if err != nil {
+			t.Fatalf("Failed to insert second row with different attributeID: %v", err)
+		}
+
+		// Try to insert duplicate (should fail)
+		_, err = db.Exec(
+			"INSERT INTO dogmaTypeAttributes (typeID, attributeID, valueFloat) VALUES (?, ?, ?)",
+			100, 1, 30.0,
+		)
+		if err == nil {
+			t.Error("Expected error when inserting duplicate composite key, got nil")
+		}
+	})
+
+	// Test dogmaTypeEffects composite key (typeID, effectID)
+	t.Run("dogmaTypeEffects_composite_key", func(t *testing.T) {
+		// Insert first row
+		_, err := db.Exec(
+			"INSERT INTO dogmaTypeEffects (typeID, effectID, isDefault) VALUES (?, ?, ?)",
+			200, 1, 1,
+		)
+		if err != nil {
+			t.Fatalf("Failed to insert first row: %v", err)
+		}
+
+		// Insert second row with different effectID (should succeed)
+		_, err = db.Exec(
+			"INSERT INTO dogmaTypeEffects (typeID, effectID, isDefault) VALUES (?, ?, ?)",
+			200, 2, 0,
+		)
+		if err != nil {
+			t.Fatalf("Failed to insert second row with different effectID: %v", err)
+		}
+
+		// Try to insert duplicate (should fail)
+		_, err = db.Exec(
+			"INSERT INTO dogmaTypeEffects (typeID, effectID, isDefault) VALUES (?, ?, ?)",
+			200, 1, 0,
+		)
+		if err == nil {
+			t.Error("Expected error when inserting duplicate composite key, got nil")
+		}
+	})
+}

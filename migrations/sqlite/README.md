@@ -11,6 +11,7 @@ Dieses Verzeichnis enthält SQL-Migrationsskripte für die EVE SDE SQLite-Datenb
 | 001 | `001_inv_types.sql` | invTypes Tabelle (häufigste SDE-Tabelle) | ✅ Implementiert |
 | 002 | `002_inv_groups.sql` | invGroups Tabelle (Item Groups Kategorisierung) | ✅ Implementiert |
 | 003 | `003_blueprints.sql` | Industry Blueprints (Blueprints, Activities, Materials, Products) | ✅ Implementiert |
+| 004 | `004_dogma.sql` | Dogma System (Attributes, Effects, Type Attributes/Effects) | ✅ Implementiert |
 
 ## Migration-Format
 
