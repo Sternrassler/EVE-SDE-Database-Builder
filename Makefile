@@ -1,11 +1,18 @@
-.PHONY: help test lint build clean coverage fmt vet tidy check-hooks secrets-check commit-lint generate-parsers
+.PHONY: help test test-tools lint build clean coverage fmt vet tidy check-hooks secrets-check commit-lint generate-parsers
 
 help: ## Display this help message
 	@echo "Available targets:"
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-15s\033[0m %s\n", $$1, $$2}'
 
-test: ## Run all tests
-	go test -v ./...
+test: ## Run all tests (core packages)
+	go test -v ./cmd/... ./internal/...
+
+test-tools: ## Run tests for tools (separate main packages)
+	@echo "Testing add-tomap-methods..."
+	@go test -v ./tools/add-tomap-methods*.go
+	@echo ""
+	@echo "Testing scrape-rift-schemas..."
+	@go test -v ./tools/scrape-rift-schemas*.go
 
 coverage: ## Run tests with coverage report
 	go test -coverprofile=coverage.out ./...
