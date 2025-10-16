@@ -75,7 +75,7 @@
 //
 //	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 //	defer cancel()
-//	
+//
 //	err := policy.Do(ctx, func() error {
 //	    // Diese Operation wird bei Context-Cancellation abgebrochen
 //	    return someOperation()

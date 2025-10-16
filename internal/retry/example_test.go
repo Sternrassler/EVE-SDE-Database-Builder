@@ -13,7 +13,7 @@ import (
 func ExamplePolicy_Do() {
 	policy := retry.DefaultPolicy()
 	ctx := context.Background()
-	
+
 	attempt := 0
 	err := policy.Do(ctx, func() error {
 		attempt++
@@ -22,7 +22,7 @@ func ExamplePolicy_Do() {
 		}
 		return nil // Success on 3rd attempt
 	})
-	
+
 	if err == nil {
 		fmt.Println("Operation succeeded after retries")
 	}
@@ -33,13 +33,13 @@ func ExamplePolicy_Do() {
 func ExamplePolicy_Do_fatal() {
 	policy := retry.DefaultPolicy()
 	ctx := context.Background()
-	
+
 	attempt := 0
 	err := policy.Do(ctx, func() error {
 		attempt++
 		return errors.NewFatal("permanent error", nil)
 	})
-	
+
 	fmt.Printf("Attempts: %d\n", attempt)
 	fmt.Printf("Error is fatal: %v\n", errors.IsFatal(err))
 	// Output:
@@ -51,7 +51,7 @@ func ExamplePolicy_Do_fatal() {
 func ExampleDoWithResult() {
 	policy := retry.DefaultPolicy()
 	ctx := context.Background()
-	
+
 	attempt := 0
 	result, err := retry.DoWithResult(ctx, policy, func() (string, error) {
 		attempt++
@@ -60,7 +60,7 @@ func ExampleDoWithResult() {
 		}
 		return "success data", nil
 	})
-	
+
 	if err == nil {
 		fmt.Printf("Result: %s\n", result)
 	}
@@ -71,13 +71,13 @@ func ExampleDoWithResult() {
 func ExampleNewPolicy() {
 	// Create a policy with 5 retries, 50ms initial delay, 2s max delay
 	policy := retry.NewPolicy(5, 50*time.Millisecond, 2*time.Second)
-	
+
 	ctx := context.Background()
 	err := policy.Do(ctx, func() error {
 		// Your operation here
 		return nil
 	})
-	
+
 	if err == nil {
 		fmt.Println("Operation completed")
 	}
@@ -88,12 +88,12 @@ func ExampleNewPolicy() {
 func ExampleDefaultPolicy() {
 	policy := retry.DefaultPolicy()
 	ctx := context.Background()
-	
+
 	err := policy.Do(ctx, func() error {
 		// Simulated successful operation
 		return nil
 	})
-	
+
 	if err == nil {
 		fmt.Println("Success with default policy")
 	}
@@ -104,12 +104,12 @@ func ExampleDefaultPolicy() {
 func ExampleDatabasePolicy() {
 	policy := retry.DatabasePolicy()
 	ctx := context.Background()
-	
+
 	err := policy.Do(ctx, func() error {
 		// Simulated database operation
 		return nil
 	})
-	
+
 	if err == nil {
 		fmt.Println("Database operation succeeded")
 	}
@@ -120,12 +120,12 @@ func ExampleDatabasePolicy() {
 func ExampleHTTPPolicy() {
 	policy := retry.HTTPPolicy()
 	ctx := context.Background()
-	
+
 	err := policy.Do(ctx, func() error {
 		// Simulated HTTP request
 		return nil
 	})
-	
+
 	if err == nil {
 		fmt.Println("HTTP request succeeded")
 	}
@@ -136,12 +136,12 @@ func ExampleHTTPPolicy() {
 func ExampleFileIOPolicy() {
 	policy := retry.FileIOPolicy()
 	ctx := context.Background()
-	
+
 	err := policy.Do(ctx, func() error {
 		// Simulated file operation
 		return nil
 	})
-	
+
 	if err == nil {
 		fmt.Println("File operation succeeded")
 	}
@@ -157,12 +157,12 @@ func ExampleNewPolicyBuilder() {
 		WithMultiplier(2.5).
 		WithJitter(true).
 		Build()
-	
+
 	ctx := context.Background()
 	err := policy.Do(ctx, func() error {
 		return nil
 	})
-	
+
 	if err == nil {
 		fmt.Println("Custom policy executed")
 	}
@@ -178,14 +178,14 @@ func ExampleFromConfig() {
 		Multiplier:     2.0,
 		Jitter:         true,
 	}
-	
+
 	policy := retry.FromConfig(cfg)
 	ctx := context.Background()
-	
+
 	err := policy.Do(ctx, func() error {
 		return nil
 	})
-	
+
 	if err == nil {
 		fmt.Println("Policy from config executed")
 	}
@@ -195,15 +195,15 @@ func ExampleFromConfig() {
 // ExamplePolicy_Do_contextCancellation demonstrates context cancellation
 func ExamplePolicy_Do_contextCancellation() {
 	policy := retry.NewPolicy(10, 100*time.Millisecond, 5*time.Second)
-	
+
 	// Create a context that's already cancelled
 	ctx, cancel := context.WithCancel(context.Background())
 	cancel() // Cancel immediately
-	
+
 	err := policy.Do(ctx, func() error {
 		return errors.NewRetryable("would retry", nil)
 	})
-	
+
 	if err == context.Canceled {
 		fmt.Println("Operation cancelled by context")
 	}

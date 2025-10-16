@@ -42,17 +42,17 @@
 // # TOML-Beispiel
 //
 //	version = "1.0.0"
-//	
+//
 //	[database]
 //	path = "./eve_sde.db"
 //	journal_mode = "WAL"
 //	cache_size_mb = 64
-//	
+//
 //	[import]
 //	sde_path = "./sde-JSONL"
 //	language = "en"
 //	workers = 0  # 0 = Auto (CPU count)
-//	
+//
 //	[logging]
 //	level = "info"
 //	format = "text"
