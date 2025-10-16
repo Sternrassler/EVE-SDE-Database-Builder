@@ -86,4 +86,40 @@
 //   - Rolls back on error return
 //   - Rolls back and re-raises panic
 //   - Respects context cancellation
+//
+// # Testing Utilities
+//
+// The package provides testing utilities for creating in-memory databases with
+// all migrations automatically applied. This simplifies test setup and ensures
+// consistency across tests.
+//
+//	func TestMyFeature(t *testing.T) {
+//		// Create in-memory database with all migrations applied
+//		db := database.NewTestDB(t)
+//		// Database is automatically cleaned up when test completes
+//
+//		// Insert test data
+//		_, err := db.Exec("INSERT INTO invTypes (typeID, typeName, groupID) VALUES (1, 'Test', 1)")
+//		if err != nil {
+//			t.Fatal(err)
+//		}
+//
+//		// Run your tests...
+//	}
+//
+// For manual migration control:
+//
+//	db, _ := database.NewDB(":memory:")
+//	defer database.Close(db)
+//
+//	// Apply all migrations from migrations/sqlite directory
+//	if err := database.ApplyMigrations(db); err != nil {
+//		log.Fatal(err)
+//	}
+//
+// Testing utilities features:
+//   - Automatic migration application (all .sql files in migrations/sqlite)
+//   - Automatic cleanup via t.Cleanup()
+//   - Independent database per test (no shared state)
+//   - All PRAGMAs pre-configured (foreign keys, WAL mode, cache settings)
 package database
