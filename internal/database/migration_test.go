@@ -2013,3 +2013,561 @@ func TestMigration_004_Dogma_CompositeKeys(t *testing.T) {
 		}
 	})
 }
+
+// TestMigration_005_Universe tests the 005_universe.sql migration
+func TestMigration_005_Universe(t *testing.T) {
+// Create in-memory database
+db, err := NewDB(":memory:")
+if err != nil {
+t.Fatalf("NewDB failed: %v", err)
+}
+defer Close(db)
+
+// Read migration file
+migrationPath := filepath.Join("..", "..", "migrations", "sqlite", "005_universe.sql")
+migrationSQL, err := os.ReadFile(migrationPath)
+if err != nil {
+t.Fatalf("Failed to read migration file: %v", err)
+}
+
+// Execute migration
+_, err = db.Exec(string(migrationSQL))
+if err != nil {
+t.Fatalf("Failed to execute migration: %v", err)
+}
+
+// Verify all tables exist
+expectedTables := []string{
+"mapRegions",
+"mapConstellations",
+"mapSolarSystems",
+"mapStargates",
+"mapPlanets",
+}
+
+for _, table := range expectedTables {
+var tableName string
+err = db.QueryRow("SELECT name FROM sqlite_master WHERE type='table' AND name=?", table).Scan(&tableName)
+if err != nil {
+t.Fatalf("Table %s was not created: %v", table, err)
+}
+if tableName != table {
+t.Errorf("Expected table name '%s', got '%s'", table, tableName)
+}
+}
+}
+
+// TestMigration_005_Universe_Schema verifies the schema structure
+func TestMigration_005_Universe_Schema(t *testing.T) {
+db, err := NewDB(":memory:")
+if err != nil {
+t.Fatalf("NewDB failed: %v", err)
+}
+defer Close(db)
+
+// Read and execute migration
+migrationPath := filepath.Join("..", "..", "migrations", "sqlite", "005_universe.sql")
+migrationSQL, err := os.ReadFile(migrationPath)
+if err != nil {
+t.Fatalf("Failed to read migration file: %v", err)
+}
+_, err = db.Exec(string(migrationSQL))
+if err != nil {
+t.Fatalf("Failed to execute migration: %v", err)
+}
+
+// Verify mapRegions schema
+t.Run("mapRegions", func(t *testing.T) {
+expectedColumns := []string{
+"regionID", "regionName", "x", "y", "z", "factionID",
+}
+rows, err := db.Query("PRAGMA table_info(mapRegions)")
+if err != nil {
+t.Fatalf("Failed to get table info: %v", err)
+}
+defer rows.Close()
+
+columnMap := make(map[string]bool)
+for rows.Next() {
+var cid int
+var name, colType string
+var notNull, pk int
+var dfltValue interface{}
+
+err := rows.Scan(&cid, &name, &colType, &notNull, &dfltValue, &pk)
+if err != nil {
+t.Fatalf("Failed to scan column info: %v", err)
+}
+columnMap[name] = true
+
+// Verify regionID is PRIMARY KEY
+if name == "regionID" && pk != 1 {
+t.Errorf("regionID should be PRIMARY KEY")
+}
+}
+
+for _, col := range expectedColumns {
+if !columnMap[col] {
+t.Errorf("Expected column '%s' not found in table", col)
+}
+}
+})
+
+// Verify mapConstellations schema
+t.Run("mapConstellations", func(t *testing.T) {
+expectedColumns := []string{
+"constellationID", "constellationName", "regionID", "x", "y", "z", "factionID",
+}
+rows, err := db.Query("PRAGMA table_info(mapConstellations)")
+if err != nil {
+t.Fatalf("Failed to get table info: %v", err)
+}
+defer rows.Close()
+
+columnMap := make(map[string]bool)
+for rows.Next() {
+var cid int
+var name, colType string
+var notNull, pk int
+var dfltValue interface{}
+
+err := rows.Scan(&cid, &name, &colType, &notNull, &dfltValue, &pk)
+if err != nil {
+t.Fatalf("Failed to scan column info: %v", err)
+}
+columnMap[name] = true
+
+// Verify constellationID is PRIMARY KEY
+if name == "constellationID" && pk != 1 {
+t.Errorf("constellationID should be PRIMARY KEY")
+}
+}
+
+for _, col := range expectedColumns {
+if !columnMap[col] {
+t.Errorf("Expected column '%s' not found in table", col)
+}
+}
+})
+
+// Verify mapSolarSystems schema
+t.Run("mapSolarSystems", func(t *testing.T) {
+expectedColumns := []string{
+"solarSystemID", "solarSystemName", "regionID", "constellationID",
+"x", "y", "z", "security", "securityClass",
+}
+rows, err := db.Query("PRAGMA table_info(mapSolarSystems)")
+if err != nil {
+t.Fatalf("Failed to get table info: %v", err)
+}
+defer rows.Close()
+
+columnMap := make(map[string]bool)
+for rows.Next() {
+var cid int
+var name, colType string
+var notNull, pk int
+var dfltValue interface{}
+
+err := rows.Scan(&cid, &name, &colType, &notNull, &dfltValue, &pk)
+if err != nil {
+t.Fatalf("Failed to scan column info: %v", err)
+}
+columnMap[name] = true
+
+// Verify solarSystemID is PRIMARY KEY
+if name == "solarSystemID" && pk != 1 {
+t.Errorf("solarSystemID should be PRIMARY KEY")
+}
+}
+
+for _, col := range expectedColumns {
+if !columnMap[col] {
+t.Errorf("Expected column '%s' not found in table", col)
+}
+}
+})
+
+// Verify mapStargates schema
+t.Run("mapStargates", func(t *testing.T) {
+expectedColumns := []string{
+"stargateID", "solarSystemID", "destinationID",
+}
+rows, err := db.Query("PRAGMA table_info(mapStargates)")
+if err != nil {
+t.Fatalf("Failed to get table info: %v", err)
+}
+defer rows.Close()
+
+columnMap := make(map[string]bool)
+for rows.Next() {
+var cid int
+var name, colType string
+var notNull, pk int
+var dfltValue interface{}
+
+err := rows.Scan(&cid, &name, &colType, &notNull, &dfltValue, &pk)
+if err != nil {
+t.Fatalf("Failed to scan column info: %v", err)
+}
+columnMap[name] = true
+
+// Verify stargateID is PRIMARY KEY
+if name == "stargateID" && pk != 1 {
+t.Errorf("stargateID should be PRIMARY KEY")
+}
+}
+
+for _, col := range expectedColumns {
+if !columnMap[col] {
+t.Errorf("Expected column '%s' not found in table", col)
+}
+}
+})
+
+// Verify mapPlanets schema
+t.Run("mapPlanets", func(t *testing.T) {
+expectedColumns := []string{
+"planetID", "planetName", "solarSystemID", "typeID", "x", "y", "z",
+}
+rows, err := db.Query("PRAGMA table_info(mapPlanets)")
+if err != nil {
+t.Fatalf("Failed to get table info: %v", err)
+}
+defer rows.Close()
+
+columnMap := make(map[string]bool)
+for rows.Next() {
+var cid int
+var name, colType string
+var notNull, pk int
+var dfltValue interface{}
+
+err := rows.Scan(&cid, &name, &colType, &notNull, &dfltValue, &pk)
+if err != nil {
+t.Fatalf("Failed to scan column info: %v", err)
+}
+columnMap[name] = true
+
+// Verify planetID is PRIMARY KEY
+if name == "planetID" && pk != 1 {
+t.Errorf("planetID should be PRIMARY KEY")
+}
+}
+
+for _, col := range expectedColumns {
+if !columnMap[col] {
+t.Errorf("Expected column '%s' not found in table", col)
+}
+}
+})
+}
+
+// TestMigration_005_Universe_Indexes verifies the indexes are created
+func TestMigration_005_Universe_Indexes(t *testing.T) {
+db, err := NewDB(":memory:")
+if err != nil {
+t.Fatalf("NewDB failed: %v", err)
+}
+defer Close(db)
+
+// Read and execute migration
+migrationPath := filepath.Join("..", "..", "migrations", "sqlite", "005_universe.sql")
+migrationSQL, err := os.ReadFile(migrationPath)
+if err != nil {
+t.Fatalf("Failed to read migration file: %v", err)
+}
+_, err = db.Exec(string(migrationSQL))
+if err != nil {
+t.Fatalf("Failed to execute migration: %v", err)
+}
+
+// Test indexes for mapConstellations
+t.Run("mapConstellations_indexes", func(t *testing.T) {
+expectedIndexes := map[string]bool{
+"idx_mapConstellations_regionID": false,
+}
+
+rows, err := db.Query("SELECT name FROM sqlite_master WHERE type='index' AND tbl_name='mapConstellations' AND name NOT LIKE 'sqlite_%'")
+if err != nil {
+t.Fatalf("Failed to query indexes: %v", err)
+}
+defer rows.Close()
+
+for rows.Next() {
+var indexName string
+if err := rows.Scan(&indexName); err != nil {
+t.Fatalf("Failed to scan index name: %v", err)
+}
+if _, exists := expectedIndexes[indexName]; exists {
+expectedIndexes[indexName] = true
+}
+}
+
+for indexName, found := range expectedIndexes {
+if !found {
+t.Errorf("Expected index '%s' not found", indexName)
+}
+}
+})
+
+// Test indexes for mapSolarSystems
+t.Run("mapSolarSystems_indexes", func(t *testing.T) {
+expectedIndexes := map[string]bool{
+"idx_mapSolarSystems_regionID":        false,
+"idx_mapSolarSystems_constellationID": false,
+}
+
+rows, err := db.Query("SELECT name FROM sqlite_master WHERE type='index' AND tbl_name='mapSolarSystems' AND name NOT LIKE 'sqlite_%'")
+if err != nil {
+t.Fatalf("Failed to query indexes: %v", err)
+}
+defer rows.Close()
+
+for rows.Next() {
+var indexName string
+if err := rows.Scan(&indexName); err != nil {
+t.Fatalf("Failed to scan index name: %v", err)
+}
+if _, exists := expectedIndexes[indexName]; exists {
+expectedIndexes[indexName] = true
+}
+}
+
+for indexName, found := range expectedIndexes {
+if !found {
+t.Errorf("Expected index '%s' not found", indexName)
+}
+}
+})
+
+// Test indexes for mapStargates
+t.Run("mapStargates_indexes", func(t *testing.T) {
+expectedIndexes := map[string]bool{
+"idx_mapStargates_solarSystemID": false,
+"idx_mapStargates_destinationID": false,
+}
+
+rows, err := db.Query("SELECT name FROM sqlite_master WHERE type='index' AND tbl_name='mapStargates' AND name NOT LIKE 'sqlite_%'")
+if err != nil {
+t.Fatalf("Failed to query indexes: %v", err)
+}
+defer rows.Close()
+
+for rows.Next() {
+var indexName string
+if err := rows.Scan(&indexName); err != nil {
+t.Fatalf("Failed to scan index name: %v", err)
+}
+if _, exists := expectedIndexes[indexName]; exists {
+expectedIndexes[indexName] = true
+}
+}
+
+for indexName, found := range expectedIndexes {
+if !found {
+t.Errorf("Expected index '%s' not found", indexName)
+}
+}
+})
+
+// Test indexes for mapPlanets
+t.Run("mapPlanets_indexes", func(t *testing.T) {
+expectedIndexes := map[string]bool{
+"idx_mapPlanets_solarSystemID": false,
+"idx_mapPlanets_typeID":        false,
+}
+
+rows, err := db.Query("SELECT name FROM sqlite_master WHERE type='index' AND tbl_name='mapPlanets' AND name NOT LIKE 'sqlite_%'")
+if err != nil {
+t.Fatalf("Failed to query indexes: %v", err)
+}
+defer rows.Close()
+
+for rows.Next() {
+var indexName string
+if err := rows.Scan(&indexName); err != nil {
+t.Fatalf("Failed to scan index name: %v", err)
+}
+if _, exists := expectedIndexes[indexName]; exists {
+expectedIndexes[indexName] = true
+}
+}
+
+for indexName, found := range expectedIndexes {
+if !found {
+t.Errorf("Expected index '%s' not found", indexName)
+}
+}
+})
+}
+
+// TestMigration_005_Universe_DataInsertion tests that data can be inserted
+func TestMigration_005_Universe_DataInsertion(t *testing.T) {
+db, err := NewDB(":memory:")
+if err != nil {
+t.Fatalf("NewDB failed: %v", err)
+}
+defer Close(db)
+
+// Execute migration
+migrationPath := filepath.Join("..", "..", "migrations", "sqlite", "005_universe.sql")
+migrationSQL, err := os.ReadFile(migrationPath)
+if err != nil {
+t.Fatalf("Failed to read migration file: %v", err)
+}
+_, err = db.Exec(string(migrationSQL))
+if err != nil {
+t.Fatalf("Failed to execute migration: %v", err)
+}
+
+// Insert test data into mapRegions
+_, err = db.Exec(
+"INSERT INTO mapRegions (regionID, regionName, x, y, z, factionID) VALUES (?, ?, ?, ?, ?, ?)",
+10000001, "Derelik", -1.234e16, 5.678e16, -9.012e16, 500001,
+)
+if err != nil {
+t.Fatalf("Failed to insert into mapRegions: %v", err)
+}
+
+// Insert test data into mapConstellations
+_, err = db.Exec(
+"INSERT INTO mapConstellations (constellationID, constellationName, regionID, x, y, z, factionID) VALUES (?, ?, ?, ?, ?, ?, ?)",
+20000001, "Anbald", 10000001, -1.234e16, 5.678e16, -9.012e16, 500001,
+)
+if err != nil {
+t.Fatalf("Failed to insert into mapConstellations: %v", err)
+}
+
+// Insert test data into mapSolarSystems
+_, err = db.Exec(
+"INSERT INTO mapSolarSystems (solarSystemID, solarSystemName, regionID, constellationID, x, y, z, security, securityClass) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+30000001, "Tanoo", 10000001, 20000001, -1.234e16, 5.678e16, -9.012e16, 0.8, "B",
+)
+if err != nil {
+t.Fatalf("Failed to insert into mapSolarSystems: %v", err)
+}
+
+// Insert test data into mapStargates
+_, err = db.Exec(
+"INSERT INTO mapStargates (stargateID, solarSystemID, destinationID) VALUES (?, ?, ?)",
+50000001, 30000001, 30000002,
+)
+if err != nil {
+t.Fatalf("Failed to insert into mapStargates: %v", err)
+}
+
+// Insert test data into mapPlanets
+_, err = db.Exec(
+"INSERT INTO mapPlanets (planetID, planetName, solarSystemID, typeID, x, y, z) VALUES (?, ?, ?, ?, ?, ?, ?)",
+40000001, "Tanoo I", 30000001, 2016, -1.0e11, 2.0e11, -3.0e11,
+)
+if err != nil {
+t.Fatalf("Failed to insert into mapPlanets: %v", err)
+}
+
+// Verify data was inserted into mapRegions
+var regionName string
+err = db.QueryRow("SELECT regionName FROM mapRegions WHERE regionID = ?", 10000001).Scan(&regionName)
+if err != nil {
+t.Fatalf("Failed to query mapRegions: %v", err)
+}
+if regionName != "Derelik" {
+t.Errorf("Expected regionName 'Derelik', got '%s'", regionName)
+}
+
+// Verify data was inserted into mapConstellations
+var constellationName string
+err = db.QueryRow("SELECT constellationName FROM mapConstellations WHERE constellationID = ?", 20000001).Scan(&constellationName)
+if err != nil {
+t.Fatalf("Failed to query mapConstellations: %v", err)
+}
+if constellationName != "Anbald" {
+t.Errorf("Expected constellationName 'Anbald', got '%s'", constellationName)
+}
+
+// Verify data was inserted into mapSolarSystems
+var solarSystemName string
+err = db.QueryRow("SELECT solarSystemName FROM mapSolarSystems WHERE solarSystemID = ?", 30000001).Scan(&solarSystemName)
+if err != nil {
+t.Fatalf("Failed to query mapSolarSystems: %v", err)
+}
+if solarSystemName != "Tanoo" {
+t.Errorf("Expected solarSystemName 'Tanoo', got '%s'", solarSystemName)
+}
+
+// Verify data was inserted into mapStargates
+var destinationID int
+err = db.QueryRow("SELECT destinationID FROM mapStargates WHERE stargateID = ?", 50000001).Scan(&destinationID)
+if err != nil {
+t.Fatalf("Failed to query mapStargates: %v", err)
+}
+if destinationID != 30000002 {
+t.Errorf("Expected destinationID 30000002, got %d", destinationID)
+}
+
+// Verify data was inserted into mapPlanets
+var planetName string
+err = db.QueryRow("SELECT planetName FROM mapPlanets WHERE planetID = ?", 40000001).Scan(&planetName)
+if err != nil {
+t.Fatalf("Failed to query mapPlanets: %v", err)
+}
+if planetName != "Tanoo I" {
+t.Errorf("Expected planetName 'Tanoo I', got '%s'", planetName)
+}
+}
+
+// TestMigration_005_Universe_Idempotence tests that migration can be run multiple times
+func TestMigration_005_Universe_Idempotence(t *testing.T) {
+db, err := NewDB(":memory:")
+if err != nil {
+t.Fatalf("NewDB failed: %v", err)
+}
+defer Close(db)
+
+// Read migration file
+migrationPath := filepath.Join("..", "..", "migrations", "sqlite", "005_universe.sql")
+migrationSQL, err := os.ReadFile(migrationPath)
+if err != nil {
+t.Fatalf("Failed to read migration file: %v", err)
+}
+
+// Execute migration first time
+_, err = db.Exec(string(migrationSQL))
+if err != nil {
+t.Fatalf("Failed to execute migration first time: %v", err)
+}
+
+// Execute migration second time (should not fail due to CREATE TABLE IF NOT EXISTS)
+_, err = db.Exec(string(migrationSQL))
+if err != nil {
+t.Fatalf("Failed to execute migration second time: %v", err)
+}
+
+// Verify all tables still exist after second migration
+expectedTables := []string{
+"mapRegions",
+"mapConstellations",
+"mapSolarSystems",
+"mapStargates",
+"mapPlanets",
+}
+
+for _, table := range expectedTables {
+var tableName string
+err = db.QueryRow("SELECT name FROM sqlite_master WHERE type='table' AND name=?", table).Scan(&tableName)
+if err != nil {
+t.Fatalf("Table %s does not exist after second migration: %v", table, err)
+}
+}
+
+// Verify indexes still exist after second migration
+var count int
+err = db.QueryRow("SELECT COUNT(*) FROM sqlite_master WHERE type='index' AND name LIKE 'idx_map%'").Scan(&count)
+if err != nil {
+t.Fatalf("Failed to count indexes: %v", err)
+}
+if count != 7 {
+t.Errorf("Expected 7 indexes, got %d", count)
+}
+}
