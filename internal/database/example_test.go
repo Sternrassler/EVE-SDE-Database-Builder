@@ -277,4 +277,3 @@ func ExampleWithTransaction_withOptions() {
 	fmt.Printf("User count: %d\n", count)
 	// Output: User count: 2
 }
-
