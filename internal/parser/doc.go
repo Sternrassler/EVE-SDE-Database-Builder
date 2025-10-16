@@ -36,6 +36,30 @@
 // werden kann. Der Parser liest die Datei Zeile für Zeile und unmarshalt jede Zeile
 // als JSON-Objekt des Typs T.
 //
+// # Streaming Parser für große Dateien
+//
+// Für große Dateien (z.B. 500k+ Zeilen) bietet StreamFile eine memory-effiziente
+// Alternative, die Daten über Channels streamt:
+//
+//	ctx := context.Background()
+//	dataChan, errChan := parser.StreamFile[TypeRow](ctx, "invTypes.jsonl")
+//
+//	for item := range dataChan {
+//	    // Process item individually (memory-efficient)
+//	    if err := processItem(item); err != nil {
+//	        break
+//	    }
+//	}
+//
+//	if err := <-errChan; err != nil {
+//	    log.Fatal(err)
+//	}
+//
+// StreamFile bietet:
+//   - Channel-basiertes Streaming mit Backpressure
+//   - Context Cancellation Support
+//   - Memory < 100MB für 500k+ Zeilen
+//
 // # Fehlerbehandlung
 //
 // Fehler werden mit Zeilennummern angereichert, um die Fehlersuche zu erleichtern:

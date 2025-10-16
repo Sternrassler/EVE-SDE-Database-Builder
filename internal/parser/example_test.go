@@ -91,8 +91,8 @@ func ExampleJSONLParser_Columns() {
 func ExampleNewJSONLParser() {
 	// Create a parser for a specific data structure
 	p := parser.NewJSONLParser[TypeRow](
-		"invTypes",                                      // database table name
-		[]string{"typeID", "groupID", "typeName"},      // column names
+		"invTypes", // database table name
+		[]string{"typeID", "groupID", "typeName"}, // column names
 	)
 
 	fmt.Printf("Parser for table: %s\n", p.TableName())
