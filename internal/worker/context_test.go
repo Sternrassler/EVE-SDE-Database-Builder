@@ -114,7 +114,7 @@ func TestSetupSignalHandler_WithPool(t *testing.T) {
 		time.Sleep(100 * time.Millisecond)
 		currentPID := os.Getpid()
 		process, _ := os.FindProcess(currentPID)
-		process.Signal(syscall.SIGINT)
+		_ = process.Signal(syscall.SIGINT) // Ignore error in test goroutine
 		close(done)
 	}()
 
@@ -215,7 +215,7 @@ func TestSetupSignalHandler_InFlightJobs(t *testing.T) {
 	// Send signal after jobs have started
 	currentPID := os.Getpid()
 	process, _ := os.FindProcess(currentPID)
-	process.Signal(syscall.SIGINT)
+	_ = process.Signal(syscall.SIGINT) // Ignore error in test
 
 	// Collect results
 	pool.Wait()
