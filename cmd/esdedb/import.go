@@ -30,21 +30,41 @@ func newImportCmd() *cobra.Command {
 		Use:   "import",
 		Short: "Import EVE SDE JSONL files into SQLite database",
 		Long: `Import command führt den 2-Phasen-Import von EVE SDE JSONL-Dateien aus:
-  Phase 1: Paralleles Parsing (Worker Pool)
-  Phase 2: Sequenzielles Database-Insert (SQLite Single-Writer)
 
-Beispiel:
+Phase 1: Paralleles Parsing (Worker Pool)
+  - Mehrere Worker-Threads parsen JSONL-Dateien gleichzeitig
+  - Anzahl der Worker konfigurierbar (Standard: 4, Auto: -1 für NumCPU)
+
+Phase 2: Sequenzielles Database-Insert (SQLite Single-Writer)
+  - Geparste Daten werden in SQLite-Datenbank eingefügt
+  - SQLite unterstützt nur einen Writer zur gleichen Zeit
+
+Der Import zeigt einen Fortschrittsbalken mit Live-Metriken:
+  - Anzahl verarbeiteter/fehlgeschlagener Dateien
+  - Eingefügte Rows und Durchsatz (Rows/Sekunde)
+  - Geschätzte verbleibende Zeit`,
+		Example: `  # Import mit Standard-Einstellungen (4 Workers)
+  esdedb import
+
+  # Import mit benutzerdefiniertem SDE-Verzeichnis und Datenbank-Pfad
   esdedb import --sde-dir ./sde-JSONL --db ./eve-sde.db --workers 4
-  esdedb import --sde-dir ./sde-JSONL --db ./eve-sde.db --workers -1  # Auto (NumCPU)
-  esdedb import --sde-dir ./sde-JSONL --db ./eve-sde.db --skip-errors # Fehler überspringen`,
+
+  # Automatische Worker-Anzahl basierend auf CPU-Kernen
+  esdedb import --sde-dir ./sde-JSONL --db ./eve-sde.db --workers -1
+
+  # Fehlerhafte Dateien überspringen und Import fortsetzen
+  esdedb import --sde-dir ./sde-JSONL --db ./eve-sde.db --skip-errors
+
+  # Import mit Verbose Logging (Debug-Level)
+  esdedb --verbose import --sde-dir ./sde-JSONL`,
 		RunE: runImportCmd,
 	}
 
 	// Flags
-	cmd.Flags().StringVarP(&sdeDir, "sde-dir", "s", "./sde-JSONL", "Pfad zum SDE JSONL-Verzeichnis")
-	cmd.Flags().StringVarP(&dbPath, "db", "d", "./eve-sde.db", "Pfad zur SQLite-Datenbank")
-	cmd.Flags().IntVarP(&workerCount, "workers", "w", 4, "Anzahl Worker (-1 = Auto/NumCPU)")
-	cmd.Flags().BoolVar(&skipErrors, "skip-errors", false, "Fehlerhafte Dateien überspringen (Standard: Abbruch bei Fehler)")
+	cmd.Flags().StringVarP(&sdeDir, "sde-dir", "s", "./sde-JSONL", "Pfad zum Verzeichnis mit SDE JSONL-Dateien")
+	cmd.Flags().StringVarP(&dbPath, "db", "d", "./eve-sde.db", "Pfad zur SQLite-Datenbank (wird erstellt falls nicht vorhanden)")
+	cmd.Flags().IntVarP(&workerCount, "workers", "w", 4, "Anzahl paralleler Worker-Threads (-1 = Automatisch basierend auf CPU-Kernen)")
+	cmd.Flags().BoolVar(&skipErrors, "skip-errors", false, "Überspringt fehlerhafte Dateien statt Import abzubrechen")
 
 	return cmd
 }
