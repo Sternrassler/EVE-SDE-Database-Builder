@@ -57,7 +57,8 @@ in eine SQLite-Datenbank. Der Import erfolgt in zwei Phasen:
 
 Verfügbare Befehle:
   import   - Importiert SDE JSONL-Dateien in SQLite-Datenbank
-  validate - Validiert eine TOML-Konfigurationsdatei`,
+  validate - Validiert eine TOML-Konfigurationsdatei
+  stats    - Zeigt Datenbankstatistiken an`,
 		Example: `  # Import mit Standard-Einstellungen
   esdedb import
 
@@ -94,6 +95,7 @@ Verfügbare Befehle:
 	rootCmd.AddCommand(newImportCmd())
 	rootCmd.AddCommand(newValidateCmd())
 	rootCmd.AddCommand(newVersionCmd())
+	rootCmd.AddCommand(newStatsCmd())
 	// rootCmd.AddCommand(newConfigCmd())
 
 	if err := rootCmd.Execute(); err != nil {
