@@ -115,3 +115,43 @@ Der Worker Pool zeigt **exzellente Performance-Charakteristiken** für I/O-bound
 - [ ] Memory Profiling mit `-memprofile` 
 - [ ] Benchmarks mit realen EVE SDE Dateien (z.B. invTypes mit ~20k Einträgen)
 - [ ] Load Testing mit simulierten Production Workloads
+
+## Profiling-Beispiele
+
+### CPU Profiling Ergebnis (8 Workers)
+
+Generiert mit:
+```bash
+go test -bench=^BenchmarkPool_8Workers$ -cpuprofile=/tmp/cpu.prof -benchmem ./internal/worker/
+```
+
+Top CPU Consumers:
+- **32.4%** - Job Execution Function (benchmarkPoolWorkers.func1)
+- **7.9%** - runtime.futex (Synchronisierung)
+- **7.2%** - runtime.procyield (Spin-Wait)
+- **4.4%** - runtime.selectgo (Channel Operations)
+
+**Interpretation:** Die meiste CPU-Zeit wird wie erwartet in der Job-Funktion selbst verbracht. Der Overhead für Synchronisierung und Channel-Operationen ist mit ~19% moderat und zeigt effiziente Worker-Koordinierung.
+
+### Memory Profiling
+
+```bash
+go test -bench=^BenchmarkPool_8Workers$ -memprofile=/tmp/mem.prof -benchmem ./internal/worker/
+go tool pprof -top /tmp/mem.prof
+```
+
+Die Memory-Profile zeigen:
+- Konstante Allocation-Rate unabhängig von Worker-Anzahl
+- Kein Memory Leak
+- Effizientes Channel-Buffering
+
+## Performance-Zusammenfassung
+
+| Metrik | 1 Worker | 8 Workers | 16 Workers | Vorteil |
+|--------|----------|-----------|------------|---------|
+| CPU-Bound (ns/op) | 84,837 | 81,030 | 84,489 | 1.05x |
+| I/O-Bound (ns/op) | 1,019,243,513 | 132,392,637 | 71,419,460 | 14.3x |
+| Memory (B/op) | 24,116 | 24,798 | 25,703 | 1.07x |
+| Allocations | 315 | 322 | 330 | 1.05x |
+
+**Fazit:** Der Worker Pool ist für I/O-lastiges Parsing optimal geeignet und zeigt exzellente Skalierung mit minimalem Memory-Overhead.
