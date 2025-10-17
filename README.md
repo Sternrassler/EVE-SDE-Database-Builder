@@ -17,6 +17,7 @@ Modernes CLI-Tool für den Import von EVE Online Static Data Export (SDE) JSONL-
 - ✅ **Structured Logging:** zerolog (JSON/Text)
 - ✅ **Resilient:** Retry-Pattern für transiente Fehler
 - ✅ **Configuration:** TOML + Environment Variables + CLI Flags
+- ✅ **Shell Completion:** Unterstützung für bash, zsh und fish
 - 🚧 **Parallel Processing:** Worker Pool (in Entwicklung - Epic #5)
 
 ---
@@ -109,6 +110,38 @@ make migrate-reset
 - 10k rows: ~14ms
 - 100k rows: ~134ms
 - 500k rows: ~664ms
+
+### Shell Completion
+
+Das CLI unterstützt Shell-Completion für bash, zsh und fish:
+
+```bash
+# Bash - Für aktuelle Shell-Session
+source <(esdedb completion bash)
+
+# Bash - Permanent (Linux)
+esdedb completion bash > /etc/bash_completion.d/esdedb
+
+# Bash - Permanent (macOS)
+esdedb completion bash > $(brew --prefix)/etc/bash_completion.d/esdedb
+
+# Zsh - Für aktuelle Shell-Session
+source <(esdedb completion zsh)
+
+# Zsh - Permanent (Linux)
+esdedb completion zsh > "${fpath[1]}/_esdedb"
+
+# Zsh - Permanent (macOS)
+esdedb completion zsh > $(brew --prefix)/share/zsh/site-functions/_esdedb
+
+# Fish - Für aktuelle Shell-Session
+esdedb completion fish | source
+
+# Fish - Permanent
+esdedb completion fish > ~/.config/fish/completions/esdedb.fish
+```
+
+**Hinweis:** Nach der Installation der Completion-Scripte muss eine neue Shell gestartet werden.
 
 ### Project Structure
 
