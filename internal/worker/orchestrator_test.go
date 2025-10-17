@@ -31,10 +31,10 @@ func TestProgressTracker_Increment(t *testing.T) {
 
 	pt.IncrementParsed()
 	pt.IncrementParsed()
-	pt.IncrementInserted()
 	pt.IncrementFailed()
 
 	parsed, inserted, failed, total := pt.GetProgress()
+	// inserted = parsed - failed = 2 - 1 = 1
 	if parsed != 2 || inserted != 1 || failed != 1 || total != 5 {
 		t.Errorf("expected (2,1,1,5), got (%d,%d,%d,%d)", parsed, inserted, failed, total)
 	}
@@ -565,10 +565,8 @@ func Example_orchestratorProgressTracking() {
 			time.Sleep(time.Duration(id) * time.Millisecond)
 			progress.IncrementParsed()
 
-			// Some succeed, some fail
-			if id%2 == 0 {
-				progress.IncrementInserted()
-			} else {
+			// Some fail (files 1 and 3)
+			if id%2 != 0 {
 				progress.IncrementFailed()
 			}
 		}(i)
