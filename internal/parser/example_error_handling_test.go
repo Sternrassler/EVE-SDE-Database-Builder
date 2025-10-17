@@ -30,7 +30,7 @@ invalid json line
 
 	fmt.Printf("Parsed %d records\n", len(records))
 	fmt.Printf("Encountered %d errors\n", len(errors))
-	
+
 	// Output:
 	// Parsed 2 records
 	// Encountered 1 errors
@@ -57,7 +57,7 @@ invalid json line
 
 	fmt.Printf("Parsed %d records before error\n", len(records))
 	fmt.Printf("Stopped with %d error(s)\n", len(errors))
-	
+
 	// Output:
 	// Parsed 1 records before error
 	// Stopped with 1 error(s)
@@ -86,7 +86,7 @@ invalid line 3
 
 	fmt.Printf("Parsed %d records\n", len(records))
 	fmt.Printf("Hit error threshold: %d errors\n", len(errors))
-	
+
 	// Output:
 	// Parsed 1 records
 	// Hit error threshold: 3 errors
@@ -118,10 +118,10 @@ invalid line
 		fmt.Printf("Summary: %s\n", result.ErrorSummary())
 		fmt.Printf("Skipped lines: %v\n", result.SkippedLines)
 	}
-	
+
 	// Use the successfully parsed records
 	fmt.Printf("Successfully parsed %d records\n", len(result.Records))
-	
+
 	// Output:
 	// Summary: Encountered 1 error(s) while parsing 3 lines. Successfully parsed 2 records. Skipped 1 lines.
 	// Skipped lines: [2]

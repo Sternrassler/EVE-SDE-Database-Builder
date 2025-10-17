@@ -71,7 +71,7 @@ func ParseWithErrorHandlingContext[T any](ctx context.Context, path string, mode
 	if ctx == nil {
 		ctx = context.Background()
 	}
-	
+
 	file, err := os.Open(path)
 	if err != nil {
 		return ParseResult[T]{
@@ -122,7 +122,7 @@ func parseReaderWithErrorHandling[T any](ctx context.Context, r io.Reader, mode 
 		var item T
 		if err := json.Unmarshal(line, &item); err != nil {
 			errorCount++
-			
+
 			// Create skippable error with context
 			parseErr := apperrors.NewSkippable("failed to parse JSON line", err).
 				WithContext("line", lineNum).
@@ -160,13 +160,13 @@ func parseReaderWithErrorHandling[T any](ctx context.Context, r io.Reader, mode 
 						WithContext("error_count", errorCount).
 						WithContext("line", lineNum)
 					errors = append(errors, thresholdErr)
-					
+
 					log.Error().
 						Int("error_count", errorCount).
 						Int("max_errors", maxErrors).
 						Int("line", lineNum).
 						Msg("error threshold exceeded, aborting parse")
-					
+
 					return ParseResult[T]{
 						Records:      results,
 						Errors:       errors,
@@ -187,7 +187,7 @@ func parseReaderWithErrorHandling[T any](ctx context.Context, r io.Reader, mode 
 		scannerErr := apperrors.NewFatal("scanner error", err).
 			WithContext("line", lineNum)
 		errors = append(errors, scannerErr)
-		
+
 		log.Error().
 			Int("line", lineNum).
 			Err(err).
@@ -225,7 +225,7 @@ func (r *ParseResult[T]) ErrorSummary() string {
 	if len(r.Errors) == 0 {
 		return "No errors"
 	}
-	
+
 	return fmt.Sprintf("Encountered %d error(s) while parsing %d lines. Successfully parsed %d records. Skipped %d lines.",
 		len(r.Errors), r.TotalLines, len(r.Records), len(r.SkippedLines))
 }

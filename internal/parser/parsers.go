@@ -24,15 +24,15 @@ type InvType struct {
 
 // InvGroup represents an EVE SDE invGroups record
 type InvGroup struct {
-	GroupID              int     `json:"groupID"`
-	CategoryID           *int    `json:"categoryID"`
-	GroupName            string  `json:"groupName"`
-	IconID               *int    `json:"iconID"`
-	UseBasePrice         *int    `json:"useBasePrice"`
-	Anchored             *int    `json:"anchored"`
-	Anchorable           *int    `json:"anchorable"`
-	FittableNonSingleton *int    `json:"fittableNonSingleton"`
-	Published            *int    `json:"published"`
+	GroupID              int    `json:"groupID"`
+	CategoryID           *int   `json:"categoryID"`
+	GroupName            string `json:"groupName"`
+	IconID               *int   `json:"iconID"`
+	UseBasePrice         *int   `json:"useBasePrice"`
+	Anchored             *int   `json:"anchored"`
+	Anchorable           *int   `json:"anchorable"`
+	FittableNonSingleton *int   `json:"fittableNonSingleton"`
+	Published            *int   `json:"published"`
 }
 
 // IndustryBlueprint represents an EVE SDE industryBlueprints record
@@ -70,34 +70,34 @@ type MapSolarSystem struct {
 
 // DogmaEffect represents an EVE SDE dogmaEffects record
 type DogmaEffect struct {
-	EffectID                      int     `json:"effectID"`
-	EffectName                    *string `json:"effectName"`
-	EffectCategory                *int    `json:"effectCategory"`
-	PreExpression                 *int    `json:"preExpression"`
-	PostExpression                *int    `json:"postExpression"`
-	Description                   *string `json:"description"`
-	Guid                          *string `json:"guid"`
-	IconID                        *int    `json:"iconID"`
-	IsOffensive                   *int    `json:"isOffensive"`
-	IsAssistance                  *int    `json:"isAssistance"`
-	DurationAttributeID           *int    `json:"durationAttributeID"`
-	TrackingSpeedAttributeID      *int    `json:"trackingSpeedAttributeID"`
-	DischargeAttributeID          *int    `json:"dischargeAttributeID"`
-	RangeAttributeID              *int    `json:"rangeAttributeID"`
-	FalloffAttributeID            *int    `json:"falloffAttributeID"`
-	DisallowAutoRepeat            *int    `json:"disallowAutoRepeat"`
-	Published                     *int    `json:"published"`
-	DisplayName                   *string `json:"displayName"`
-	IsWarpSafe                    *int    `json:"isWarpSafe"`
-	RangeChance                   *int    `json:"rangeChance"`
-	ElectronicChance              *int    `json:"electronicChance"`
-	PropulsionChance              *int    `json:"propulsionChance"`
-	Distribution                  *int    `json:"distribution"`
-	SfxName                       *string `json:"sfxName"`
-	NpcUsageChanceAttributeID     *int    `json:"npcUsageChanceAttributeID"`
-	NpcActivationChanceAttributeID *int   `json:"npcActivationChanceAttributeID"`
-	FittingUsageChanceAttributeID *int    `json:"fittingUsageChanceAttributeID"`
-	ModifierInfo                  *string `json:"modifierInfo"`
+	EffectID                       int     `json:"effectID"`
+	EffectName                     *string `json:"effectName"`
+	EffectCategory                 *int    `json:"effectCategory"`
+	PreExpression                  *int    `json:"preExpression"`
+	PostExpression                 *int    `json:"postExpression"`
+	Description                    *string `json:"description"`
+	Guid                           *string `json:"guid"`
+	IconID                         *int    `json:"iconID"`
+	IsOffensive                    *int    `json:"isOffensive"`
+	IsAssistance                   *int    `json:"isAssistance"`
+	DurationAttributeID            *int    `json:"durationAttributeID"`
+	TrackingSpeedAttributeID       *int    `json:"trackingSpeedAttributeID"`
+	DischargeAttributeID           *int    `json:"dischargeAttributeID"`
+	RangeAttributeID               *int    `json:"rangeAttributeID"`
+	FalloffAttributeID             *int    `json:"falloffAttributeID"`
+	DisallowAutoRepeat             *int    `json:"disallowAutoRepeat"`
+	Published                      *int    `json:"published"`
+	DisplayName                    *string `json:"displayName"`
+	IsWarpSafe                     *int    `json:"isWarpSafe"`
+	RangeChance                    *int    `json:"rangeChance"`
+	ElectronicChance               *int    `json:"electronicChance"`
+	PropulsionChance               *int    `json:"propulsionChance"`
+	Distribution                   *int    `json:"distribution"`
+	SfxName                        *string `json:"sfxName"`
+	NpcUsageChanceAttributeID      *int    `json:"npcUsageChanceAttributeID"`
+	NpcActivationChanceAttributeID *int    `json:"npcActivationChanceAttributeID"`
+	FittingUsageChanceAttributeID  *int    `json:"fittingUsageChanceAttributeID"`
+	ModifierInfo                   *string `json:"modifierInfo"`
 }
 
 // DogmaTypeAttribute represents an EVE SDE dogmaTypeAttributes record
@@ -164,12 +164,12 @@ type InvCategory struct {
 
 // InvMarketGroup represents an EVE SDE invMarketGroups record
 type InvMarketGroup struct {
-	MarketGroupID       int     `json:"marketGroupID"`
-	ParentGroupID       *int    `json:"parentGroupID"`
-	MarketGroupName     *string `json:"marketGroupName"`
-	Description         *string `json:"description"`
-	IconID              *int    `json:"iconID"`
-	HasTypes            *int    `json:"hasTypes"`
+	MarketGroupID   int     `json:"marketGroupID"`
+	ParentGroupID   *int    `json:"parentGroupID"`
+	MarketGroupName *string `json:"marketGroupName"`
+	Description     *string `json:"description"`
+	IconID          *int    `json:"iconID"`
+	HasTypes        *int    `json:"hasTypes"`
 }
 
 // InvMetaGroup represents an EVE SDE invMetaGroups record
@@ -201,8 +201,6 @@ type ChrFaction struct {
 	MilitiaCorporationID *int     `json:"militiaCorporationID"`
 	IconID               *int     `json:"iconID"`
 }
-
-
 
 // Core parser instances for EVE SDE tables (17 essential tables).
 // Extended parsers (36 tables) are defined in parsers_extended.go.
@@ -352,21 +350,21 @@ func RegisterParsers() map[string]Parser {
 		"chrFactions": ChrFactionsParser,
 
 		// Character/NPC (Extended)
-		"chrAncestries":                ChrAncestriesParser,
-		"chrBloodlines":                ChrBloodlinesParser,
-		"chrAttributes":                ChrAttributesParser,
-		"chrNPCCharacters":             NPCCharactersParser,
-		"crpNPCCorporations":           CrpNPCCorporationsParser,
-		"crpNPCCorporationDivisions":   CrpNPCCorporationDivisionsParser,
-		"staStations":                  StaNPCStationsParser,
+		"chrAncestries":              ChrAncestriesParser,
+		"chrBloodlines":              ChrBloodlinesParser,
+		"chrAttributes":              ChrAttributesParser,
+		"chrNPCCharacters":           NPCCharactersParser,
+		"crpNPCCorporations":         CrpNPCCorporationsParser,
+		"crpNPCCorporationDivisions": CrpNPCCorporationDivisionsParser,
+		"staStations":                StaNPCStationsParser,
 
 		// Agents
 		"agtAgentTypes": AgentTypesParser,
 		"agtAgents":     AgentsInSpaceParser,
 
 		// Certificates/Skills
-		"certCerts":      CertificatesParser,
-		"certMasteries":  MasteriesParser,
+		"certCerts":     CertificatesParser,
+		"certMasteries": MasteriesParser,
 
 		// Skins
 		"skins":         SkinsParser,
@@ -382,15 +380,15 @@ func RegisterParsers() map[string]Parser {
 		"sovereigntyUpgrades": SovereigntyUpgradesParser,
 
 		// Miscellaneous
-		"eveIcons":               IconsParser,
-		"eveGraphics":            GraphicsParser,
-		"contrabandTypes":        ContrabandTypesParser,
-		"controlTowerResources":  ControlTowerResourcesParser,
-		"crpActivities":          CorporationActivitiesParser,
-		"dbuffCollections":       DogmaBuffCollectionsParser,
-		"planetResources":        PlanetResourcesParser,
-		"planetSchematics":       PlanetSchematicsParser,
-		"typeBonuses":            TypeBonusesParser,
-		"_sde":                   SDEMetadataParser,
+		"eveIcons":              IconsParser,
+		"eveGraphics":           GraphicsParser,
+		"contrabandTypes":       ContrabandTypesParser,
+		"controlTowerResources": ControlTowerResourcesParser,
+		"crpActivities":         CorporationActivitiesParser,
+		"dbuffCollections":      DogmaBuffCollectionsParser,
+		"planetResources":       PlanetResourcesParser,
+		"planetSchematics":      PlanetSchematicsParser,
+		"typeBonuses":           TypeBonusesParser,
+		"_sde":                  SDEMetadataParser,
 	}
 }

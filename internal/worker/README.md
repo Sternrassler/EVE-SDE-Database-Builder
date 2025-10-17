@@ -6,12 +6,16 @@ Worker Pool Implementierung für paralleles JSONL-Parsing gemäß ADR-006.
 
 Das `worker` Package stellt einen konfigurierbaren Worker Pool zur Verfügung, der Jobs parallel mit einer definierten Anzahl von Workers verarbeitet. Es implementiert das Worker Pool Pattern mit Channel-basierter Job-Verteilung und Graceful Shutdown via Context.
 
+**Neu in v0.1.0:** Import Orchestrator für 2-Phasen-Import (Parse parallel → Insert sequentiell)
+
 ## Features
 
 - ✅ Konfigurierbare Worker-Anzahl
 - ✅ Channel-basierte Job-Verteilung (buffered channels)
 - ✅ Graceful Shutdown über `context.Context`
 - ✅ Error Collection (alle Job-Fehler werden gesammelt)
+- ✅ **Import Orchestrator (2-Phasen-Import)**
+- ✅ **Progress Tracking (thread-safe)**
 - ✅ 100% Test Coverage
 - ✅ Thread-safe
 
@@ -251,6 +255,30 @@ go test -v ./internal/worker/... -run Example
 
 ## Siehe auch
 
+- [ORCHESTRATOR.md](./ORCHESTRATOR.md) - **Import Orchestrator Dokumentation (2-Phasen-Import)**
 - [ADR-006: Concurrency & Worker Pool Pattern](../../docs/adr/ADR-006-concurrency-worker-pool.md)
 - [internal/parser](../parser/) - JSONL-Parsing
 - [internal/database](../database/) - SQLite-Integration
+
+## Schnellstart: Import Orchestrator
+
+Für vollständige Dokumentation siehe [ORCHESTRATOR.md](./ORCHESTRATOR.md).
+
+```go
+// 1. Setup
+db, _ := database.NewDB("eve_sde.db")
+defer db.Close()
+
+pool := worker.NewPool(4)
+parsers := map[string]parser.Parser{
+    "types.jsonl": myParser,
+}
+
+// 2. Import ausführen
+orch := worker.NewOrchestrator(db, pool, parsers)
+progress, err := orch.ImportAll(context.Background(), "/path/to/sde")
+
+// 3. Ergebnisse prüfen
+parsed, inserted, failed, total := progress.GetProgress()
+log.Printf("Import: %d/%d parsed, %d inserted, %d failed", parsed, total, inserted, failed)
+```
