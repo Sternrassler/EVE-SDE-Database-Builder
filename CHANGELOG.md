@@ -9,6 +9,36 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Pre-Push Git Hook** (PR #c6f53ba)
+  - Automatische Ausführung von `make lint` vor jedem Push
+  - Automatische Ausführung von `make test` vor jedem Push
+  - Verhindert Push von Code mit Linting-Fehlern oder fehlschlagenden Tests
+  - Hook-Datei: `.githooks/pre-push`
+- **Code Generation Tools** (PR #134)
+  - Tool: `add-tomap-methods` - Fügt ToMap() Methoden zu generierten Structs hinzu
+  - Tool: `scrape-rift-schemas` - Scrapt YAML-Schemas von RIFT EVE Schema Browser
+  - Separate Package-Struktur: `tools/add-tomap-methods/` und `tools/scrape-rift-schemas/`
+  - Tests für beide Tools mit vollständiger Abdeckung
+  - Behebung: "main redeclared" und "Config redeclared" Kompilierungsfehler
+- **Parser Package Documentation** (PR #133)
+  - Package-Level Dokumentation für alle Parser-Komponenten
+  - Behebung: SA1012 Lint-Fehler (nil context → context.Background())
+  - Verbesserte Godoc-Kommentare für öffentliche APIs
+- **Error Recovery Strategies** (PR #132)
+  - Dokumentation: Umfassende Error Recovery Patterns
+  - Beispiele für Skip-Mode, FailFast-Mode und Error-Threshold-Handling
+  - Integration mit JSONL Parser für robuste Fehlerbehandlung
+  - Fehler-Statistiken und Reporting (ParseResult mit ErrorSummary)
+- **Core Parsers Implementation** (PR #131)
+  - Parser für invTypes mit vollständiger Feldabdeckung
+  - Parser für invGroups mit Gruppen-Hierarchie
+  - Behebung aller errcheck Lint-Warnungen
+  - Registrierung aller Parser im zentralen Registry
+- **Parser Performance Benchmarks** (PR #130)
+  - Benchmarks für 1k, 10k, 50k, 100k und 500k Zeilen
+  - Memory-Effizienz Tests für große Dateien
+  - Streaming Performance Validation
+  - Backpressure Handling Tests
 - **Parser Integration Tests (E2E: JSONL → DB)**
   - Integration Test für invTypes (Parse JSONL → Insert → Verify Row Count)
   - Integration Test für invGroups (Parse JSONL → Insert → Verify Row Count)
