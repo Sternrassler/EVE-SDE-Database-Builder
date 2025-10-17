@@ -107,6 +107,82 @@ Returns:
 
 ## Typen
 
+### Job Interface Pattern (Neu in v0.1.0)
+
+#### `JobExecutor` Interface
+
+```go
+type JobExecutor interface {
+    Execute(ctx context.Context) (JobResult, error)
+}
+```
+
+Neue Interface-basierte Abstraktion für typisierte Jobs.
+
+#### `ParseJob`
+
+```go
+type ParseJob struct {
+    Parser   parser.Parser
+    FilePath string
+}
+```
+
+JSONL-Parse-Job für Phase 1 (paralleles Parsing).
+
+**Beispiel:**
+
+```go
+job := &worker.ParseJob{
+    Parser:   myParser,
+    FilePath: "/data/types.jsonl",
+}
+
+result, err := job.Execute(ctx)
+parseResult := result.(worker.ParseResult)
+// parseResult.Items enthält geparste Daten
+```
+
+#### `InsertJob`
+
+```go
+type InsertJob struct {
+    Table string
+    Rows  []interface{}
+}
+```
+
+Datenbank-Insert-Job für Phase 2 (sequenzieller Insert). *Hinweis: Aktuell Platzhalter-Implementierung.*
+
+**Beispiel:**
+
+```go
+job := &worker.InsertJob{
+    Table: "types",
+    Rows:  parsedItems,
+}
+
+result, err := job.Execute(ctx)
+insertResult := result.(worker.InsertResult)
+// insertResult.RowsAffected enthält Anzahl eingefügter Rows
+```
+
+#### `JobResult` Interface
+
+```go
+type JobResult interface {
+    isJobResult()
+}
+```
+
+Marker-Interface für typisierte Job-Results.
+
+**Implementierungen:**
+- `ParseResult` - Enthält `Items []interface{}`
+- `InsertResult` - Enthält `RowsAffected int`
+
+### Legacy Job Pattern (Pool-Kompatibilität)
+
 ### `Job`
 
 ```go
@@ -115,6 +191,8 @@ type Job struct {
     Fn func(context.Context) (interface{}, error)
 }
 ```
+
+Legacy-Job-Struktur für direkte Pool-Verwendung. Wird weiterhin von `Pool` unterstützt.
 
 ### `Result`
 
