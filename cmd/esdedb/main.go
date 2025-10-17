@@ -26,6 +26,9 @@ var (
 )
 
 func main() {
+	// Check if we're running a completion command - if so, skip logging to avoid polluting the completion script
+	isCompletionCmd := len(os.Args) >= 2 && os.Args[1] == "completion"
+
 	// Initialize logger
 	logLevel := "info"
 	logFormat := "json"
@@ -33,15 +36,19 @@ func main() {
 	log := logger.NewLogger(logLevel, logFormat)
 	logger.SetGlobalLogger(log)
 
-	// Log application start
-	logger.LogAppStart(version, commit)
+	// Log application start (skip for completion commands)
+	if !isCompletionCmd {
+		logger.LogAppStart(version, commit)
+	}
 
 	// Setup signal handler for graceful shutdown
 	sigChan := make(chan os.Signal, 1)
 	signal.Notify(sigChan, os.Interrupt, syscall.SIGTERM)
 	go func() {
 		sig := <-sigChan
-		logger.LogAppShutdown(fmt.Sprintf("received signal: %v", sig))
+		if !isCompletionCmd {
+			logger.LogAppShutdown(fmt.Sprintf("received signal: %v", sig))
+		}
 		os.Exit(0)
 	}()
 
@@ -99,11 +106,15 @@ Verfügbare Befehle:
 	// rootCmd.AddCommand(newConfigCmd())
 
 	if err := rootCmd.Execute(); err != nil {
-		logger.LogAppShutdown(fmt.Sprintf("error: %v", err))
+		if !isCompletionCmd {
+			logger.LogAppShutdown(fmt.Sprintf("error: %v", err))
+		}
 		fmt.Fprintf(os.Stderr, "Error: %v\n", err)
 		os.Exit(1)
 	}
 
-	// Log normal shutdown
-	logger.LogAppShutdown("normal exit")
+	// Log normal shutdown (skip for completion commands)
+	if !isCompletionCmd {
+		logger.LogAppShutdown("normal exit")
+	}
 }
