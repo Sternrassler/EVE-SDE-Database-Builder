@@ -133,4 +133,3 @@ func Example_signalHandling() {
 	fmt.Printf("Processed %d jobs (graceful shutdown on signals)\n", len(results))
 	// Output: Processed 3 jobs (graceful shutdown on signals)
 }
-
