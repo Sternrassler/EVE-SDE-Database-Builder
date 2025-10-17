@@ -2,6 +2,16 @@
 
 This package provides a generic, type-safe parser interface for JSONL (JSON Lines) files used in the EVE SDE Database Builder.
 
+## File Organization
+
+The parser implementations are split into two files for better organization:
+
+- **`parsers.go`**: Core parsers (17 tables) - Essential EVE SDE tables
+- **`parsers_extended.go`**: Extended parsers (36 tables) - Additional EVE SDE tables
+- **Total**: 53 parsers for all EVE SDE JSONL tables
+
+All parsers are registered via the `RegisterParsers()` function which returns a unified map of all available parsers.
+
 ## Features
 
 - **Generic Parser Interface**: Type-safe parsing using Go generics
