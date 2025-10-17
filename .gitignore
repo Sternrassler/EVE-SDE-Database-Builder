@@ -32,6 +32,7 @@ Root Directory/*
 *.out
 coverage.out
 vendor/
+esdedb
 
 # Generated code (regenerated via make generate-parsers)
 internal/parser/generated/
