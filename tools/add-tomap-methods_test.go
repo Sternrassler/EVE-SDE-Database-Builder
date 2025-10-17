@@ -364,7 +364,7 @@ func (t *TypeRow) ToMap() map[string]interface{} {
 	// Note: formatting might change, so parse both and compare
 	fset1 := token.NewFileSet()
 	file1, _ := parser.ParseFile(fset1, "", originalContent, 0)
-	
+
 	fset2 := token.NewFileSet()
 	file2, _ := parser.ParseFile(fset2, "", result, 0)
 

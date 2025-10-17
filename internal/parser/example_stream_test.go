@@ -50,7 +50,7 @@ func ExampleStreamFile() {
 func ExampleStreamFile_withCancellation() {
 	tmpDir := os.TempDir()
 	testFile := filepath.Join(tmpDir, "example_cancel.jsonl")
-	
+
 	// Create a large file to ensure cancellation happens before all items are read
 	file, _ := os.Create(testFile)
 	for i := 1; i <= 1000; i++ {
