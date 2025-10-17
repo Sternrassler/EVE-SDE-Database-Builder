@@ -150,20 +150,21 @@ InvTypesParser = NewJSONLParser[InvType]("invTypes", []string{
 
 ### Key Components
 
-1. **Struct Definitions** (`internal/parser/parsers.go`)
+1. **Struct Definitions** (split across two files)
    - 51 type-safe Go structs
    - JSON tags for unmarshalling
    - Pointer types for optional fields
-   - ~1,000 lines of code
+   - Core types in `parsers.go`, extended types in `parsers_extended.go`
 
-2. **Parser Instances** (var block)
-   - 51 parser instances
+2. **Parser Instances** (split across two files)
+   - 53 parser instances (17 core + 36 extended)
    - Table name + column list per parser
+   - Core parsers in `parsers.go`, extended in `parsers_extended.go`
    - Centralized initialization
 
-3. **Registry Function** (`RegisterParsers()`)
+3. **Registry Function** (`RegisterParsers()` in `parsers.go`)
    - Single source of truth for all parsers
-   - Returns `map[string]Parser`
+   - Returns `map[string]Parser` with all 53 parsers
    - Used by import pipeline
 
 4. **Test Suite** (`internal/parser/parsers_test.go`)
@@ -238,13 +239,15 @@ Success Rate: 100% (all passing)
 ## Files Modified
 
 ```
-internal/parser/parsers.go         +701 -217 lines
-internal/parser/parsers_test.go    +130 -100 lines
-schemas/*.json                     +51 files (RIFT schema metadata)
-docs/epic-4-completion-summary.md  +350 lines (this file)
+internal/parser/parsers.go              Reduced to 396 lines (core parsers only)
+internal/parser/parsers_extended.go     +498 lines (new file - extended parsers)
+internal/parser/parsers_test.go         (unchanged - tests all parsers)
+internal/parser/README.md               +10 lines (file organization section)
+docs/epic-4-completion-summary.md       +20 lines (this file - updated for split)
+schemas/*.json                          +51 files (RIFT schema metadata)
 ```
 
-**Total Lines Added:** ~1,200 (parsers + tests + docs)
+**Total Lines**: ~1,900 (parsers + tests + docs)
 
 ---
 
@@ -257,6 +260,7 @@ docs/epic-4-completion-summary.md  +350 lines (this file)
 3. **Test-Driven:** Comprehensive tests caught issues early
 4. **Central Registry:** `RegisterParsers()` function provides clean integration point
 5. **ADR-003 Adherence:** Following established architecture ensured consistency
+6. **File Organization:** Splitting into core and extended files improved maintainability
 
 ### Challenges Overcome
 
@@ -354,7 +358,8 @@ Epic #4 successfully delivered complete parser coverage for all 51 EVE SDE table
 - **Epic #3 Summary:** Parser Core Infrastructure (`docs/epic-3-completion-summary.md`)
 - **RIFT SDE:** https://sde.riftforeve.online/
 - **EVE SDE:** https://developers.eveonline.com/static-data
-- **Parser Package:** `internal/parser/parsers.go`
+- **Core Parsers:** `internal/parser/parsers.go`
+- **Extended Parsers:** `internal/parser/parsers_extended.go`
 - **Test Suite:** `internal/parser/parsers_test.go`
 
 ---
