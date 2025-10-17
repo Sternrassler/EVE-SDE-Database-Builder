@@ -14,7 +14,9 @@ func TestBatchInsert_BasicFunctionality(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create database: %v", err)
 	}
-	defer Close(db)
+	defer func() {
+		_ = Close(db)
+	}()
 
 	// Create test table
 	_, err = db.Exec(`
@@ -73,7 +75,9 @@ func TestBatchInsert_EmptyRows(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create database: %v", err)
 	}
-	defer Close(db)
+	defer func() {
+		_ = Close(db)
+	}()
 
 	// Create test table
 	_, err = db.Exec(`CREATE TABLE test_data (id INTEGER, name TEXT)`)
@@ -109,7 +113,9 @@ func TestBatchInsert_BatchSplitting(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create database: %v", err)
 	}
-	defer Close(db)
+	defer func() {
+		_ = Close(db)
+	}()
 
 	// Create test table
 	_, err = db.Exec(`CREATE TABLE test_data (id INTEGER, value INTEGER)`)
@@ -185,7 +191,9 @@ func TestBatchInsert_TransactionRollback(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create database: %v", err)
 	}
-	defer Close(db)
+	defer func() {
+		_ = Close(db)
+	}()
 
 	// Create test table with NOT NULL constraint
 	_, err = db.Exec(`
@@ -231,7 +239,9 @@ func TestBatchInsert_LargeDataset(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create database: %v", err)
 	}
-	defer Close(db)
+	defer func() {
+		_ = Close(db)
+	}()
 
 	// Create test table
 	_, err = db.Exec(`
@@ -292,7 +302,9 @@ func TestBatchInsert_ValidationErrors(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create database: %v", err)
 	}
-	defer Close(db)
+	defer func() {
+		_ = Close(db)
+	}()
 
 	ctx := context.Background()
 
@@ -362,7 +374,9 @@ func TestBatchInsert_ContextCancellation(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create database: %v", err)
 	}
-	defer Close(db)
+	defer func() {
+		_ = Close(db)
+	}()
 
 	// Create test table
 	_, err = db.Exec(`CREATE TABLE test_data (id INTEGER, value INTEGER)`)
@@ -449,7 +463,9 @@ func BenchmarkBatchInsert_100k(b *testing.B) {
 	if err != nil {
 		b.Fatalf("Failed to create database: %v", err)
 	}
-	defer Close(db)
+	defer func() {
+		_ = Close(db)
+	}()
 
 	// Create test table
 	_, err = db.Exec(`
@@ -482,7 +498,7 @@ func BenchmarkBatchInsert_100k(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		// Clear table for each iteration
 		if i > 0 {
-			db.Exec("DELETE FROM test_data")
+			_, _ = db.Exec("DELETE FROM test_data")
 		}
 
 		err = BatchInsert(ctx, db, "test_data", columns, rows, 1000)
@@ -514,7 +530,9 @@ func BenchmarkBatchInsert_DifferentBatchSizes(b *testing.B) {
 			if err != nil {
 				b.Fatalf("Failed to create database: %v", err)
 			}
-			defer Close(db)
+			defer func() {
+				_ = Close(db)
+			}()
 
 			// Create test table
 			_, err = db.Exec(`CREATE TABLE test_data (id INTEGER, value INTEGER)`)
@@ -534,7 +552,7 @@ func BenchmarkBatchInsert_DifferentBatchSizes(b *testing.B) {
 			b.ResetTimer()
 			for i := 0; i < b.N; i++ {
 				if i > 0 {
-					db.Exec("DELETE FROM test_data")
+					_, _ = db.Exec("DELETE FROM test_data")
 				}
 
 				err = BatchInsert(ctx, db, "test_data", columns, rows, batchSize)

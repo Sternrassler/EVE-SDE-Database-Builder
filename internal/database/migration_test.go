@@ -16,7 +16,9 @@ func TestMigration_001_InvTypes(t *testing.T) {
 	if err != nil {
 		t.Fatalf("NewDB failed: %v", err)
 	}
-	defer Close(db)
+	defer func() {
+		_ = Close(db)
+	}()
 
 	// Read migration file
 	migrationPath := filepath.Join("..", "..", "migrations", "sqlite", "001_inv_types.sql")
@@ -48,7 +50,9 @@ func TestMigration_001_InvTypes_Schema(t *testing.T) {
 	if err != nil {
 		t.Fatalf("NewDB failed: %v", err)
 	}
-	defer Close(db)
+	defer func() {
+		_ = Close(db)
+	}()
 
 	// Read and execute migration
 	migrationPath := filepath.Join("..", "..", "migrations", "sqlite", "001_inv_types.sql")
@@ -112,7 +116,9 @@ func TestMigration_001_InvTypes_Indexes(t *testing.T) {
 	if err != nil {
 		t.Fatalf("NewDB failed: %v", err)
 	}
-	defer Close(db)
+	defer func() {
+		_ = Close(db)
+	}()
 
 	// Read and execute migration
 	migrationPath := filepath.Join("..", "..", "migrations", "sqlite", "001_inv_types.sql")
@@ -161,7 +167,9 @@ func TestMigration_001_InvTypes_DataInsertion(t *testing.T) {
 	if err != nil {
 		t.Fatalf("NewDB failed: %v", err)
 	}
-	defer Close(db)
+	defer func() {
+		_ = Close(db)
+	}()
 
 	// Execute migration
 	migrationPath := filepath.Join("..", "..", "migrations", "sqlite", "001_inv_types.sql")
@@ -222,7 +230,9 @@ func TestMigration_001_InvTypes_IndexPerformance(t *testing.T) {
 	if err != nil {
 		t.Fatalf("NewDB failed: %v", err)
 	}
-	defer Close(db)
+	defer func() {
+		_ = Close(db)
+	}()
 
 	// Execute migration
 	migrationPath := filepath.Join("..", "..", "migrations", "sqlite", "001_inv_types.sql")
@@ -283,7 +293,9 @@ func TestMigration_001_InvTypes_Idempotence(t *testing.T) {
 	if err != nil {
 		t.Fatalf("NewDB failed: %v", err)
 	}
-	defer Close(db)
+	defer func() {
+		_ = Close(db)
+	}()
 
 	// Read migration file
 	migrationPath := filepath.Join("..", "..", "migrations", "sqlite", "001_inv_types.sql")
@@ -319,7 +331,9 @@ func TestMigration_002_InvGroups(t *testing.T) {
 	if err != nil {
 		t.Fatalf("NewDB failed: %v", err)
 	}
-	defer Close(db)
+	defer func() {
+		_ = Close(db)
+	}()
 
 	// Read migration file
 	migrationPath := filepath.Join("..", "..", "migrations", "sqlite", "002_inv_groups.sql")
@@ -351,7 +365,9 @@ func TestMigration_002_InvGroups_Schema(t *testing.T) {
 	if err != nil {
 		t.Fatalf("NewDB failed: %v", err)
 	}
-	defer Close(db)
+	defer func() {
+		_ = Close(db)
+	}()
 
 	// Read and execute migration
 	migrationPath := filepath.Join("..", "..", "migrations", "sqlite", "002_inv_groups.sql")
@@ -414,7 +430,9 @@ func TestMigration_002_InvGroups_Indexes(t *testing.T) {
 	if err != nil {
 		t.Fatalf("NewDB failed: %v", err)
 	}
-	defer Close(db)
+	defer func() {
+		_ = Close(db)
+	}()
 
 	// Read and execute migration
 	migrationPath := filepath.Join("..", "..", "migrations", "sqlite", "002_inv_groups.sql")
@@ -462,7 +480,9 @@ func TestMigration_002_InvGroups_DataInsertion(t *testing.T) {
 	if err != nil {
 		t.Fatalf("NewDB failed: %v", err)
 	}
-	defer Close(db)
+	defer func() {
+		_ = Close(db)
+	}()
 
 	// Execute migration
 	migrationPath := filepath.Join("..", "..", "migrations", "sqlite", "002_inv_groups.sql")
@@ -523,7 +543,9 @@ func TestMigration_002_InvGroups_IndexPerformance(t *testing.T) {
 	if err != nil {
 		t.Fatalf("NewDB failed: %v", err)
 	}
-	defer Close(db)
+	defer func() {
+		_ = Close(db)
+	}()
 
 	// Execute migration
 	migrationPath := filepath.Join("..", "..", "migrations", "sqlite", "002_inv_groups.sql")
@@ -569,7 +591,9 @@ func TestMigration_002_InvGroups_Idempotence(t *testing.T) {
 	if err != nil {
 		t.Fatalf("NewDB failed: %v", err)
 	}
-	defer Close(db)
+	defer func() {
+		_ = Close(db)
+	}()
 
 	// Read migration file
 	migrationPath := filepath.Join("..", "..", "migrations", "sqlite", "002_inv_groups.sql")
@@ -605,7 +629,9 @@ func TestMigration_003_Blueprints(t *testing.T) {
 	if err != nil {
 		t.Fatalf("NewDB failed: %v", err)
 	}
-	defer Close(db)
+	defer func() {
+		_ = Close(db)
+	}()
 
 	// Read migration file
 	migrationPath := filepath.Join("..", "..", "migrations", "sqlite", "003_blueprints.sql")
@@ -646,7 +672,9 @@ func TestMigration_003_Blueprints_Schema(t *testing.T) {
 	if err != nil {
 		t.Fatalf("NewDB failed: %v", err)
 	}
-	defer Close(db)
+	defer func() {
+		_ = Close(db)
+	}()
 
 	// Read and execute migration
 	migrationPath := filepath.Join("..", "..", "migrations", "sqlite", "003_blueprints.sql")
@@ -824,7 +852,9 @@ func TestMigration_003_Blueprints_Indexes(t *testing.T) {
 	if err != nil {
 		t.Fatalf("NewDB failed: %v", err)
 	}
-	defer Close(db)
+	defer func() {
+		_ = Close(db)
+	}()
 
 	// Read and execute migration
 	migrationPath := filepath.Join("..", "..", "migrations", "sqlite", "003_blueprints.sql")
@@ -934,7 +964,9 @@ func TestMigration_003_Blueprints_DataInsertion(t *testing.T) {
 	if err != nil {
 		t.Fatalf("NewDB failed: %v", err)
 	}
-	defer Close(db)
+	defer func() {
+		_ = Close(db)
+	}()
 
 	// Execute migration
 	migrationPath := filepath.Join("..", "..", "migrations", "sqlite", "003_blueprints.sql")
@@ -1030,7 +1062,9 @@ func TestMigration_003_Blueprints_IndexPerformance(t *testing.T) {
 	if err != nil {
 		t.Fatalf("NewDB failed: %v", err)
 	}
-	defer Close(db)
+	defer func() {
+		_ = Close(db)
+	}()
 
 	// Execute migration
 	migrationPath := filepath.Join("..", "..", "migrations", "sqlite", "003_blueprints.sql")
@@ -1137,7 +1171,9 @@ func TestMigration_003_Blueprints_Idempotence(t *testing.T) {
 	if err != nil {
 		t.Fatalf("NewDB failed: %v", err)
 	}
-	defer Close(db)
+	defer func() {
+		_ = Close(db)
+	}()
 
 	// Read migration file
 	migrationPath := filepath.Join("..", "..", "migrations", "sqlite", "003_blueprints.sql")
@@ -1191,7 +1227,9 @@ func TestMigration_003_Blueprints_CompositeKeys(t *testing.T) {
 	if err != nil {
 		t.Fatalf("NewDB failed: %v", err)
 	}
-	defer Close(db)
+	defer func() {
+		_ = Close(db)
+	}()
 
 	// Execute migration
 	migrationPath := filepath.Join("..", "..", "migrations", "sqlite", "003_blueprints.sql")
@@ -1302,7 +1340,9 @@ func TestMigration_004_Dogma(t *testing.T) {
 	if err != nil {
 		t.Fatalf("NewDB failed: %v", err)
 	}
-	defer Close(db)
+	defer func() {
+		_ = Close(db)
+	}()
 
 	// Read migration file
 	migrationPath := filepath.Join("..", "..", "migrations", "sqlite", "004_dogma.sql")
@@ -1343,7 +1383,9 @@ func TestMigration_004_Dogma_Schema(t *testing.T) {
 	if err != nil {
 		t.Fatalf("NewDB failed: %v", err)
 	}
-	defer Close(db)
+	defer func() {
+		_ = Close(db)
+	}()
 
 	// Read and execute migration
 	migrationPath := filepath.Join("..", "..", "migrations", "sqlite", "004_dogma.sql")
@@ -1526,7 +1568,9 @@ func TestMigration_004_Dogma_Indexes(t *testing.T) {
 	if err != nil {
 		t.Fatalf("NewDB failed: %v", err)
 	}
-	defer Close(db)
+	defer func() {
+		_ = Close(db)
+	}()
 
 	// Read and execute migration
 	migrationPath := filepath.Join("..", "..", "migrations", "sqlite", "004_dogma.sql")
@@ -1665,7 +1709,9 @@ func TestMigration_004_Dogma_DataInsertion(t *testing.T) {
 	if err != nil {
 		t.Fatalf("NewDB failed: %v", err)
 	}
-	defer Close(db)
+	defer func() {
+		_ = Close(db)
+	}()
 
 	// Execute migration
 	migrationPath := filepath.Join("..", "..", "migrations", "sqlite", "004_dogma.sql")
@@ -1761,7 +1807,9 @@ func TestMigration_004_Dogma_IndexPerformance(t *testing.T) {
 	if err != nil {
 		t.Fatalf("NewDB failed: %v", err)
 	}
-	defer Close(db)
+	defer func() {
+		_ = Close(db)
+	}()
 
 	// Execute migration
 	migrationPath := filepath.Join("..", "..", "migrations", "sqlite", "004_dogma.sql")
@@ -1889,7 +1937,9 @@ func TestMigration_004_Dogma_Idempotence(t *testing.T) {
 	if err != nil {
 		t.Fatalf("NewDB failed: %v", err)
 	}
-	defer Close(db)
+	defer func() {
+		_ = Close(db)
+	}()
 
 	// Read migration file
 	migrationPath := filepath.Join("..", "..", "migrations", "sqlite", "004_dogma.sql")
@@ -1943,7 +1993,9 @@ func TestMigration_004_Dogma_CompositeKeys(t *testing.T) {
 	if err != nil {
 		t.Fatalf("NewDB failed: %v", err)
 	}
-	defer Close(db)
+	defer func() {
+		_ = Close(db)
+	}()
 
 	// Execute migration
 	migrationPath := filepath.Join("..", "..", "migrations", "sqlite", "004_dogma.sql")
@@ -2024,7 +2076,9 @@ func TestMigration_005_Universe(t *testing.T) {
 	if err != nil {
 		t.Fatalf("NewDB failed: %v", err)
 	}
-	defer Close(db)
+	defer func() {
+		_ = Close(db)
+	}()
 
 	// Read migration file
 	migrationPath := filepath.Join("..", "..", "migrations", "sqlite", "005_universe.sql")
@@ -2066,7 +2120,9 @@ func TestMigration_005_Universe_Schema(t *testing.T) {
 	if err != nil {
 		t.Fatalf("NewDB failed: %v", err)
 	}
-	defer Close(db)
+	defer func() {
+		_ = Close(db)
+	}()
 
 	// Read and execute migration
 	migrationPath := filepath.Join("..", "..", "migrations", "sqlite", "005_universe.sql")
@@ -2272,7 +2328,9 @@ func TestMigration_005_Universe_Indexes(t *testing.T) {
 	if err != nil {
 		t.Fatalf("NewDB failed: %v", err)
 	}
-	defer Close(db)
+	defer func() {
+		_ = Close(db)
+	}()
 
 	// Read and execute migration
 	migrationPath := filepath.Join("..", "..", "migrations", "sqlite", "005_universe.sql")
@@ -2411,7 +2469,9 @@ func TestMigration_005_Universe_DataInsertion(t *testing.T) {
 	if err != nil {
 		t.Fatalf("NewDB failed: %v", err)
 	}
-	defer Close(db)
+	defer func() {
+		_ = Close(db)
+	}()
 
 	// Execute migration
 	migrationPath := filepath.Join("..", "..", "migrations", "sqlite", "005_universe.sql")
@@ -2526,7 +2586,9 @@ func TestMigration_005_Universe_Idempotence(t *testing.T) {
 	if err != nil {
 		t.Fatalf("NewDB failed: %v", err)
 	}
-	defer Close(db)
+	defer func() {
+		_ = Close(db)
+	}()
 
 	// Read migration file
 	migrationPath := filepath.Join("..", "..", "migrations", "sqlite", "005_universe.sql")
@@ -2681,7 +2743,9 @@ func TestMigrationsApply_Idempotence(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create database: %v", err)
 	}
-	defer Close(db)
+	defer func() {
+		_ = Close(db)
+	}()
 
 	// Apply migrations first time
 	if err := ApplyMigrations(db); err != nil {

@@ -33,7 +33,7 @@ func TestScrapeTableSchema_Success(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
-		w.Write(jsonData)
+		_, _ = w.Write(jsonData)
 	}))
 	defer server.Close()
 
@@ -117,7 +117,7 @@ func TestScrapeTableSchema_InvalidJSON(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html")
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte("<!DOCTYPE html><html>...</html>"))
+		_, _ = w.Write([]byte("<!DOCTYPE html><html>...</html>"))
 	}))
 	defer server.Close()
 

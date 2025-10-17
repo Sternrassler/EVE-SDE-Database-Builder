@@ -132,7 +132,9 @@ func TestApplyMigrations_AllMigrationsExecuted(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create database: %v", err)
 	}
-	defer Close(db)
+	defer func() {
+		_ = Close(db)
+	}()
 
 	// Apply migrations manually
 	if err := ApplyMigrations(db); err != nil {
@@ -193,7 +195,9 @@ func TestApplyMigrations_Idempotent(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create database: %v", err)
 	}
-	defer Close(db)
+	defer func() {
+		_ = Close(db)
+	}()
 
 	// Apply migrations first time
 	if err := ApplyMigrations(db); err != nil {
@@ -222,7 +226,9 @@ func TestApplyMigrations_IndexesCreated(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create database: %v", err)
 	}
-	defer Close(db)
+	defer func() {
+		_ = Close(db)
+	}()
 
 	if err := ApplyMigrations(db); err != nil {
 		t.Fatalf("ApplyMigrations failed: %v", err)
@@ -253,7 +259,9 @@ func TestApplyMigrations_DataInsertion(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create database: %v", err)
 	}
-	defer Close(db)
+	defer func() {
+		_ = Close(db)
+	}()
 
 	if err := ApplyMigrations(db); err != nil {
 		t.Fatalf("ApplyMigrations failed: %v", err)

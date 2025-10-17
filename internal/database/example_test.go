@@ -237,7 +237,10 @@ func ExampleWithTransaction_rollback() {
 
 	// Verify no data was committed (rollback worked)
 	var count int
-	db.QueryRow("SELECT COUNT(*) FROM users").Scan(&count)
+	if err := db.QueryRow("SELECT COUNT(*) FROM users").Scan(&count); err != nil {
+		fmt.Printf("Error: %v\n", err)
+		return
+	}
 
 	fmt.Printf("Users in database: %d\n", count)
 	// Output:

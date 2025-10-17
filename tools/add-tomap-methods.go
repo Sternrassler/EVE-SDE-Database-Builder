@@ -428,18 +428,3 @@ func generateToMapMethod(structName string, fields []FieldInfo) string {
 
 	return buf.String()
 }
-
-// expandGlob expands file glob patterns
-func expandGlob(patterns []string) ([]string, error) {
-	var files []string
-
-	for _, pattern := range patterns {
-		matches, err := filepath.Glob(pattern)
-		if err != nil {
-			return nil, fmt.Errorf("failed to expand glob %s: %w", pattern, err)
-		}
-		files = append(files, matches...)
-	}
-
-	return files, nil
-}
