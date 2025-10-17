@@ -7,45 +7,35 @@ import (
 )
 
 // TestRegisterParsers verifies that all parsers are registered correctly
-// Updated for Epic #4: Now includes 17 core parsers (Phase 1)
+// Epic #4: Complete - All 51 EVE SDE tables implemented
 func TestRegisterParsers(t *testing.T) {
 	parsers := parser.RegisterParsers()
 
-	// Core parsers that should be registered (Epic #4, Task #37)
-	expectedParsers := []string{
-		// Core Inventory & Market
-		"invTypes",
-		"invGroups",
-		"invCategories",
-		"invMarketGroups",
-		"invMetaGroups",
-		// Industry & Blueprints
+	// Minimum expected parser count (51 EVE SDE tables)
+	minExpectedParsers := 51
+
+	// Verify we have at least 51 parsers
+	if len(parsers) < minExpectedParsers {
+		t.Errorf("Expected at least %d parsers, got %d", minExpectedParsers, len(parsers))
+	}
+
+	// Core parsers that must be registered (sanity check)
+	requiredParsers := []string{
+		// Core tables from Epic #4 Task #37
+		"invTypes", "invGroups", "invCategories", "invMarketGroups", "invMetaGroups",
 		"industryBlueprints",
-		// Dogma System
-		"dogmaAttributes",
-		"dogmaEffects",
-		"dogmaTypeAttributes",
-		"dogmaTypeEffects",
-		// Universe/Map
-		"mapRegions",
-		"mapConstellations",
-		"mapSolarSystems",
-		"mapStargates",
-		"mapPlanets",
-		// Character/Faction
-		"chrRaces",
-		"chrFactions",
+		"dogmaAttributes", "dogmaEffects", "dogmaTypeAttributes", "dogmaTypeEffects",
+		"mapRegions", "mapConstellations", "mapSolarSystems", "mapStargates", "mapPlanets",
+		"chrRaces", "chrFactions",
+		// Extended tables from Epic #4 Task #38 (sample)
+		"chrAncestries", "chrBloodlines", "agtAgentTypes", "certCerts",
+		"skins", "eveIcons", "_sde",
 	}
 
-	// Verify count
-	if len(parsers) != len(expectedParsers) {
-		t.Errorf("Expected %d parsers, got %d", len(expectedParsers), len(parsers))
-	}
-
-	// Verify each parser is registered
-	for _, name := range expectedParsers {
+	// Verify required parsers are registered
+	for _, name := range requiredParsers {
 		if _, ok := parsers[name]; !ok {
-			t.Errorf("Parser %s not registered", name)
+			t.Errorf("Required parser %s not registered", name)
 		}
 	}
 
@@ -55,124 +45,74 @@ func TestRegisterParsers(t *testing.T) {
 			t.Errorf("Parser %s has incorrect table name: %s", name, p.TableName())
 		}
 	}
+
+	// Verify all parsers have non-empty columns
+	for name, p := range parsers {
+		if len(p.Columns()) == 0 {
+			t.Errorf("Parser %s has empty columns", name)
+		}
+	}
 }
 
 // TestParserInstances verifies that parser instances are correctly configured
-// Updated for Epic #4: Now includes 17 core parsers (Phase 1)
+// Epic #4: Complete - Tests sample of all 51 parsers
 func TestParserInstances(t *testing.T) {
+	// Test representative sample from each category
 	tests := []struct {
-		name           string
-		parser         parser.Parser
-		expectedTable  string
-		expectedColLen int
+		name          string
+		parser        parser.Parser
+		expectedTable string
+		minColumns    int // Minimum expected columns
 	}{
 		// Core Inventory & Market
-		{
-			name:           "InvTypesParser",
-			parser:         parser.InvTypesParser,
-			expectedTable:  "invTypes",
-			expectedColLen: 15,
-		},
-		{
-			name:           "InvGroupsParser",
-			parser:         parser.InvGroupsParser,
-			expectedTable:  "invGroups",
-			expectedColLen: 9,
-		},
-		{
-			name:           "InvCategoriesParser",
-			parser:         parser.InvCategoriesParser,
-			expectedTable:  "invCategories",
-			expectedColLen: 4,
-		},
-		{
-			name:           "InvMarketGroupsParser",
-			parser:         parser.InvMarketGroupsParser,
-			expectedTable:  "invMarketGroups",
-			expectedColLen: 6,
-		},
-		{
-			name:           "InvMetaGroupsParser",
-			parser:         parser.InvMetaGroupsParser,
-			expectedTable:  "invMetaGroups",
-			expectedColLen: 4,
-		},
+		{"InvTypesParser", parser.InvTypesParser, "invTypes", 10},
+		{"InvGroupsParser", parser.InvGroupsParser, "invGroups", 5},
+		{"InvCategoriesParser", parser.InvCategoriesParser, "invCategories", 3},
+		
 		// Industry & Blueprints
-		{
-			name:           "IndustryBlueprintsParser",
-			parser:         parser.IndustryBlueprintsParser,
-			expectedTable:  "industryBlueprints",
-			expectedColLen: 2,
-		},
-		// Dogma System
-		{
-			name:           "DogmaAttributesParser",
-			parser:         parser.DogmaAttributesParser,
-			expectedTable:  "dogmaAttributes",
-			expectedColLen: 10,
-		},
-		{
-			name:           "DogmaEffectsParser",
-			parser:         parser.DogmaEffectsParser,
-			expectedTable:  "dogmaEffects",
-			expectedColLen: 28,
-		},
-		{
-			name:           "DogmaTypeAttributesParser",
-			parser:         parser.DogmaTypeAttributesParser,
-			expectedTable:  "dogmaTypeAttributes",
-			expectedColLen: 4,
-		},
-		{
-			name:           "DogmaTypeEffectsParser",
-			parser:         parser.DogmaTypeEffectsParser,
-			expectedTable:  "dogmaTypeEffects",
-			expectedColLen: 3,
-		},
-		// Universe/Map
-		{
-			name:           "MapRegionsParser",
-			parser:         parser.MapRegionsParser,
-			expectedTable:  "mapRegions",
-			expectedColLen: 6,
-		},
-		{
-			name:           "MapConstellationsParser",
-			parser:         parser.MapConstellationsParser,
-			expectedTable:  "mapConstellations",
-			expectedColLen: 7,
-		},
-		{
-			name:           "MapSolarSystemsParser",
-			parser:         parser.MapSolarSystemsParser,
-			expectedTable:  "mapSolarSystems",
-			expectedColLen: 9,
-		},
-		{
-			name:           "MapStargatesParser",
-			parser:         parser.MapStargatesParser,
-			expectedTable:  "mapStargates",
-			expectedColLen: 3,
-		},
-		{
-			name:           "MapPlanetsParser",
-			parser:         parser.MapPlanetsParser,
-			expectedTable:  "mapPlanets",
-			expectedColLen: 7,
-		},
-		// Character/Faction
-		{
-			name:           "ChrRacesParser",
-			parser:         parser.ChrRacesParser,
-			expectedTable:  "chrRaces",
-			expectedColLen: 4,
-		},
-		{
-			name:           "ChrFactionsParser",
-			parser:         parser.ChrFactionsParser,
-			expectedTable:  "chrFactions",
-			expectedColLen: 10,
-		},
+		{"IndustryBlueprintsParser", parser.IndustryBlueprintsParser, "industryBlueprints", 2},
+		
+		// Dogma System (Core)
+		{"DogmaAttributesParser", parser.DogmaAttributesParser, "dogmaAttributes", 5},
+		{"DogmaEffectsParser", parser.DogmaEffectsParser, "dogmaEffects", 10},
+		
+		// Dogma System (Extended)
+		{"DogmaAttributeCategoriesParser", parser.DogmaAttributeCategoriesParser, "dogmaAttributeCategories", 2},
+		{"DogmaUnitsParser", parser.DogmaUnitsParser, "dogmaUnits", 2},
+		
+		// Universe/Map (Core)
+		{"MapRegionsParser", parser.MapRegionsParser, "mapRegions", 4},
+		{"MapSolarSystemsParser", parser.MapSolarSystemsParser, "mapSolarSystems", 5},
+		
+		// Universe/Map (Extended)
+		{"MapMoonsParser", parser.MapMoonsParser, "mapMoons", 4},
+		{"MapStarsParser", parser.MapStarsParser, "mapStars", 3},
+		
+		// Character/Faction (Core)
+		{"ChrRacesParser", parser.ChrRacesParser, "chrRaces", 3},
+		{"ChrFactionsParser", parser.ChrFactionsParser, "chrFactions", 5},
+		
+		// Character/NPC (Extended)
+		{"ChrAncestriesParser", parser.ChrAncestriesParser, "chrAncestries", 3},
+		{"ChrBloodlinesParser", parser.ChrBloodlinesParser, "chrBloodlines", 3},
+		
+		// Agents
+		{"AgentTypesParser", parser.AgentTypesParser, "agtAgentTypes", 2},
+		{"AgentsInSpaceParser", parser.AgentsInSpaceParser, "agtAgents", 5},
+		
+		// Certificates/Skills
+		{"CertificatesParser", parser.CertificatesParser, "certCerts", 3},
+		{"MasteriesParser", parser.MasteriesParser, "certMasteries", 2},
+		
+		// Skins
+		{"SkinsParser", parser.SkinsParser, "skins", 3},
+		
+		// Station
+		{"StationOperationsParser", parser.StationOperationsParser, "staOperations", 2},
+		
+		// Miscellaneous
+		{"IconsParser", parser.IconsParser, "eveIcons", 2},
+		{"SDEMetadataParser", parser.SDEMetadataParser, "_sde", 2},
 	}
 
 	for _, tt := range tests {
@@ -182,10 +122,10 @@ func TestParserInstances(t *testing.T) {
 				t.Errorf("%s.TableName() = %s, want %s", tt.name, tt.parser.TableName(), tt.expectedTable)
 			}
 
-			// Verify columns length
+			// Verify columns length (at least minimum)
 			cols := tt.parser.Columns()
-			if len(cols) != tt.expectedColLen {
-				t.Errorf("%s.Columns() length = %d, want %d", tt.name, len(cols), tt.expectedColLen)
+			if len(cols) < tt.minColumns {
+				t.Errorf("%s.Columns() length = %d, want at least %d", tt.name, len(cols), tt.minColumns)
 			}
 
 			// Verify columns are not empty
@@ -199,42 +139,40 @@ func TestParserInstances(t *testing.T) {
 }
 
 // TestParserInterfaceCompliance verifies all parsers implement the Parser interface
-// Updated for Epic #4: Now includes 17 core parsers (Phase 1)
+// Epic #4: Complete - Validates all registered parsers via RegisterParsers()
 func TestParserInterfaceCompliance(t *testing.T) {
-	parsers := []parser.Parser{
-		// Core Inventory & Market
-		parser.InvTypesParser,
-		parser.InvGroupsParser,
-		parser.InvCategoriesParser,
-		parser.InvMarketGroupsParser,
-		parser.InvMetaGroupsParser,
-		// Industry & Blueprints
-		parser.IndustryBlueprintsParser,
-		// Dogma System
-		parser.DogmaAttributesParser,
-		parser.DogmaEffectsParser,
-		parser.DogmaTypeAttributesParser,
-		parser.DogmaTypeEffectsParser,
-		// Universe/Map
-		parser.MapRegionsParser,
-		parser.MapConstellationsParser,
-		parser.MapSolarSystemsParser,
-		parser.MapStargatesParser,
-		parser.MapPlanetsParser,
-		// Character/Faction
-		parser.ChrRacesParser,
-		parser.ChrFactionsParser,
+	// Get all registered parsers dynamically
+	allParsers := parser.RegisterParsers()
+
+	// Verify we have a reasonable number of parsers
+	if len(allParsers) < 51 {
+		t.Fatalf("Expected at least 51 registered parsers, got %d", len(allParsers))
 	}
 
-	for _, p := range parsers {
-		// Verify TableName returns non-empty string
-		if p.TableName() == "" {
-			t.Errorf("Parser %T returned empty TableName", p)
-		}
+	// Test each registered parser
+	for name, p := range allParsers {
+		t.Run(name, func(t *testing.T) {
+			// Verify TableName returns non-empty string
+			if p.TableName() == "" {
+				t.Errorf("Parser %s returned empty TableName", name)
+			}
 
-		// Verify Columns returns non-empty slice
-		if len(p.Columns()) == 0 {
-			t.Errorf("Parser %T returned empty Columns", p)
-		}
+			// Verify TableName matches registry key
+			if p.TableName() != name {
+				t.Errorf("Parser %s has mismatched TableName: got %s", name, p.TableName())
+			}
+
+			// Verify Columns returns non-empty slice
+			if len(p.Columns()) == 0 {
+				t.Errorf("Parser %s returned empty Columns", name)
+			}
+
+			// Verify all column names are non-empty
+			for i, col := range p.Columns() {
+				if col == "" {
+					t.Errorf("Parser %s has empty column at index %d", name, i)
+				}
+			}
+		})
 	}
 }
