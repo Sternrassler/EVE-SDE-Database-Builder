@@ -201,7 +201,7 @@ func runImportCmd(cmd *cobra.Command, args []string) error {
 		if !skipErrors {
 			return fmt.Errorf("%d files failed to import", failed)
 		}
-		fmt.Printf("⚠️  Warning: %d files failed to import (continuing due to --skip-errors)\n", failed)
+		cli.Warning("Warning: %d files failed to import (continuing due to --skip-errors)", failed)
 	}
 
 	return nil

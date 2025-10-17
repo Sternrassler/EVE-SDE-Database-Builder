@@ -8,6 +8,7 @@ import (
 	"os/signal"
 	"syscall"
 
+	"github.com/Sternrassler/EVE-SDE-Database-Builder/internal/cli"
 	"github.com/Sternrassler/EVE-SDE-Database-Builder/internal/logger"
 	"github.com/spf13/cobra"
 )
@@ -21,6 +22,7 @@ var (
 var (
 	configPath string
 	verbose    bool
+	noColor    bool
 )
 
 func main() {
@@ -54,12 +56,19 @@ func main() {
 				log := logger.NewLogger("debug", logFormat)
 				logger.SetGlobalLogger(log)
 			}
+			// Set color mode based on --no-color flag
+			if noColor {
+				cli.SetColorMode(cli.ColorNever)
+			} else {
+				cli.SetColorMode(cli.ColorAuto)
+			}
 		},
 	}
 
 	// Persistent Flags (global für alle Commands)
 	rootCmd.PersistentFlags().StringVarP(&configPath, "config", "c", "./config.toml", "Pfad zur Konfigurationsdatei")
 	rootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "Verbose Logging (Debug Level)")
+	rootCmd.PersistentFlags().BoolVar(&noColor, "no-color", false, "Farbige Ausgabe deaktivieren")
 
 	// Subcommands
 	rootCmd.AddCommand(newImportCmd())

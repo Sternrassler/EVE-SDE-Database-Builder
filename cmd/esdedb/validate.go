@@ -2,8 +2,8 @@ package main
 
 import (
 	"fmt"
-	"os"
 
+	"github.com/Sternrassler/EVE-SDE-Database-Builder/internal/cli"
 	"github.com/Sternrassler/EVE-SDE-Database-Builder/internal/config"
 	"github.com/Sternrassler/EVE-SDE-Database-Builder/internal/logger"
 	"github.com/spf13/cobra"
@@ -42,7 +42,7 @@ func runValidateCmd(cmd *cobra.Command, args []string) error {
 			logger.Field{Key: "config_path", Value: configPath},
 			logger.Field{Key: "error", Value: err.Error()},
 		)
-		fmt.Fprintf(os.Stderr, "❌ Configuration validation failed: %v\n", err)
+		cli.Error("Configuration validation failed: %v", err)
 		return err
 	}
 
@@ -55,7 +55,7 @@ func runValidateCmd(cmd *cobra.Command, args []string) error {
 		logger.Field{Key: "language", Value: cfg.Import.Language},
 	)
 
-	fmt.Println("✅ Configuration is valid")
+	cli.Success("Configuration is valid")
 	fmt.Printf("\nConfiguration Summary:\n")
 	fmt.Printf("  Database Path: %s\n", cfg.Database.Path)
 	fmt.Printf("  SDE Path:      %s\n", cfg.Import.SDEPath)
