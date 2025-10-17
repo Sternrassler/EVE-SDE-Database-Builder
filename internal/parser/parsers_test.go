@@ -6,21 +6,35 @@ import (
 	"github.com/Sternrassler/EVE-SDE-Database-Builder/internal/parser"
 )
 
-// TestRegisterParsers verifies that all 10 parsers are registered correctly
+// TestRegisterParsers verifies that all parsers are registered correctly
+// Updated for Epic #4: Now includes 17 core parsers (Phase 1)
 func TestRegisterParsers(t *testing.T) {
 	parsers := parser.RegisterParsers()
 
+	// Core parsers that should be registered (Epic #4, Task #37)
 	expectedParsers := []string{
+		// Core Inventory & Market
 		"invTypes",
 		"invGroups",
+		"invCategories",
+		"invMarketGroups",
+		"invMetaGroups",
+		// Industry & Blueprints
 		"industryBlueprints",
+		// Dogma System
 		"dogmaAttributes",
-		"mapSolarSystems",
 		"dogmaEffects",
 		"dogmaTypeAttributes",
 		"dogmaTypeEffects",
+		// Universe/Map
 		"mapRegions",
 		"mapConstellations",
+		"mapSolarSystems",
+		"mapStargates",
+		"mapPlanets",
+		// Character/Faction
+		"chrRaces",
+		"chrFactions",
 	}
 
 	// Verify count
@@ -44,6 +58,7 @@ func TestRegisterParsers(t *testing.T) {
 }
 
 // TestParserInstances verifies that parser instances are correctly configured
+// Updated for Epic #4: Now includes 17 core parsers (Phase 1)
 func TestParserInstances(t *testing.T) {
 	tests := []struct {
 		name           string
@@ -51,6 +66,7 @@ func TestParserInstances(t *testing.T) {
 		expectedTable  string
 		expectedColLen int
 	}{
+		// Core Inventory & Market
 		{
 			name:           "InvTypesParser",
 			parser:         parser.InvTypesParser,
@@ -64,22 +80,36 @@ func TestParserInstances(t *testing.T) {
 			expectedColLen: 9,
 		},
 		{
+			name:           "InvCategoriesParser",
+			parser:         parser.InvCategoriesParser,
+			expectedTable:  "invCategories",
+			expectedColLen: 4,
+		},
+		{
+			name:           "InvMarketGroupsParser",
+			parser:         parser.InvMarketGroupsParser,
+			expectedTable:  "invMarketGroups",
+			expectedColLen: 6,
+		},
+		{
+			name:           "InvMetaGroupsParser",
+			parser:         parser.InvMetaGroupsParser,
+			expectedTable:  "invMetaGroups",
+			expectedColLen: 4,
+		},
+		// Industry & Blueprints
+		{
 			name:           "IndustryBlueprintsParser",
 			parser:         parser.IndustryBlueprintsParser,
 			expectedTable:  "industryBlueprints",
 			expectedColLen: 2,
 		},
+		// Dogma System
 		{
 			name:           "DogmaAttributesParser",
 			parser:         parser.DogmaAttributesParser,
 			expectedTable:  "dogmaAttributes",
 			expectedColLen: 10,
-		},
-		{
-			name:           "MapSolarSystemsParser",
-			parser:         parser.MapSolarSystemsParser,
-			expectedTable:  "mapSolarSystems",
-			expectedColLen: 9,
 		},
 		{
 			name:           "DogmaEffectsParser",
@@ -99,6 +129,7 @@ func TestParserInstances(t *testing.T) {
 			expectedTable:  "dogmaTypeEffects",
 			expectedColLen: 3,
 		},
+		// Universe/Map
 		{
 			name:           "MapRegionsParser",
 			parser:         parser.MapRegionsParser,
@@ -110,6 +141,37 @@ func TestParserInstances(t *testing.T) {
 			parser:         parser.MapConstellationsParser,
 			expectedTable:  "mapConstellations",
 			expectedColLen: 7,
+		},
+		{
+			name:           "MapSolarSystemsParser",
+			parser:         parser.MapSolarSystemsParser,
+			expectedTable:  "mapSolarSystems",
+			expectedColLen: 9,
+		},
+		{
+			name:           "MapStargatesParser",
+			parser:         parser.MapStargatesParser,
+			expectedTable:  "mapStargates",
+			expectedColLen: 3,
+		},
+		{
+			name:           "MapPlanetsParser",
+			parser:         parser.MapPlanetsParser,
+			expectedTable:  "mapPlanets",
+			expectedColLen: 7,
+		},
+		// Character/Faction
+		{
+			name:           "ChrRacesParser",
+			parser:         parser.ChrRacesParser,
+			expectedTable:  "chrRaces",
+			expectedColLen: 4,
+		},
+		{
+			name:           "ChrFactionsParser",
+			parser:         parser.ChrFactionsParser,
+			expectedTable:  "chrFactions",
+			expectedColLen: 10,
 		},
 	}
 
@@ -137,18 +199,31 @@ func TestParserInstances(t *testing.T) {
 }
 
 // TestParserInterfaceCompliance verifies all parsers implement the Parser interface
+// Updated for Epic #4: Now includes 17 core parsers (Phase 1)
 func TestParserInterfaceCompliance(t *testing.T) {
 	parsers := []parser.Parser{
+		// Core Inventory & Market
 		parser.InvTypesParser,
 		parser.InvGroupsParser,
+		parser.InvCategoriesParser,
+		parser.InvMarketGroupsParser,
+		parser.InvMetaGroupsParser,
+		// Industry & Blueprints
 		parser.IndustryBlueprintsParser,
+		// Dogma System
 		parser.DogmaAttributesParser,
-		parser.MapSolarSystemsParser,
 		parser.DogmaEffectsParser,
 		parser.DogmaTypeAttributesParser,
 		parser.DogmaTypeEffectsParser,
+		// Universe/Map
 		parser.MapRegionsParser,
 		parser.MapConstellationsParser,
+		parser.MapSolarSystemsParser,
+		parser.MapStargatesParser,
+		parser.MapPlanetsParser,
+		// Character/Faction
+		parser.ChrRacesParser,
+		parser.ChrFactionsParser,
 	}
 
 	for _, p := range parsers {

@@ -1,9 +1,5 @@
 {
-  "groupID": 18,
-  "categoryID": 4,
-  "groupName": {
-    "en": "Mineral",
-    "de": "Mineral"
-  },
-  "published": true
+  "_source": "https://sde.riftforeve.online/schema/groups/",
+  "_status": "schema_page_verified",
+  "_table": "groups"
 }

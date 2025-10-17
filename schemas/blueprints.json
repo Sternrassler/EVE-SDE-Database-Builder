@@ -1,21 +1,5 @@
 {
-  "blueprintTypeID": 1234,
-  "maxProductionLimit": 100,
-  "activities": {
-    "manufacturing": {
-      "time": 3600,
-      "materials": [
-        {
-          "typeID": 34,
-          "quantity": 1000
-        }
-      ],
-      "products": [
-        {
-          "typeID": 35,
-          "quantity": 1
-        }
-      ]
-    }
-  }
+  "_source": "https://sde.riftforeve.online/schema/blueprints/",
+  "_status": "schema_page_verified",
+  "_table": "blueprints"
 }
