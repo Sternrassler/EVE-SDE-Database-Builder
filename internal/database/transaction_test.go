@@ -16,7 +16,9 @@ func TestWithTransaction_Commit(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create database: %v", err)
 	}
-	defer Close(db)
+	defer func() {
+		_ = Close(db)
+	}()
 
 	// Create test table
 	_, err = db.Exec(`CREATE TABLE test_data (id INTEGER PRIMARY KEY, value TEXT)`)
@@ -53,7 +55,9 @@ func TestWithTransaction_Rollback(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create database: %v", err)
 	}
-	defer Close(db)
+	defer func() {
+		_ = Close(db)
+	}()
 
 	// Create test table
 	_, err = db.Exec(`CREATE TABLE test_data (id INTEGER PRIMARY KEY, value TEXT)`)
@@ -97,7 +101,9 @@ func TestWithTransaction_Panic(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create database: %v", err)
 	}
-	defer Close(db)
+	defer func() {
+		_ = Close(db)
+	}()
 
 	// Create test table
 	_, err = db.Exec(`CREATE TABLE test_data (id INTEGER PRIMARY KEY, value TEXT)`)
@@ -131,7 +137,9 @@ func TestWithTransaction_PanicRollback(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create database: %v", err)
 	}
-	defer Close(db)
+	defer func() {
+		_ = Close(db)
+	}()
 
 	// Create test table
 	_, err = db.Exec(`CREATE TABLE test_data (id INTEGER PRIMARY KEY, value TEXT)`)
@@ -173,7 +181,9 @@ func TestWithTransaction_ContextCancellation(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create database: %v", err)
 	}
-	defer Close(db)
+	defer func() {
+		_ = Close(db)
+	}()
 
 	// Create test table
 	_, err = db.Exec(`CREATE TABLE test_data (id INTEGER PRIMARY KEY, value TEXT)`)
@@ -228,7 +238,9 @@ func TestWithTransaction_ContextCancelledBeforeBegin(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create database: %v", err)
 	}
-	defer Close(db)
+	defer func() {
+		_ = Close(db)
+	}()
 
 	// Create already-cancelled context
 	ctx, cancel := context.WithCancel(context.Background())
@@ -250,7 +262,9 @@ func TestWithTransaction_IsolationLevel(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create database: %v", err)
 	}
-	defer Close(db)
+	defer func() {
+		_ = Close(db)
+	}()
 
 	// Create test table
 	_, err = db.Exec(`CREATE TABLE test_data (id INTEGER PRIMARY KEY, value TEXT)`)
@@ -287,7 +301,9 @@ func TestWithTransaction_ReadOnly(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create database: %v", err)
 	}
-	defer Close(db)
+	defer func() {
+		_ = Close(db)
+	}()
 
 	// Create and populate test table
 	_, err = db.Exec(`CREATE TABLE test_data (id INTEGER PRIMARY KEY, value TEXT)`)
@@ -321,7 +337,9 @@ func TestWithTransaction_MultipleOptions(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create database: %v", err)
 	}
-	defer Close(db)
+	defer func() {
+		_ = Close(db)
+	}()
 
 	// Create and populate test table
 	_, err = db.Exec(`CREATE TABLE test_data (id INTEGER PRIMARY KEY, value TEXT)`)
@@ -363,7 +381,7 @@ func TestWithTransaction_CommitError(t *testing.T) {
 	}
 
 	// Close database to force commit error
-	Close(db)
+	_ = Close(db)
 
 	// Try to execute transaction on closed database
 	ctx := context.Background()
@@ -383,7 +401,9 @@ func TestWithTransaction_NestedTransactions(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create database: %v", err)
 	}
-	defer Close(db)
+	defer func() {
+		_ = Close(db)
+	}()
 
 	// Create test table
 	_, err = db.Exec(`CREATE TABLE test_data (id INTEGER PRIMARY KEY, value TEXT)`)

@@ -44,7 +44,10 @@ workers = 4
 level = "debug"
 format = "json"
 `
-	tmpfile.WriteString(content)
+	if _, err := tmpfile.WriteString(content); err != nil {
+		fmt.Printf("Error: %v\n", err)
+		return
+	}
 	tmpfile.Close()
 
 	cfg, err := config.Load(tmpfile.Name())

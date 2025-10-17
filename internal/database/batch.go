@@ -66,7 +66,9 @@ func BatchInsertWithProgress(ctx context.Context, db *sqlx.DB, table string, col
 	if err != nil {
 		return fmt.Errorf("failed to begin transaction: %w", err)
 	}
-	defer tx.Rollback() // Rollback if not committed
+	defer func() {
+		_ = tx.Rollback() // Rollback if not committed (ignore error as commit may have succeeded)
+	}()
 
 	totalRows := len(rows)
 	processedRows := 0

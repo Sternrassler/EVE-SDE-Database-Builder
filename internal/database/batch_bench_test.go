@@ -47,7 +47,9 @@ func benchmarkBatchInsertRows(b *testing.B, rowCount int, batchSize int) {
 	if err != nil {
 		b.Fatalf("Failed to create database: %v", err)
 	}
-	defer Close(db)
+	defer func() {
+		_ = Close(db)
+	}()
 
 	// Create test table
 	_, err = db.Exec(`

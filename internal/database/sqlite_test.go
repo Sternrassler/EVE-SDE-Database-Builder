@@ -12,7 +12,9 @@ func TestNewDB_InMemory(t *testing.T) {
 	if err != nil {
 		t.Fatalf("NewDB failed: %v", err)
 	}
-	defer Close(db)
+	defer func() {
+		_ = Close(db)
+	}()
 
 	if db == nil {
 		t.Fatal("NewDB returned nil database")
@@ -34,7 +36,9 @@ func TestNewDB_FileDatabase(t *testing.T) {
 	if err != nil {
 		t.Fatalf("NewDB failed: %v", err)
 	}
-	defer Close(db)
+	defer func() {
+		_ = Close(db)
+	}()
 
 	if db == nil {
 		t.Fatal("NewDB returned nil database")
@@ -52,7 +56,9 @@ func TestPragmas_Verification(t *testing.T) {
 	if err != nil {
 		t.Fatalf("NewDB failed: %v", err)
 	}
-	defer Close(db)
+	defer func() {
+		_ = Close(db)
+	}()
 
 	tests := []struct {
 		name     string
@@ -121,7 +127,9 @@ func TestPragmas_FileDatabase(t *testing.T) {
 	if err != nil {
 		t.Fatalf("NewDB failed: %v", err)
 	}
-	defer Close(db)
+	defer func() {
+		_ = Close(db)
+	}()
 
 	// Verify WAL mode is set for file-based database
 	var journalMode string
@@ -141,7 +149,9 @@ func TestConnectionPool_Limits(t *testing.T) {
 	if err != nil {
 		t.Fatalf("NewDB failed: %v", err)
 	}
-	defer Close(db)
+	defer func() {
+		_ = Close(db)
+	}()
 
 	stats := db.Stats()
 
@@ -208,7 +218,9 @@ func TestApplyPragmas_DirectCall(t *testing.T) {
 	if err != nil {
 		t.Fatalf("NewDB failed: %v", err)
 	}
-	defer Close(db)
+	defer func() {
+		_ = Close(db)
+	}()
 
 	// applyPragmas is already called in NewDB, but we test it's idempotent
 	if err := applyPragmas(db); err != nil {
@@ -222,7 +234,9 @@ func TestDatabase_BasicOperations(t *testing.T) {
 	if err != nil {
 		t.Fatalf("NewDB failed: %v", err)
 	}
-	defer Close(db)
+	defer func() {
+		_ = Close(db)
+	}()
 
 	// Create a test table
 	_, err = db.Exec(`
@@ -259,7 +273,9 @@ func TestForeignKeys_Enforcement(t *testing.T) {
 	if err != nil {
 		t.Fatalf("NewDB failed: %v", err)
 	}
-	defer Close(db)
+	defer func() {
+		_ = Close(db)
+	}()
 
 	// Create parent table
 	_, err = db.Exec(`

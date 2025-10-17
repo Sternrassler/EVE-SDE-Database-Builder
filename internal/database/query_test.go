@@ -18,7 +18,9 @@ func TestQueryRow_SingleResult(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create database: %v", err)
 	}
-	defer Close(db)
+	defer func() {
+		_ = Close(db)
+	}()
 
 	// Create test table
 	_, err = db.Exec(`
@@ -68,7 +70,9 @@ func TestQueryRow_PrimitiveType(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create database: %v", err)
 	}
-	defer Close(db)
+	defer func() {
+		_ = Close(db)
+	}()
 
 	// Create test table
 	_, err = db.Exec(`CREATE TABLE counters (value INTEGER)`)
@@ -99,7 +103,9 @@ func TestQueryRow_NoRows(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create database: %v", err)
 	}
-	defer Close(db)
+	defer func() {
+		_ = Close(db)
+	}()
 
 	// Create test table
 	_, err = db.Exec(`CREATE TABLE users (id INTEGER, name TEXT)`)
@@ -135,7 +141,9 @@ func TestQueryRow_WithTransaction(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create database: %v", err)
 	}
-	defer Close(db)
+	defer func() {
+		_ = Close(db)
+	}()
 
 	// Create test table
 	_, err = db.Exec(`CREATE TABLE products (id INTEGER, name TEXT, price REAL)`)
@@ -180,7 +188,9 @@ func TestQueryRow_ContextCancellation(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create database: %v", err)
 	}
-	defer Close(db)
+	defer func() {
+		_ = Close(db)
+	}()
 
 	// Create test table
 	_, err = db.Exec(`CREATE TABLE test (id INTEGER)`)
@@ -212,7 +222,9 @@ func TestQueryAll_MultipleRows(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create database: %v", err)
 	}
-	defer Close(db)
+	defer func() {
+		_ = Close(db)
+	}()
 
 	// Create test table
 	_, err = db.Exec(`
@@ -279,7 +291,9 @@ func TestQueryAll_EmptyResult(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create database: %v", err)
 	}
-	defer Close(db)
+	defer func() {
+		_ = Close(db)
+	}()
 
 	// Create test table
 	_, err = db.Exec(`CREATE TABLE items (id INTEGER, name TEXT)`)
@@ -313,7 +327,9 @@ func TestQueryAll_WithFilter(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create database: %v", err)
 	}
-	defer Close(db)
+	defer func() {
+		_ = Close(db)
+	}()
 
 	// Create test table
 	_, err = db.Exec(`CREATE TABLE products (id INTEGER, category TEXT, price REAL)`)
@@ -356,7 +372,9 @@ func TestQueryAll_WithTransaction(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create database: %v", err)
 	}
-	defer Close(db)
+	defer func() {
+		_ = Close(db)
+	}()
 
 	// Create test table
 	_, err = db.Exec(`CREATE TABLE orders (id INTEGER, status TEXT)`)
@@ -400,7 +418,9 @@ func TestExists_True(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create database: %v", err)
 	}
-	defer Close(db)
+	defer func() {
+		_ = Close(db)
+	}()
 
 	// Create test table
 	_, err = db.Exec(`CREATE TABLE users (id INTEGER, email TEXT)`)
@@ -431,7 +451,9 @@ func TestExists_False(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create database: %v", err)
 	}
-	defer Close(db)
+	defer func() {
+		_ = Close(db)
+	}()
 
 	// Create test table
 	_, err = db.Exec(`CREATE TABLE users (id INTEGER, email TEXT)`)
@@ -456,7 +478,9 @@ func TestExists_WithTransaction(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create database: %v", err)
 	}
-	defer Close(db)
+	defer func() {
+		_ = Close(db)
+	}()
 
 	// Create test table
 	_, err = db.Exec(`CREATE TABLE sessions (id INTEGER, token TEXT)`)
@@ -495,7 +519,9 @@ func TestExists_EmptyTable(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create database: %v", err)
 	}
-	defer Close(db)
+	defer func() {
+		_ = Close(db)
+	}()
 
 	// Create test table
 	_, err = db.Exec(`CREATE TABLE empty_table (id INTEGER)`)
@@ -520,7 +546,9 @@ func TestExists_ContextCancellation(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create database: %v", err)
 	}
-	defer Close(db)
+	defer func() {
+		_ = Close(db)
+	}()
 
 	// Create test table
 	_, err = db.Exec(`CREATE TABLE test (id INTEGER)`)
@@ -548,7 +576,9 @@ func TestQueryAll_ContextTimeout(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create database: %v", err)
 	}
-	defer Close(db)
+	defer func() {
+		_ = Close(db)
+	}()
 
 	// Create test table
 	_, err = db.Exec(`CREATE TABLE test (id INTEGER)`)
