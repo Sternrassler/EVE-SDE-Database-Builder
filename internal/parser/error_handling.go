@@ -67,6 +67,11 @@ func ParseWithErrorHandling[T any](path string, mode ErrorMode, maxErrors int) (
 // ParseWithErrorHandlingContext parses a JSONL file with context support and error handling.
 // This is the main implementation that provides detailed error recovery and reporting.
 func ParseWithErrorHandlingContext[T any](ctx context.Context, path string, mode ErrorMode, maxErrors int) ParseResult[T] {
+	// Use background context if none provided
+	if ctx == nil {
+		ctx = context.Background()
+	}
+	
 	file, err := os.Open(path)
 	if err != nil {
 		return ParseResult[T]{
