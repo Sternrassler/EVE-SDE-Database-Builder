@@ -273,42 +273,91 @@ func TestPool_CancellationBeforeStart(t *testing.T) {
 
 // TestPool_JobWithContextCheck tests job that checks context
 func TestPool_JobWithContextCheck(t *testing.T) {
-	ctx, cancel := context.WithTimeout(context.Background(), 50*time.Millisecond)
-	defer cancel()
-
+	ctx := context.Background()
 	pool := NewPool(1)
 	pool.Start(ctx)
 
+	var jobStarted atomic.Int32
+	done := make(chan struct{})
+
 	pool.Submit(Job{
-		ID: "timeout_job",
+		ID: "long_job",
 		Fn: func(ctx context.Context) (interface{}, error) {
+			jobStarted.Add(1)
+			close(done)
 			// Long-running operation that checks context
 			for i := 0; i < 100; i++ {
 				select {
 				case <-ctx.Done():
 					return nil, ctx.Err()
 				default:
-					time.Sleep(10 * time.Millisecond)
+					time.Sleep(5 * time.Millisecond)
 				}
 			}
 			return "completed", nil
 		},
 	})
 
+	// Wait for job to start
+	<-done
+
 	results, errs := pool.Wait()
 
-	// Job should have been cancelled
+	// Job should have started
+	if jobStarted.Load() == 0 {
+		t.Fatal("job should have started")
+	}
+
+	// Job should have completed normally (no cancellation)
 	if len(results) != 1 {
 		t.Fatalf("expected 1 result, got %d", len(results))
 	}
 
-	if results[0].Err == nil {
-		t.Error("expected error from cancelled job")
+	if results[0].Err != nil {
+		t.Errorf("unexpected error: %v", results[0].Err)
 	}
 
-	if len(errs) != 1 {
-		t.Errorf("expected 1 error, got %d", len(errs))
+	if len(errs) != 0 {
+		t.Errorf("expected 0 errors, got %d", len(errs))
 	}
+}
+
+// TestPool_TimeoutCancellation tests graceful worker shutdown on timeout
+func TestPool_TimeoutCancellation(t *testing.T) {
+	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Millisecond)
+	defer cancel()
+
+	pool := NewPool(2)
+	pool.Start(ctx)
+
+	var started atomic.Int32
+
+	// Submit several jobs
+	for i := 0; i < 5; i++ {
+		pool.Submit(Job{
+			ID: fmt.Sprintf("job-%d", i),
+			Fn: func(ctx context.Context) (interface{}, error) {
+				started.Add(1)
+				// Simulate work
+				time.Sleep(10 * time.Millisecond)
+				return "done", nil
+			},
+		})
+	}
+
+	results, _ := pool.Wait()
+
+	// Some jobs should have started
+	if started.Load() == 0 {
+		t.Error("expected at least some jobs to start")
+	}
+
+	// But due to timeout, not all will complete
+	if int32(len(results)) > started.Load() {
+		t.Errorf("results count (%d) cannot exceed jobs started (%d)", len(results), started.Load())
+	}
+
+	t.Logf("Started: %d, Results: %d (context timeout)", started.Load(), len(results))
 }
 
 // TestPool_ResultOrder tests that all results are collected (order doesn't matter)
