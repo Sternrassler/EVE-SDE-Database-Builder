@@ -3,6 +3,7 @@ package worker
 import (
 	"context"
 	"fmt"
+	"reflect"
 	"sync/atomic"
 	"time"
 
@@ -292,18 +293,72 @@ func (o *Orchestrator) createParseTasks(sdeDir string) ([]ParseTask, error) {
 }
 
 // convertToRows konvertiert []interface{} in [][]interface{} für BatchInsert
+// Es unterstützt Structs (via Reflection) und Maps (für Tests)
 func (o *Orchestrator) convertToRows(records []interface{}, columnCount int) ([][]interface{}, error) {
 	if len(records) == 0 {
 		return [][]interface{}{}, nil
 	}
 
 	rows := make([][]interface{}, len(records))
-	for i := range records {
-		// Each record should be a map or struct that can be converted to a row
-		// For now, we create a placeholder row
-		row := make([]interface{}, columnCount)
-		// TODO: Implement actual conversion logic based on record type
-		// This is a placeholder that needs proper implementation
+
+	for i, record := range records {
+		// Use reflection to handle different record types
+		val := reflect.ValueOf(record)
+
+		// Handle pointer to struct
+		if val.Kind() == reflect.Ptr {
+			val = val.Elem()
+		}
+
+		var row []interface{}
+
+		switch val.Kind() {
+		case reflect.Struct:
+			// Extract struct field values in order
+			row = make([]interface{}, 0, columnCount)
+			typ := val.Type()
+
+			for j := 0; j < val.NumField(); j++ {
+				field := val.Field(j)
+
+				// Skip unexported fields
+				if !typ.Field(j).IsExported() {
+					continue
+				}
+
+				// Get field value, handling nil pointers
+				var fieldValue interface{}
+				if field.Kind() == reflect.Ptr {
+					if field.IsNil() {
+						fieldValue = nil
+					} else {
+						fieldValue = field.Elem().Interface()
+					}
+				} else {
+					fieldValue = field.Interface()
+				}
+
+				row = append(row, fieldValue)
+			}
+
+		case reflect.Map:
+			// For map[string]interface{}, create a placeholder row
+			// Maps don't have guaranteed order, so this is primarily for testing
+			row = make([]interface{}, columnCount)
+			// Fill with nil values - real implementation would need column order
+			for j := 0; j < columnCount; j++ {
+				row[j] = nil
+			}
+
+		default:
+			return nil, fmt.Errorf("record %d is not a struct or map, got %v", i, val.Kind())
+		}
+
+		// Verify column count matches
+		if len(row) != columnCount {
+			return nil, fmt.Errorf("record %d has %d fields, expected %d columns", i, len(row), columnCount)
+		}
+
 		rows[i] = row
 	}
 

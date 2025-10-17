@@ -126,7 +126,7 @@ func TestOrchestrator_CreateParseTasks(t *testing.T) {
 	}
 }
 
-// TestOrchestrator_ConvertToRows tests row conversion
+// TestOrchestrator_ConvertToRows tests row conversion with structs
 func TestOrchestrator_ConvertToRows(t *testing.T) {
 	db, err := database.NewDB(":memory:")
 	if err != nil {
@@ -137,7 +137,17 @@ func TestOrchestrator_ConvertToRows(t *testing.T) {
 	pool := NewPool(2)
 	orch := NewOrchestrator(db, pool, nil)
 
-	records := []interface{}{"rec1", "rec2", "rec3"}
+	// Use simple struct records instead of strings
+	type TestRecord struct {
+		ID   int
+		Name string
+	}
+
+	records := []interface{}{
+		TestRecord{ID: 1, Name: "rec1"},
+		TestRecord{ID: 2, Name: "rec2"},
+		TestRecord{ID: 3, Name: "rec3"},
+	}
 	rows, err := orch.convertToRows(records, 2)
 
 	if err != nil {
@@ -152,6 +162,11 @@ func TestOrchestrator_ConvertToRows(t *testing.T) {
 		if len(row) != 2 {
 			t.Errorf("row %d: expected 2 columns, got %d", i, len(row))
 		}
+	}
+
+	// Verify values
+	if rows[0][0] != 1 || rows[0][1] != "rec1" {
+		t.Errorf("row 0: expected [1, rec1], got %v", rows[0])
 	}
 }
 
