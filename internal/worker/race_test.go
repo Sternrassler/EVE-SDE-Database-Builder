@@ -14,16 +14,16 @@ import (
 // To handle the results channel buffer limit (100), we process jobs in batches
 func TestPool_RaceConditions(t *testing.T) {
 	ctx := context.Background()
-	
+
 	// Process 1000 jobs total across multiple pool instances
 	totalJobs := 1000
 	batchSize := 90 // Stay under the 100 results buffer limit
 	batches := (totalJobs + batchSize - 1) / batchSize
-	
+
 	var totalCompleted atomic.Int32
 	var allResults []Result
 	var allErrors []error
-	
+
 	for batch := 0; batch < batches; batch++ {
 		// Calculate jobs for this batch
 		startJob := batch * batchSize
@@ -32,10 +32,10 @@ func TestPool_RaceConditions(t *testing.T) {
 			endJob = totalJobs
 		}
 		jobsInBatch := endJob - startJob
-		
+
 		pool := NewPool(10)
 		pool.Start(ctx)
-		
+
 		// Submit jobs for this batch
 		for i := startJob; i < endJob; i++ {
 			jobNum := i
@@ -47,32 +47,32 @@ func TestPool_RaceConditions(t *testing.T) {
 				},
 			})
 		}
-		
+
 		// Wait for batch to complete
 		results, errs := pool.Wait()
 		allResults = append(allResults, results...)
 		allErrors = append(allErrors, errs...)
-		
+
 		// Verify batch results
 		if len(results) != jobsInBatch {
 			t.Errorf("batch %d: expected %d results, got %d", batch, jobsInBatch, len(results))
 		}
 	}
-	
+
 	// Verify all jobs completed successfully
 	if len(allErrors) != 0 {
 		t.Errorf("expected no errors, got %d", len(allErrors))
 	}
-	
+
 	if len(allResults) != totalJobs {
 		t.Errorf("expected %d total results, got %d", totalJobs, len(allResults))
 	}
-	
+
 	if totalCompleted.Load() != int32(totalJobs) {
 		t.Errorf("expected %d completed jobs, got %d", totalJobs, totalCompleted.Load())
 	}
-	
-	t.Logf("Race condition test completed: %d jobs processed successfully across %d batches", 
+
+	t.Logf("Race condition test completed: %d jobs processed successfully across %d batches",
 		totalCompleted.Load(), batches)
 }
 
@@ -84,21 +84,21 @@ func TestPool_RaceConditions_StressTest(t *testing.T) {
 	}
 
 	ctx := context.Background()
-	
+
 	// Process 5000 jobs total across multiple pool instances with concurrent workers
 	totalJobs := 5000
 	batchSize := 90 // Stay under results buffer limit
 	batches := (totalJobs + batchSize - 1) / batchSize
-	
+
 	var totalCompleted atomic.Int32
 	var mu sync.Mutex
 	var allResults []Result
 	var allErrors []error
-	
+
 	// Process batches concurrently using a worker pool pattern
 	var wg sync.WaitGroup
 	batchChan := make(chan int, batches)
-	
+
 	// Start batch processors
 	concurrentProcessors := 3
 	for p := 0; p < concurrentProcessors; p++ {
@@ -112,10 +112,10 @@ func TestPool_RaceConditions_StressTest(t *testing.T) {
 				if endJob > totalJobs {
 					endJob = totalJobs
 				}
-				
+
 				pool := NewPool(20)
 				pool.Start(ctx)
-				
+
 				// Submit jobs for this batch
 				for i := startJob; i < endJob; i++ {
 					jobNum := i
@@ -131,10 +131,10 @@ func TestPool_RaceConditions_StressTest(t *testing.T) {
 						},
 					})
 				}
-				
+
 				// Wait for batch to complete
 				results, errs := pool.Wait()
-				
+
 				// Collect results thread-safely
 				mu.Lock()
 				allResults = append(allResults, results...)
@@ -143,30 +143,30 @@ func TestPool_RaceConditions_StressTest(t *testing.T) {
 			}
 		}()
 	}
-	
+
 	// Queue all batches
 	for batch := 0; batch < batches; batch++ {
 		batchChan <- batch
 	}
 	close(batchChan)
-	
+
 	// Wait for all batches to complete
 	wg.Wait()
-	
+
 	// Verify results
 	if len(allErrors) != 0 {
 		t.Errorf("expected no errors, got %d", len(allErrors))
 	}
-	
+
 	if len(allResults) != totalJobs {
 		t.Errorf("expected %d total results, got %d", totalJobs, len(allResults))
 	}
-	
+
 	if totalCompleted.Load() != int32(totalJobs) {
 		t.Errorf("expected %d completed jobs, got %d", totalJobs, totalCompleted.Load())
 	}
-	
-	t.Logf("Stress test completed: %d jobs processed successfully across %d batches with %d concurrent processors", 
+
+	t.Logf("Stress test completed: %d jobs processed successfully across %d batches with %d concurrent processors",
 		totalCompleted.Load(), batches, concurrentProcessors)
 }
 
@@ -404,6 +404,6 @@ func TestPool_RaceConditions_ContextCancellation(t *testing.T) {
 		t.Errorf("results count (%d) cannot exceed started jobs (%d)", len(results), started.Load())
 	}
 
-	t.Logf("Cancellation test: %d started, %d completed, %d results", 
+	t.Logf("Cancellation test: %d started, %d completed, %d results",
 		started.Load(), completed.Load(), len(results))
 }
