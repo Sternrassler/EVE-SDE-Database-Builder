@@ -3,6 +3,7 @@ package worker
 import (
 	"context"
 	"os"
+	"sync/atomic"
 	"syscall"
 	"testing"
 	"time"
@@ -84,7 +85,7 @@ func TestSetupSignalHandler_WithPool(t *testing.T) {
 	pool := NewPool(2)
 	pool.Start(ctx)
 
-	var jobsStarted, jobsCompleted int32
+	var jobsStarted, jobsCompleted atomic.Int32
 	done := make(chan struct{})
 
 	// Submit long-running jobs
@@ -92,7 +93,7 @@ func TestSetupSignalHandler_WithPool(t *testing.T) {
 		pool.Submit(Job{
 			ID: "long-job",
 			Fn: func(ctx context.Context) (interface{}, error) {
-				jobsStarted++
+				jobsStarted.Add(1)
 				// Simulate work with context awareness
 				for j := 0; j < 10; j++ {
 					select {
@@ -102,7 +103,7 @@ func TestSetupSignalHandler_WithPool(t *testing.T) {
 						// Continue work
 					}
 				}
-				jobsCompleted++
+				jobsCompleted.Add(1)
 				return "completed", nil
 			},
 		})
