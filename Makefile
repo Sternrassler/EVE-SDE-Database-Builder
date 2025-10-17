@@ -1,8 +1,34 @@
-.PHONY: help test test-tools lint build clean coverage fmt vet tidy check-hooks secrets-check commit-lint generate-parsers
+.PHONY: help setup test test-tools lint build clean coverage fmt vet tidy check-hooks secrets-check commit-lint generate-parsers
 
 help: ## Display this help message
 	@echo "Available targets:"
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-15s\033[0m %s\n", $$1, $$2}'
+
+setup: ## Complete setup: install dependencies + generate parsers
+	@echo "🚀 Setting up EVE SDE Database Builder..."
+	@echo ""
+	@echo "1️⃣  Installing Go dependencies..."
+	@go mod download
+	@echo "✅ Go dependencies installed"
+	@echo ""
+	@echo "2️⃣  Checking quicktype (code generation tool)..."
+	@if ! command -v quicktype &> /dev/null; then \
+		echo "⚠️  quicktype not found - attempting to install..."; \
+		if command -v npm &> /dev/null; then \
+			npm install -g quicktype && echo "✅ quicktype installed"; \
+		else \
+			echo "❌ npm not found - please install Node.js first"; \
+			echo "   Visit: https://nodejs.org/"; \
+			exit 1; \
+		fi; \
+	else \
+		echo "✅ quicktype already installed ($$(quicktype --version | head -n1))"; \
+	fi
+	@echo ""
+	@echo "3️⃣  Generating parser code from schemas..."
+	@$(MAKE) generate-parsers
+	@echo ""
+	@echo "🎉 Setup complete! You can now run 'make test' or 'make build'"
 
 test: ## Run all tests (core packages)
 	go test -v ./cmd/... ./internal/...

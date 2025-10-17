@@ -134,12 +134,14 @@ add_tomap_methods() {
     fi
     
     # Run add-tomap-methods tool
-    if go run tools/add-tomap-methods/main.go $go_files; then
-        log_info "ToMap methods added successfully"
-    else
-        log_error "Failed to add ToMap methods"
-        return 1
-    fi
+    # Note: Tool must be run from repo root, processes files in-place
+    for go_file in $go_files; do
+        if ! go run ./tools/add-tomap-methods "$go_file"; then
+            log_error "Failed to add ToMap methods to: $go_file"
+            return 1
+        fi
+    done
+    log_info "ToMap methods added successfully"
     
     return 0
 }

@@ -52,12 +52,24 @@ Vollständige Architektur-Dokumentation: [docs/migration/architecture-analysis.m
 - Go 1.21+
 - SQLite 3.35+
 - Make
+- Node.js + npm (für Code-Generierung)
 
 ### Setup
 
 ```bash
-# Install Dependencies
+# Komplettes Setup (Dependencies + Code-Generierung)
+make setup
+
+# Oder manuell Schritt für Schritt:
+
+# 1. Install Go Dependencies
 go mod download
+
+# 2. Install Code Generation Tools
+npm install -g quicktype
+
+# 3. Generate Parser Code from Schemas
+make generate-parsers
 
 # Run Tests
 make test
@@ -68,6 +80,8 @@ make lint
 # Security Scan
 make scan
 ```
+
+**Nach `git clone`:** Führe `make setup` aus, um alle Dependencies zu installieren und Parser-Code zu generieren.
 
 ### Database Migrations
 
