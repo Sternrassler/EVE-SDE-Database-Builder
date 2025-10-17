@@ -63,6 +63,7 @@ func main() {
 
 	// Subcommands
 	rootCmd.AddCommand(newImportCmd())
+	rootCmd.AddCommand(newValidateCmd())
 	// rootCmd.AddCommand(newConfigCmd())
 	// rootCmd.AddCommand(newVersionCmd())
 
