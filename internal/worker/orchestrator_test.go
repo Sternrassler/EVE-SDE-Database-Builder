@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"os"
+	"path/filepath"
 	"sync"
 	"testing"
 	"time"
@@ -96,6 +98,23 @@ func TestNewOrchestrator(t *testing.T) {
 
 // TestOrchestrator_CreateParseTasks tests parse task creation
 func TestOrchestrator_CreateParseTasks(t *testing.T) {
+	// Create temporary directory with test files
+	tmpDir := t.TempDir()
+
+	// Create test JSONL files
+	typesFile := filepath.Join(tmpDir, "types.jsonl")
+	groupsFile := filepath.Join(tmpDir, "groups.jsonl")
+
+	err := os.WriteFile(typesFile, []byte(`{"typeID":1,"typeName":"test"}`), 0644)
+	if err != nil {
+		t.Fatalf("failed to create types.jsonl: %v", err)
+	}
+
+	err = os.WriteFile(groupsFile, []byte(`{"groupID":1,"groupName":"test"}`), 0644)
+	if err != nil {
+		t.Fatalf("failed to create groups.jsonl: %v", err)
+	}
+
 	db, err := database.NewDB(":memory:")
 	if err != nil {
 		t.Fatalf("failed to create test database: %v", err)
@@ -104,18 +123,18 @@ func TestOrchestrator_CreateParseTasks(t *testing.T) {
 
 	pool := NewPool(2)
 	parsers := map[string]parser.Parser{
-		"types.jsonl": &MockParser{
+		"types": &MockParser{
 			tableName: "invTypes",
 			columns:   []string{"typeID", "typeName"},
 		},
-		"groups.jsonl": &MockParser{
+		"groups": &MockParser{
 			tableName: "invGroups",
 			columns:   []string{"groupID", "groupName"},
 		},
 	}
 
 	orch := NewOrchestrator(db, pool, parsers)
-	tasks, err := orch.createParseTasks("/test/sde")
+	tasks, err := orch.createParseTasks(tmpDir)
 
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
@@ -194,6 +213,8 @@ func TestOrchestrator_ConvertToRows_Empty(t *testing.T) {
 
 // TestOrchestrator_ImportAll_EmptyParsers tests import with no parsers
 func TestOrchestrator_ImportAll_EmptyParsers(t *testing.T) {
+	tmpDir := t.TempDir()
+
 	db, err := database.NewDB(":memory:")
 	if err != nil {
 		t.Fatalf("failed to create test database: %v", err)
@@ -205,7 +226,7 @@ func TestOrchestrator_ImportAll_EmptyParsers(t *testing.T) {
 	orch := NewOrchestrator(db, pool, parsers)
 
 	ctx := context.Background()
-	progress, err := orch.ImportAll(ctx, "/test/sde")
+	progress, err := orch.ImportAll(ctx, tmpDir)
 
 	if err == nil {
 		t.Error("expected error for no JSONL files, got nil")
@@ -218,6 +239,15 @@ func TestOrchestrator_ImportAll_EmptyParsers(t *testing.T) {
 
 // TestOrchestrator_ImportAll_WithMockParsers tests basic import flow
 func TestOrchestrator_ImportAll_WithMockParsers(t *testing.T) {
+	tmpDir := t.TempDir()
+
+	// Create test JSONL file
+	typesFile := filepath.Join(tmpDir, "types.jsonl")
+	err := os.WriteFile(typesFile, []byte(`{"id":1,"name":"test"}`), 0644)
+	if err != nil {
+		t.Fatalf("failed to create types.jsonl: %v", err)
+	}
+
 	db, err := database.NewDB(":memory:")
 	if err != nil {
 		t.Fatalf("failed to create test database: %v", err)
@@ -232,7 +262,7 @@ func TestOrchestrator_ImportAll_WithMockParsers(t *testing.T) {
 
 	pool := NewPool(2)
 	parsers := map[string]parser.Parser{
-		"types.jsonl": &MockParser{
+		"types": &MockParser{
 			tableName:   "test_types",
 			columns:     []string{"id", "name"},
 			returnItems: []interface{}{"record1", "record2"},
@@ -242,7 +272,7 @@ func TestOrchestrator_ImportAll_WithMockParsers(t *testing.T) {
 	orch := NewOrchestrator(db, pool, parsers)
 
 	ctx := context.Background()
-	progress, err := orch.ImportAll(ctx, "/test/sde")
+	progress, err := orch.ImportAll(ctx, tmpDir)
 
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
@@ -260,6 +290,15 @@ func TestOrchestrator_ImportAll_WithMockParsers(t *testing.T) {
 
 // TestOrchestrator_ImportAll_WithParseError tests error handling
 func TestOrchestrator_ImportAll_WithParseError(t *testing.T) {
+	tmpDir := t.TempDir()
+
+	// Create test JSONL file
+	badFile := filepath.Join(tmpDir, "bad.jsonl")
+	err := os.WriteFile(badFile, []byte(`{"id":1}`), 0644)
+	if err != nil {
+		t.Fatalf("failed to create bad.jsonl: %v", err)
+	}
+
 	db, err := database.NewDB(":memory:")
 	if err != nil {
 		t.Fatalf("failed to create test database: %v", err)
@@ -268,7 +307,7 @@ func TestOrchestrator_ImportAll_WithParseError(t *testing.T) {
 
 	pool := NewPool(2)
 	parsers := map[string]parser.Parser{
-		"bad.jsonl": &MockParser{
+		"bad": &MockParser{
 			tableName:   "test_table",
 			columns:     []string{"id"},
 			shouldFail:  true,
@@ -279,7 +318,7 @@ func TestOrchestrator_ImportAll_WithParseError(t *testing.T) {
 	orch := NewOrchestrator(db, pool, parsers)
 
 	ctx := context.Background()
-	progress, err := orch.ImportAll(ctx, "/test/sde")
+	progress, err := orch.ImportAll(ctx, tmpDir)
 
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
@@ -299,6 +338,15 @@ func TestOrchestrator_ImportAll_WithParseError(t *testing.T) {
 
 // TestOrchestrator_ImportAll_ContextCancellation tests graceful cancellation
 func TestOrchestrator_ImportAll_ContextCancellation(t *testing.T) {
+	tmpDir := t.TempDir()
+
+	// Create test JSONL file
+	slowFile := filepath.Join(tmpDir, "slow.jsonl")
+	err := os.WriteFile(slowFile, []byte(`{"id":1}`), 0644)
+	if err != nil {
+		t.Fatalf("failed to create slow.jsonl: %v", err)
+	}
+
 	db, err := database.NewDB(":memory:")
 	if err != nil {
 		t.Fatalf("failed to create test database: %v", err)
@@ -307,7 +355,7 @@ func TestOrchestrator_ImportAll_ContextCancellation(t *testing.T) {
 
 	pool := NewPool(2)
 	parsers := map[string]parser.Parser{
-		"slow.jsonl": &MockParser{
+		"slow": &MockParser{
 			tableName: "test_table",
 			columns:   []string{"id"},
 			parseFunc: func(ctx context.Context, path string) ([]interface{}, error) {
@@ -329,7 +377,7 @@ func TestOrchestrator_ImportAll_ContextCancellation(t *testing.T) {
 	// Cancel immediately
 	cancel()
 
-	_, err = orch.ImportAll(ctx, "/test/sde")
+	_, err = orch.ImportAll(ctx, tmpDir)
 
 	// Should return context error or complete quickly
 	if err != nil && !errors.Is(err, context.Canceled) {
@@ -339,6 +387,22 @@ func TestOrchestrator_ImportAll_ContextCancellation(t *testing.T) {
 
 // TestOrchestrator_ImportAll_MultipleFiles tests multiple file processing
 func TestOrchestrator_ImportAll_MultipleFiles(t *testing.T) {
+	tmpDir := t.TempDir()
+
+	// Create test JSONL files
+	typesFile := filepath.Join(tmpDir, "types.jsonl")
+	groupsFile := filepath.Join(tmpDir, "groups.jsonl")
+
+	err := os.WriteFile(typesFile, []byte(`{"id":1}`), 0644)
+	if err != nil {
+		t.Fatalf("failed to create types.jsonl: %v", err)
+	}
+
+	err = os.WriteFile(groupsFile, []byte(`{"id":2}`), 0644)
+	if err != nil {
+		t.Fatalf("failed to create groups.jsonl: %v", err)
+	}
+
 	db, err := database.NewDB(":memory:")
 	if err != nil {
 		t.Fatalf("failed to create test database: %v", err)
@@ -357,11 +421,11 @@ func TestOrchestrator_ImportAll_MultipleFiles(t *testing.T) {
 
 	pool := NewPool(4)
 	parsers := map[string]parser.Parser{
-		"types.jsonl": &MockParser{
+		"types": &MockParser{
 			tableName: "types",
 			columns:   []string{"id"},
 		},
-		"groups.jsonl": &MockParser{
+		"groups": &MockParser{
 			tableName:   "groups",
 			columns:     []string{"id"},
 			returnItems: []interface{}{"data"},
@@ -371,7 +435,7 @@ func TestOrchestrator_ImportAll_MultipleFiles(t *testing.T) {
 	orch := NewOrchestrator(db, pool, parsers)
 
 	ctx := context.Background()
-	progress, err := orch.ImportAll(ctx, "/test/sde")
+	progress, err := orch.ImportAll(ctx, tmpDir)
 
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
@@ -385,6 +449,22 @@ func TestOrchestrator_ImportAll_MultipleFiles(t *testing.T) {
 
 // TestOrchestrator_ImportAll_MixedResults tests mixed success/failure
 func TestOrchestrator_ImportAll_MixedResults(t *testing.T) {
+	tmpDir := t.TempDir()
+
+	// Create test JSONL files
+	successFile := filepath.Join(tmpDir, "success.jsonl")
+	failureFile := filepath.Join(tmpDir, "failure.jsonl")
+
+	err := os.WriteFile(successFile, []byte(`{"id":1}`), 0644)
+	if err != nil {
+		t.Fatalf("failed to create success.jsonl: %v", err)
+	}
+
+	err = os.WriteFile(failureFile, []byte(`{"id":2}`), 0644)
+	if err != nil {
+		t.Fatalf("failed to create failure.jsonl: %v", err)
+	}
+
 	db, err := database.NewDB(":memory:")
 	if err != nil {
 		t.Fatalf("failed to create test database: %v", err)
@@ -399,12 +479,12 @@ func TestOrchestrator_ImportAll_MixedResults(t *testing.T) {
 
 	pool := NewPool(2)
 	parsers := map[string]parser.Parser{
-		"success.jsonl": &MockParser{
+		"success": &MockParser{
 			tableName:   "success_table",
 			columns:     []string{"id"},
 			returnItems: []interface{}{"data"},
 		},
-		"failure.jsonl": &MockParser{
+		"failure": &MockParser{
 			tableName:   "failure_table",
 			columns:     []string{"id"},
 			shouldFail:  true,
@@ -415,7 +495,7 @@ func TestOrchestrator_ImportAll_MixedResults(t *testing.T) {
 	orch := NewOrchestrator(db, pool, parsers)
 
 	ctx := context.Background()
-	progress, err := orch.ImportAll(ctx, "/test/sde")
+	progress, err := orch.ImportAll(ctx, tmpDir)
 
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
@@ -494,7 +574,7 @@ func Example_orchestratorBasicUsage() {
 
 	// Register parsers for different file types
 	parsers := map[string]parser.Parser{
-		"types.jsonl": &MockParser{
+		"types": &MockParser{
 			tableName: "types",
 			columns:   []string{"typeID", "typeName"},
 			returnItems: []interface{}{
@@ -507,9 +587,16 @@ func Example_orchestratorBasicUsage() {
 	// Create orchestrator
 	orch := NewOrchestrator(db, pool, parsers)
 
+	// Create temporary directory for the example
+	tmpDir, _ := os.MkdirTemp("", "sde-example")
+	defer os.RemoveAll(tmpDir)
+
+	// Create a test file
+	_ = os.WriteFile(filepath.Join(tmpDir, "types.jsonl"), []byte(`{"typeID":1,"typeName":"test"}`), 0644)
+
 	// Execute 2-phase import
 	ctx := context.Background()
-	progress, err := orch.ImportAll(ctx, "/path/to/sde")
+	progress, err := orch.ImportAll(ctx, tmpDir)
 	if err != nil {
 		fmt.Printf("Import error: %v\n", err)
 		return
@@ -593,4 +680,106 @@ func Example_orchestratorProgressTracking() {
 	parsed, inserted, failed, total := progress.GetProgress()
 	fmt.Printf("Parsed: %d/%d, Inserted: %d, Failed: %d\n", parsed, total, inserted, failed)
 	// Output: Parsed: 5/5, Inserted: 3, Failed: 2
+}
+
+// TestDiscoverJSONLFiles tests file discovery functionality
+func TestDiscoverJSONLFiles(t *testing.T) {
+	// Create temporary test directory
+	tmpDir := t.TempDir()
+
+	// Create test files
+	testFiles := []string{
+		"types.jsonl",
+		"agents.jsonl",
+		"blueprints.jsonl",
+		"notjsonl.txt",
+		".hidden.jsonl",
+	}
+
+	for _, file := range testFiles {
+		path := filepath.Join(tmpDir, file)
+		err := os.WriteFile(path, []byte("{}"), 0644)
+		if err != nil {
+			t.Fatalf("Failed to create test file %s: %v", file, err)
+		}
+	}
+
+	// Create subdirectory (should be ignored)
+	subDir := filepath.Join(tmpDir, "subdir")
+	err := os.Mkdir(subDir, 0755)
+	if err != nil {
+		t.Fatalf("Failed to create subdirectory: %v", err)
+	}
+
+	// Test file discovery
+	files, err := DiscoverJSONLFiles(tmpDir)
+	if err != nil {
+		t.Fatalf("DiscoverJSONLFiles failed: %v", err)
+	}
+
+	// Verify results
+	expected := 3 // types.jsonl, agents.jsonl, blueprints.jsonl
+	if len(files) != expected {
+		t.Errorf("Expected %d files, got %d: %v", expected, len(files), files)
+	}
+
+	// Verify correct files are discovered
+	foundFiles := make(map[string]bool)
+	for _, f := range files {
+		foundFiles[filepath.Base(f)] = true
+	}
+
+	if !foundFiles["types.jsonl"] {
+		t.Error("types.jsonl not found")
+	}
+	if !foundFiles["agents.jsonl"] {
+		t.Error("agents.jsonl not found")
+	}
+	if !foundFiles["blueprints.jsonl"] {
+		t.Error("blueprints.jsonl not found")
+	}
+	if foundFiles["notjsonl.txt"] {
+		t.Error("notjsonl.txt should not be found")
+	}
+	if foundFiles[".hidden.jsonl"] {
+		t.Error(".hidden.jsonl should not be found (hidden file)")
+	}
+}
+
+// TestDiscoverJSONLFiles_EmptyDirectory tests discovery in empty directory
+func TestDiscoverJSONLFiles_EmptyDirectory(t *testing.T) {
+	tmpDir := t.TempDir()
+
+	files, err := DiscoverJSONLFiles(tmpDir)
+	if err != nil {
+		t.Fatalf("DiscoverJSONLFiles failed: %v", err)
+	}
+
+	if len(files) != 0 {
+		t.Errorf("Expected 0 files in empty directory, got %d", len(files))
+	}
+}
+
+// TestDiscoverJSONLFiles_InvalidDirectory tests error handling
+func TestDiscoverJSONLFiles_InvalidDirectory(t *testing.T) {
+	_, err := DiscoverJSONLFiles("/nonexistent/directory")
+	if err == nil {
+		t.Error("Expected error for nonexistent directory")
+	}
+}
+
+// TestDiscoverJSONLFiles_FileInsteadOfDirectory tests error when path is a file
+func TestDiscoverJSONLFiles_FileInsteadOfDirectory(t *testing.T) {
+	tmpDir := t.TempDir()
+	filePath := filepath.Join(tmpDir, "test.txt")
+
+	err := os.WriteFile(filePath, []byte("test"), 0644)
+	if err != nil {
+		t.Fatalf("Failed to create test file: %v", err)
+	}
+
+	_, err = DiscoverJSONLFiles(filePath)
+	if err == nil {
+		t.Error("Expected error when path is a file, not a directory")
+	}
 }

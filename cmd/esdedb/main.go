@@ -61,8 +61,8 @@ func main() {
 	rootCmd.PersistentFlags().StringVarP(&configPath, "config", "c", "./config.toml", "Pfad zur Konfigurationsdatei")
 	rootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "Verbose Logging (Debug Level)")
 
-	// Subcommands (werden später implementiert)
-	// rootCmd.AddCommand(newImportCmd())
+	// Subcommands
+	rootCmd.AddCommand(newImportCmd())
 	// rootCmd.AddCommand(newConfigCmd())
 	// rootCmd.AddCommand(newVersionCmd())
 

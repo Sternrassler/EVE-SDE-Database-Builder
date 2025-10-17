@@ -3,7 +3,10 @@ package worker
 import (
 	"context"
 	"fmt"
+	"os"
+	"path/filepath"
 	"reflect"
+	"strings"
 	"sync/atomic"
 	"time"
 
@@ -376,17 +379,51 @@ func (o *Orchestrator) ImportAll(ctx context.Context, sdeDir string) (*ProgressT
 
 // createParseTasks erstellt Parse-Tasks für alle JSONL-Dateien im SDE-Verzeichnis
 func (o *Orchestrator) createParseTasks(sdeDir string) ([]ParseTask, error) {
-	// Placeholder implementation - in real scenario, this would discover files
-	// For now, return empty slice as we don't have file discovery logic yet
+	files, err := DiscoverJSONLFiles(sdeDir)
+	if err != nil {
+		return nil, fmt.Errorf("failed to discover JSONL files: %w", err)
+	}
+
 	var tasks []ParseTask
 
-	// Iterate through registered parsers and create tasks
-	// In real implementation, this would scan sdeDir for matching .jsonl files
-	for fileName, p := range o.parsers {
-		tasks = append(tasks, ParseTask{
-			File:   fileName,
-			Parser: p,
-		})
+	// Match discovered files with registered parsers
+	for _, file := range files {
+		// Extract base filename without extension for parser matching
+		baseName := filepath.Base(file)
+		baseNameNoExt := strings.TrimSuffix(baseName, ".jsonl")
+
+		// Try exact match first (for full path keys - test compatibility)
+		if p, ok := o.parsers[file]; ok {
+			tasks = append(tasks, ParseTask{
+				File:   file,
+				Parser: p,
+			})
+			continue
+		}
+
+		// Try base name without extension (for standard naming)
+		if p, ok := o.parsers[baseNameNoExt]; ok {
+			tasks = append(tasks, ParseTask{
+				File:   file,
+				Parser: p,
+			})
+			continue
+		}
+
+		// Try with suffix stripped (e.g., invTypes_1 -> invTypes)
+		// This handles test data like invTypes_1.jsonl, invTypes_2.jsonl
+		if idx := strings.LastIndex(baseNameNoExt, "_"); idx > 0 {
+			prefix := baseNameNoExt[:idx]
+			if p, ok := o.parsers[prefix]; ok {
+				tasks = append(tasks, ParseTask{
+					File:   file,
+					Parser: p,
+				})
+				continue
+			}
+		}
+
+		// Silently skip files without matching parser
 	}
 
 	return tasks, nil
@@ -463,4 +500,57 @@ func (o *Orchestrator) convertToRows(records []interface{}, columnCount int) ([]
 	}
 
 	return rows, nil
+}
+
+// DiscoverJSONLFiles scans a directory for .jsonl files and returns their full paths.
+//
+// DiscoverJSONLFiles performs a non-recursive directory scan, returning only files
+// that match the *.jsonl pattern. Hidden files (starting with ".") are excluded.
+//
+// This function is used by the Orchestrator to discover SDE data files for import.
+//
+// Parameters:
+//   - dir: Directory path to scan for JSONL files
+//
+// Returns:
+//   - []string: List of full file paths to .jsonl files
+//   - error: Any error encountered during directory traversal
+//
+// Example:
+//
+//	files, err := worker.DiscoverJSONLFiles("/path/to/sde-JSONL")
+//	// files: ["/path/to/sde-JSONL/types.jsonl", "/path/to/sde-JSONL/agents.jsonl", ...]
+func DiscoverJSONLFiles(dir string) ([]string, error) {
+	// Verify directory exists
+	info, err := os.Stat(dir)
+	if err != nil {
+		return nil, fmt.Errorf("failed to access directory %s: %w", dir, err)
+	}
+	if !info.IsDir() {
+		return nil, fmt.Errorf("%s is not a directory", dir)
+	}
+
+	// Read directory entries
+	entries, err := os.ReadDir(dir)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read directory %s: %w", dir, err)
+	}
+
+	var files []string
+
+	// Filter for .jsonl files
+	for _, entry := range entries {
+		// Skip directories and hidden files
+		if entry.IsDir() || strings.HasPrefix(entry.Name(), ".") {
+			continue
+		}
+
+		// Check for .jsonl extension
+		if strings.HasSuffix(strings.ToLower(entry.Name()), ".jsonl") {
+			fullPath := filepath.Join(dir, entry.Name())
+			files = append(files, fullPath)
+		}
+	}
+
+	return files, nil
 }
