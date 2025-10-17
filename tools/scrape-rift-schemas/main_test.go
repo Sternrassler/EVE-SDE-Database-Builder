@@ -1,8 +1,5 @@
 // tools/scrape-rift-schemas_test.go
 // Tests for RIFT SDE schema scraper
-//go:build !add_tomap_methods
-// +build !add_tomap_methods
-
 package main
 
 import (

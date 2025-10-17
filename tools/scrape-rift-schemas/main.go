@@ -1,9 +1,6 @@
 // tools/scrape-rift-schemas.go
 // Scrapes JSON schema definitions from RIFT SDE API
 // ADR Reference: ADR-003 (Full Code-Gen Approach)
-//go:build !add_tomap_methods
-// +build !add_tomap_methods
-
 package main
 
 import (

@@ -1,8 +1,5 @@
 // tools/add-tomap-methods_test.go
 // Tests for ToMap method post-processing tool
-//go:build !scrape_rift_schemas
-// +build !scrape_rift_schemas
-
 package main
 
 import (
