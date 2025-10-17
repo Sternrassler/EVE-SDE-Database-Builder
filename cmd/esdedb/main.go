@@ -93,8 +93,8 @@ Verfügbare Befehle:
 	// Subcommands
 	rootCmd.AddCommand(newImportCmd())
 	rootCmd.AddCommand(newValidateCmd())
+	rootCmd.AddCommand(newVersionCmd())
 	// rootCmd.AddCommand(newConfigCmd())
-	// rootCmd.AddCommand(newVersionCmd())
 
 	if err := rootCmd.Execute(); err != nil {
 		logger.LogAppShutdown(fmt.Sprintf("error: %v", err))
