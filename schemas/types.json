@@ -1,15 +1,5 @@
 {
-  "typeID": 34,
-  "groupID": 18,
-  "typeName": {
-    "en": "Tritanium",
-    "de": "Tritanium"
-  },
-  "description": {
-    "en": "A common mineral",
-    "de": "Ein gewöhnliches Mineral"
-  },
-  "mass": 0.01,
-  "volume": 0.01,
-  "published": true
+  "_source": "https://sde.riftforeve.online/schema/types/",
+  "_status": "schema_page_verified",
+  "_table": "types"
 }
