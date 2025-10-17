@@ -4,7 +4,7 @@ This directory contains tools for generating Go parsers from EVE SDE JSON schema
 
 ## Tools
 
-### 1. RIFT Schema Scraper (`scrape-rift-schemas.go`)
+### 1. RIFT Schema Scraper (`scrape-rift-schemas/`)
 
 Tool zum Scrapen aller Schema-Definitionen von der RIFT SDE API.
 
@@ -12,7 +12,7 @@ Tool zum Scrapen aller Schema-Definitionen von der RIFT SDE API.
 **Epic:** #3 JSONL Parser Migration  
 **Source:** https://sde.riftforeve.online/
 
-### 2. ToMap Method Generator (`add-tomap-methods.go`)
+### 2. ToMap Method Generator (`add-tomap-methods/`)
 
 AST-basiertes Post-Processing Tool zur automatischen Generierung von `ToMap()` Methoden für generierte Structs.
 
@@ -20,12 +20,28 @@ AST-basiertes Post-Processing Tool zur automatischen Generierung von `ToMap()` M
 **Epic:** #3 JSONL Parser Migration  
 **Purpose:** Converts structs to `map[string]interface{}` for database operations
 
+## Directory Structure
+
+```
+tools/
+├── add-tomap-methods/       # ToMap method generator
+│   ├── main.go             # Main program
+│   └── main_test.go        # Tests
+├── scrape-rift-schemas/    # RIFT schema scraper
+│   ├── main.go             # Main program
+│   └── main_test.go        # Tests
+├── generate-parsers.sh     # Batch code generation script
+└── README.md               # This file
+```
+
+Each tool is in its own subdirectory to avoid package conflicts and enable independent testing.
+
 ## Usage
 
 ### Basic Usage
 
 ```bash
-go run tools/scrape-rift-schemas.go
+go run tools/scrape-rift-schemas/main.go
 ```
 
 This will verify access to 51 EVE SDE table schema pages and create placeholder JSON files in the `schemas/` directory.
@@ -33,7 +49,7 @@ This will verify access to 51 EVE SDE table schema pages and create placeholder 
 ### Options
 
 ```bash
-go run tools/scrape-rift-schemas.go [flags]
+go run tools/scrape-rift-schemas/main.go [flags]
 ```
 
 Available flags:
@@ -46,13 +62,13 @@ Available flags:
 
 ```bash
 # Download schemas to custom directory
-go run tools/scrape-rift-schemas.go -output /tmp/eve-schemas
+go run tools/scrape-rift-schemas/main.go -output /tmp/eve-schemas
 
 # Use verbose logging
-go run tools/scrape-rift-schemas.go -verbose
+go run tools/scrape-rift-schemas/main.go -verbose
 
 # Increase timeout for slow connections
-go run tools/scrape-rift-schemas.go -timeout 60s
+go run tools/scrape-rift-schemas/main.go -timeout 60s
 ```
 
 ## Features
@@ -98,7 +114,7 @@ The tool verifies that RIFT schema documentation pages are accessible and create
 
 ```bash
 # Add ToMap methods to generated files
-go run tools/add-tomap-methods.go internal/parser/generated/*.go
+go run tools/add-tomap-methods/main.go internal/parser/generated/*.go
 ```
 
 ### Options
@@ -112,13 +128,13 @@ Available flags:
 
 ```bash
 # Add ToMap methods to all generated files
-go run tools/add-tomap-methods.go internal/parser/generated/*.go
+go run tools/add-tomap-methods/main.go internal/parser/generated/*.go
 
 # Dry run (preview changes)
-go run tools/add-tomap-methods.go -dry-run -verbose internal/parser/generated/types.go
+go run tools/add-tomap-methods/main.go -dry-run -verbose internal/parser/generated/types.go
 
 # Force update (regenerate existing methods)
-go run tools/add-tomap-methods.go -force internal/parser/generated/*.go
+go run tools/add-tomap-methods/main.go -force internal/parser/generated/*.go
 ```
 
 ## Features: ToMap Method Generator
@@ -160,11 +176,18 @@ func (t *TypeRow) ToMap() map[string]interface{} {
 
 ## Testing
 
-Run tests:
+Run tests for both tools:
 
 ```bash
-go test -v ./tools/...
+# Recommended: Use Makefile target which tests both tools
+make test-tools
+
+# Or test each tool individually
+go test -v ./tools/add-tomap-methods/...
+go test -v ./tools/scrape-rift-schemas/...
 ```
+
+**Directory Isolation:** Each tool is in its own subdirectory, eliminating package conflicts and enabling independent testing without build tags.
 
 Tests include:
 

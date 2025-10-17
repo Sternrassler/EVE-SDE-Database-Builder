@@ -9,10 +9,10 @@ test: ## Run all tests (core packages)
 
 test-tools: ## Run tests for tools (separate main packages)
 	@echo "Testing add-tomap-methods..."
-	@go test -v ./tools/add-tomap-methods*.go
+	@go test -v ./tools/add-tomap-methods/...
 	@echo ""
 	@echo "Testing scrape-rift-schemas..."
-	@go test -v ./tools/scrape-rift-schemas*.go
+	@go test -v ./tools/scrape-rift-schemas/...
 
 coverage: ## Run tests with coverage report
 	go test -coverprofile=coverage.out ./...
