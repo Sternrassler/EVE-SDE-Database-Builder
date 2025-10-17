@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"os"
+	"path/filepath"
 	"sync"
 	"testing"
 	"time"
@@ -593,4 +595,106 @@ func Example_orchestratorProgressTracking() {
 	parsed, inserted, failed, total := progress.GetProgress()
 	fmt.Printf("Parsed: %d/%d, Inserted: %d, Failed: %d\n", parsed, total, inserted, failed)
 	// Output: Parsed: 5/5, Inserted: 3, Failed: 2
+}
+
+// TestDiscoverJSONLFiles tests file discovery functionality
+func TestDiscoverJSONLFiles(t *testing.T) {
+	// Create temporary test directory
+	tmpDir := t.TempDir()
+
+	// Create test files
+	testFiles := []string{
+		"types.jsonl",
+		"agents.jsonl",
+		"blueprints.jsonl",
+		"notjsonl.txt",
+		".hidden.jsonl",
+	}
+
+	for _, file := range testFiles {
+		path := filepath.Join(tmpDir, file)
+		err := os.WriteFile(path, []byte("{}"), 0644)
+		if err != nil {
+			t.Fatalf("Failed to create test file %s: %v", file, err)
+		}
+	}
+
+	// Create subdirectory (should be ignored)
+	subDir := filepath.Join(tmpDir, "subdir")
+	err := os.Mkdir(subDir, 0755)
+	if err != nil {
+		t.Fatalf("Failed to create subdirectory: %v", err)
+	}
+
+	// Test file discovery
+	files, err := DiscoverJSONLFiles(tmpDir)
+	if err != nil {
+		t.Fatalf("DiscoverJSONLFiles failed: %v", err)
+	}
+
+	// Verify results
+	expected := 3 // types.jsonl, agents.jsonl, blueprints.jsonl
+	if len(files) != expected {
+		t.Errorf("Expected %d files, got %d: %v", expected, len(files), files)
+	}
+
+	// Verify correct files are discovered
+	foundFiles := make(map[string]bool)
+	for _, f := range files {
+		foundFiles[filepath.Base(f)] = true
+	}
+
+	if !foundFiles["types.jsonl"] {
+		t.Error("types.jsonl not found")
+	}
+	if !foundFiles["agents.jsonl"] {
+		t.Error("agents.jsonl not found")
+	}
+	if !foundFiles["blueprints.jsonl"] {
+		t.Error("blueprints.jsonl not found")
+	}
+	if foundFiles["notjsonl.txt"] {
+		t.Error("notjsonl.txt should not be found")
+	}
+	if foundFiles[".hidden.jsonl"] {
+		t.Error(".hidden.jsonl should not be found (hidden file)")
+	}
+}
+
+// TestDiscoverJSONLFiles_EmptyDirectory tests discovery in empty directory
+func TestDiscoverJSONLFiles_EmptyDirectory(t *testing.T) {
+	tmpDir := t.TempDir()
+
+	files, err := DiscoverJSONLFiles(tmpDir)
+	if err != nil {
+		t.Fatalf("DiscoverJSONLFiles failed: %v", err)
+	}
+
+	if len(files) != 0 {
+		t.Errorf("Expected 0 files in empty directory, got %d", len(files))
+	}
+}
+
+// TestDiscoverJSONLFiles_InvalidDirectory tests error handling
+func TestDiscoverJSONLFiles_InvalidDirectory(t *testing.T) {
+	_, err := DiscoverJSONLFiles("/nonexistent/directory")
+	if err == nil {
+		t.Error("Expected error for nonexistent directory")
+	}
+}
+
+// TestDiscoverJSONLFiles_FileInsteadOfDirectory tests error when path is a file
+func TestDiscoverJSONLFiles_FileInsteadOfDirectory(t *testing.T) {
+	tmpDir := t.TempDir()
+	filePath := filepath.Join(tmpDir, "test.txt")
+
+	err := os.WriteFile(filePath, []byte("test"), 0644)
+	if err != nil {
+		t.Fatalf("Failed to create test file: %v", err)
+	}
+
+	_, err = DiscoverJSONLFiles(filePath)
+	if err == nil {
+		t.Error("Expected error when path is a file, not a directory")
+	}
 }
