@@ -20,7 +20,7 @@ import (
 //	    },
 //	}
 type Job struct {
-	ID string                                      // Eindeutige Job-Identifikation
+	ID string                                     // Eindeutige Job-Identifikation
 	Fn func(context.Context) (interface{}, error) // Auszuführende Funktion
 }
 
