@@ -103,7 +103,7 @@ Verfügbare Befehle:
 	rootCmd.AddCommand(newValidateCmd())
 	rootCmd.AddCommand(newVersionCmd())
 	rootCmd.AddCommand(newStatsCmd())
-	// rootCmd.AddCommand(newConfigCmd())
+	rootCmd.AddCommand(newConfigCmd())
 
 	if err := rootCmd.Execute(); err != nil {
 		if !isCompletionCmd {
