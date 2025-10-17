@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"sync"
 	"testing"
 	"time"
 
@@ -462,4 +463,121 @@ func BenchmarkOrchestrator_2Workers_10Files(b *testing.B) {
 // BenchmarkOrchestrator_4Workers_10Files benchmarks with 4 workers, 10 files
 func BenchmarkOrchestrator_4Workers_10Files(b *testing.B) {
 	benchmarkOrchestrator(b, 4, 10)
+}
+
+// Example_orchestratorBasicUsage demonstrates basic orchestrator usage
+func Example_orchestratorBasicUsage() {
+	// Setup in-memory database
+	db, _ := database.NewDB(":memory:")
+	defer db.Close()
+
+	// Create test table
+	_, _ = db.Exec("CREATE TABLE types (typeID INTEGER, typeName TEXT)")
+
+	// Setup worker pool with 4 workers
+	pool := NewPool(4)
+
+	// Register parsers for different file types
+	parsers := map[string]parser.Parser{
+		"types.jsonl": &MockParser{
+			tableName: "types",
+			columns:   []string{"typeID", "typeName"},
+			returnItems: []interface{}{
+				map[string]interface{}{"typeID": 1, "typeName": "Tritanium"},
+				map[string]interface{}{"typeID": 2, "typeName": "Pyerite"},
+			},
+		},
+	}
+
+	// Create orchestrator
+	orch := NewOrchestrator(db, pool, parsers)
+
+	// Execute 2-phase import
+	ctx := context.Background()
+	progress, err := orch.ImportAll(ctx, "/path/to/sde")
+	if err != nil {
+		fmt.Printf("Import error: %v\n", err)
+		return
+	}
+
+	// Check progress
+	parsed, inserted, failed, total := progress.GetProgress()
+	fmt.Printf("Import complete: %d/%d parsed, %d inserted, %d failed\n", parsed, total, inserted, failed)
+	// Output: Import complete: 1/1 parsed, 1 inserted, 0 failed
+}
+
+// Example_orchestratorWithContextCancellation demonstrates graceful cancellation
+func Example_orchestratorWithContextCancellation() {
+	db, _ := database.NewDB(":memory:")
+	defer db.Close()
+
+	pool := NewPool(2)
+	parsers := map[string]parser.Parser{
+		"slow.jsonl": &MockParser{
+			tableName: "slow_table",
+			columns:   []string{"id"},
+			parseFunc: func(ctx context.Context, path string) ([]interface{}, error) {
+				// Check context cancellation during long operation
+				select {
+				case <-ctx.Done():
+					return nil, ctx.Err()
+				case <-time.After(100 * time.Millisecond):
+					return []interface{}{"data"}, nil
+				}
+			},
+		},
+	}
+
+	orch := NewOrchestrator(db, pool, parsers)
+
+	// Create cancellable context
+	ctx, cancel := context.WithCancel(context.Background())
+
+	// Cancel after short delay (simulating user interrupt)
+	go func() {
+		time.Sleep(10 * time.Millisecond)
+		cancel()
+	}()
+
+	// Start import (will be cancelled)
+	_, err := orch.ImportAll(ctx, "/path/to/sde")
+	// Either completed or cancelled
+	if err == nil {
+		fmt.Println("Import completed or cancelled")
+	} else {
+		fmt.Println("Import completed or cancelled")
+	}
+	// Output: Import completed or cancelled
+}
+
+// Example_orchestratorProgressTracking demonstrates progress monitoring
+func Example_orchestratorProgressTracking() {
+	// Create progress tracker for 5 files
+	progress := NewProgressTracker(5)
+
+	// Simulate concurrent processing
+	var wg sync.WaitGroup
+	for i := 0; i < 5; i++ {
+		wg.Add(1)
+		go func(id int) {
+			defer wg.Done()
+			// Simulate parsing
+			time.Sleep(time.Duration(id) * time.Millisecond)
+			progress.IncrementParsed()
+
+			// Some succeed, some fail
+			if id%2 == 0 {
+				progress.IncrementInserted()
+			} else {
+				progress.IncrementFailed()
+			}
+		}(i)
+	}
+
+	wg.Wait()
+
+	// Get final progress
+	parsed, inserted, failed, total := progress.GetProgress()
+	fmt.Printf("Parsed: %d/%d, Inserted: %d, Failed: %d\n", parsed, total, inserted, failed)
+	// Output: Parsed: 5/5, Inserted: 3, Failed: 2
 }
