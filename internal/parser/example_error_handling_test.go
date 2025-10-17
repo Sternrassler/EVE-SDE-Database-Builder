@@ -1,6 +1,7 @@
 package parser_test
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -104,10 +105,9 @@ invalid line
 	defer os.Remove(testFile)
 
 	// Use ParseWithErrorHandlingContext for detailed results
-	// Note: passing nil context here only for example purposes
-	// In real code, use context.Background() or proper context
+	ctx := context.Background()
 	result := parser.ParseWithErrorHandlingContext[TestRow](
-		nil,
+		ctx,
 		testFile,
 		parser.ErrorModeSkip,
 		0,
