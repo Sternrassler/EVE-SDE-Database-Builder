@@ -1,6 +1,6 @@
 # EVE SDE Database Builder (Go Edition)
 
-**Status:** 🚧 In Development (Architecture Phase Complete)
+**Status:** 🚀 Core Implementation Complete (51/51 Parsers Ready)
 
 Modernes CLI-Tool für den Import von EVE Online Static Data Export (SDE) JSONL-Dateien in eine SQLite-Datenbank. Komplettes Refactoring der VB.NET Legacy-Version mit Fokus auf Performance, Wartbarkeit und Testbarkeit.
 
@@ -12,11 +12,12 @@ Modernes CLI-Tool für den Import von EVE Online Static Data Export (SDE) JSONL-
 
 - ✅ **SQLite-Only:** Einfach, portabel, keine externen Datenbankserver
 - ✅ **JSONL Support:** Native Unterstützung für CCP's JSONL-Format
-- ✅ **Parallel Processing:** Worker Pool für schnellen Import (~3.5min statt ~8min)
-- ✅ **Type-Safe:** Full Code Generation für alle 50+ SDE-Tabellen
+- ✅ **51 Parser Implementations:** Vollständige Abdeckung aller EVE SDE Tabellen
+- ✅ **Type-Safe:** Generic parser mit compile-time type checks
 - ✅ **Structured Logging:** zerolog (JSON/Text)
 - ✅ **Resilient:** Retry-Pattern für transiente Fehler
 - ✅ **Configuration:** TOML + Environment Variables + CLI Flags
+- 🚧 **Parallel Processing:** Worker Pool (in Entwicklung - Epic #5)
 
 ---
 
@@ -157,4 +158,10 @@ Siehe [LICENSE](LICENSE)
 
 ---
 
-**Status:** 🚧 v0.1.0-dev (Architecture Complete, Implementation in Progress)
+## Recent Milestones
+
+- ✅ **Epic #3 Complete** - Parser Core Infrastructure (Generic JSONL parser, validation, streaming)
+- ✅ **Epic #4 Complete** - Full Parser Migration (51/51 EVE SDE tables implemented)
+- 🚧 **Epic #5 Next** - Worker Pool & Parallel Processing
+
+**Status:** 🚀 v0.2.0 (Core Implementation Complete, Worker Pool in Development)
