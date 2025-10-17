@@ -68,48 +68,48 @@ func TestParserInstances(t *testing.T) {
 		{"InvTypesParser", parser.InvTypesParser, "invTypes", 10},
 		{"InvGroupsParser", parser.InvGroupsParser, "invGroups", 5},
 		{"InvCategoriesParser", parser.InvCategoriesParser, "invCategories", 3},
-		
+
 		// Industry & Blueprints
 		{"IndustryBlueprintsParser", parser.IndustryBlueprintsParser, "industryBlueprints", 2},
-		
+
 		// Dogma System (Core)
 		{"DogmaAttributesParser", parser.DogmaAttributesParser, "dogmaAttributes", 5},
 		{"DogmaEffectsParser", parser.DogmaEffectsParser, "dogmaEffects", 10},
-		
+
 		// Dogma System (Extended)
 		{"DogmaAttributeCategoriesParser", parser.DogmaAttributeCategoriesParser, "dogmaAttributeCategories", 2},
 		{"DogmaUnitsParser", parser.DogmaUnitsParser, "dogmaUnits", 2},
-		
+
 		// Universe/Map (Core)
 		{"MapRegionsParser", parser.MapRegionsParser, "mapRegions", 4},
 		{"MapSolarSystemsParser", parser.MapSolarSystemsParser, "mapSolarSystems", 5},
-		
+
 		// Universe/Map (Extended)
 		{"MapMoonsParser", parser.MapMoonsParser, "mapMoons", 4},
 		{"MapStarsParser", parser.MapStarsParser, "mapStars", 3},
-		
+
 		// Character/Faction (Core)
 		{"ChrRacesParser", parser.ChrRacesParser, "chrRaces", 3},
 		{"ChrFactionsParser", parser.ChrFactionsParser, "chrFactions", 5},
-		
+
 		// Character/NPC (Extended)
 		{"ChrAncestriesParser", parser.ChrAncestriesParser, "chrAncestries", 3},
 		{"ChrBloodlinesParser", parser.ChrBloodlinesParser, "chrBloodlines", 3},
-		
+
 		// Agents
 		{"AgentTypesParser", parser.AgentTypesParser, "agtAgentTypes", 2},
 		{"AgentsInSpaceParser", parser.AgentsInSpaceParser, "agtAgents", 5},
-		
+
 		// Certificates/Skills
 		{"CertificatesParser", parser.CertificatesParser, "certCerts", 3},
 		{"MasteriesParser", parser.MasteriesParser, "certMasteries", 2},
-		
+
 		// Skins
 		{"SkinsParser", parser.SkinsParser, "skins", 3},
-		
+
 		// Station
 		{"StationOperationsParser", parser.StationOperationsParser, "staOperations", 2},
-		
+
 		// Miscellaneous
 		{"IconsParser", parser.IconsParser, "eveIcons", 2},
 		{"SDEMetadataParser", parser.SDEMetadataParser, "_sde", 2},
