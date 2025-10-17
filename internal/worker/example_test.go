@@ -103,3 +103,34 @@ func Example_parallelParsing() {
 	fmt.Printf("Parsed %d files\n", len(results))
 	// Output: Parsed 3 files
 }
+
+// Example_signalHandling demonstrates graceful shutdown on SIGINT/SIGTERM
+func Example_signalHandling() {
+	// Setup context that cancels on SIGINT/SIGTERM
+	ctx := worker.SetupSignalHandler()
+
+	pool := worker.NewPool(2)
+	pool.Start(ctx)
+
+	// Submit jobs
+	for i := 1; i <= 3; i++ {
+		jobNum := i
+		pool.Submit(worker.Job{
+			ID: fmt.Sprintf("job-%d", jobNum),
+			Fn: func(ctx context.Context) (interface{}, error) {
+				// Jobs will be cancelled on Ctrl+C
+				select {
+				case <-ctx.Done():
+					return nil, ctx.Err()
+				default:
+					return jobNum * 10, nil
+				}
+			},
+		})
+	}
+
+	results, _ := pool.Wait()
+	fmt.Printf("Processed %d jobs (graceful shutdown on signals)\n", len(results))
+	// Output: Processed 3 jobs (graceful shutdown on signals)
+}
+
