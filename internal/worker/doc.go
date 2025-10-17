@@ -40,6 +40,15 @@
 //	// Signal Cancellation
 //	cancel() // Workers stoppen nach aktuellem Job
 //
+// # Signal Handling (SIGINT/SIGTERM)
+//
+//	// Setup automatic cancellation on Ctrl+C or SIGTERM
+//	ctx := worker.SetupSignalHandler()
+//	pool := worker.NewPool(4)
+//	pool.Start(ctx)
+//	// ... Submit jobs ...
+//	// Pool wird automatisch bei SIGINT/SIGTERM beendet
+//
 // # Error Collection
 //
 // Der Pool sammelt Fehler von allen Jobs und gibt sie gesammelt zurück:
