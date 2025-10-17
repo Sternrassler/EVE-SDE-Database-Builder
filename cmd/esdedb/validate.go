@@ -15,13 +15,24 @@ func newValidateCmd() *cobra.Command {
 		Short: "Validate configuration file",
 		Long: `Validate command prüft eine TOML-Konfigurationsdatei auf Gültigkeit.
 
-Exit Codes:
-  0 - Konfiguration ist gültig
-  1 - Konfiguration ist ungültig oder Fehler beim Laden
+Folgende Aspekte werden validiert:
+  - TOML-Syntax (Datei muss gültiges TOML sein)
+  - Erforderliche Felder (database.path, import.sde_path)
+  - Wertebereichsprüfungen (workers: 1-32, language: en/de/fr/ja/ru/zh/es/ko)
+  - Logik-Konsistenz (z.B. gültige Pfade, sinnvolle Werte)
 
-Beispiel:
+Bei erfolgreicher Validierung wird eine Zusammenfassung der Konfiguration angezeigt.`,
+		Example: `  # Konfigurationsdatei validieren (Standard: ./config.toml)
+  esdedb validate
+
+  # Spezifische Konfigurationsdatei validieren
   esdedb validate --config ./config.toml
-  esdedb validate -c /etc/esdedb/config.toml`,
+
+  # Produktions-Konfiguration validieren
+  esdedb validate -c /etc/esdedb/config.toml
+
+  # Mit Verbose Logging für detaillierte Ausgabe
+  esdedb --verbose validate --config ./config.toml`,
 		RunE: runValidateCmd,
 	}
 
