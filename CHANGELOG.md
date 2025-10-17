@@ -9,6 +9,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Epic #4 Complete: All 51 EVE SDE Parsers** (PR #135, PR #136)
+  - **Phase 1 (Task #37)**: 7 zusätzliche Core Parsers
+    - Inventory: InvCategoriesParser, InvMarketGroupsParser, InvMetaGroupsParser
+    - Universe: MapStargatesParser, MapPlanetsParser
+    - Character: ChrRacesParser, ChrFactionsParser
+    - Gesamt Core Parsers: 17 (von geplanten 10-15)
+  - **Phase 2 (Task #38)**: 34 Extended Parsers
+    - Character/NPC: ancestries, bloodlines, attributes, npcCharacters, npcCorporations, npcCorporationDivisions, npcStations
+    - Agents: agentTypes, agentsInSpace
+    - Dogma Extended: attributeCategories, units, typeDogma, dynamicItemAttributes
+    - Universe Extended: moons, stars, asteroidBelts, landmarks
+    - Certificates/Skills: certificates, masteries
+    - Skins: skins, skinLicenses, skinMaterials
+    - Translation: translationLanguages
+    - Station: operations, services, sovereigntyUpgrades
+    - Miscellaneous: icons, graphics, contrabandTypes, controlTowerResources, corporationActivities, dbuffCollections, planetResources, planetSchematics, typeBonuses, _sde metadata
+  - **Gesamt: 51 Parser** (100% aller EVE SDE Tabellen abgedeckt)
+  - **171+ Tests** alle erfolgreich
+  - **Code Organization**: Split in `parsers.go` (Core, 17 Parser) und `parsers_extended.go` (Extended, 36 Parser)
+  - **JSON Schemas**: Alle 51 Schemas in `schemas/` Verzeichnis verfügbar
+- **Developer Experience: Make Setup Target** (Commit cd0f404)
+  - Neues `make setup` Target für komplette Projekt-Initialisierung
+  - Automatische Installation von Go Dependencies
+  - Automatische Installation von quicktype (wenn npm verfügbar)
+  - Automatische Parser-Code-Generierung aus Schemas
+  - Fix: `tools/generate-parsers.sh` verwendet korrekten Tool-Pfad
+  - Dokumentation: README.md aktualisiert mit Setup-Anleitung nach `git clone`
+
 ### Changed
 
 ### Fixed
