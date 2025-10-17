@@ -160,11 +160,18 @@ func (t *TypeRow) ToMap() map[string]interface{} {
 
 ## Testing
 
-Run tests:
+Run tests for both tools:
 
 ```bash
-go test -v ./tools/...
+# Recommended: Use Makefile target which tests tools separately
+make test-tools
+
+# Or test each tool explicitly
+go test -v ./tools/add-tomap-methods*.go
+go test -v ./tools/scrape-rift-schemas*.go
 ```
+
+**Note:** Both tools are `package main` programs with their own `main()` functions. The Makefile `test-tools` target tests them separately to avoid symbol conflicts. Build tags (`//go:build`) ensure they can be built independently.
 
 Tests include:
 

@@ -1,6 +1,9 @@
 // tools/add-tomap-methods.go
 // Post-Processing Tool: Adds ToMap() methods to generated structs
 // ADR Reference: ADR-003 (Custom Post-Processing)
+//go:build !scrape_rift_schemas
+// +build !scrape_rift_schemas
+
 package main
 
 import (
@@ -12,7 +15,6 @@ import (
 	"go/parser"
 	"go/token"
 	"os"
-	"path/filepath"
 	"strings"
 )
 
