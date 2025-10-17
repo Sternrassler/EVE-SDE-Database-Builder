@@ -9,12 +9,12 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/Sternrassler/EVE-SDE-Database-Builder/internal/cli"
 	"github.com/Sternrassler/EVE-SDE-Database-Builder/internal/database"
 	"github.com/Sternrassler/EVE-SDE-Database-Builder/internal/logger"
 	"github.com/Sternrassler/EVE-SDE-Database-Builder/internal/parser"
 	"github.com/Sternrassler/EVE-SDE-Database-Builder/internal/worker"
 	_ "github.com/mattn/go-sqlite3"
-	"github.com/schollz/progressbar/v3"
 	"github.com/spf13/cobra"
 )
 
@@ -124,27 +124,17 @@ func runImportCmd(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("no JSONL files found in %s", sdeDir)
 	}
 
-	// Create progress bar
-	bar := progressbar.NewOptions(len(files),
-		progressbar.OptionEnableColorCodes(true),
-		progressbar.OptionShowCount(),
-		progressbar.OptionSetWidth(40),
-		progressbar.OptionSetDescription("[cyan]Importing files...[reset]"),
-		progressbar.OptionSetTheme(progressbar.Theme{
-			Saucer:        "[green]=[reset]",
-			SaucerHead:    "[green]>[reset]",
-			SaucerPadding: " ",
-			BarStart:      "[",
-			BarEnd:        "]",
-		}),
-		progressbar.OptionShowIts(),
-		progressbar.OptionSetItsString("files"),
-	)
+	// Create enhanced progress bar with live metrics
+	progressBar := cli.NewProgressBar(cli.ProgressBarConfig{
+		Total:       len(files),
+		Description: "Importing files",
+		Width:       40,
+		UpdateRate:  100 * time.Millisecond,
+		ShowSpinner: false, // Spinner für einzelne Dateien kann optional aktiviert werden
+	})
 
-	// Start Import in background and update progress bar
+	// Start Import in background
 	startTime := time.Now()
-
-	// Channel to track progress updates
 	done := make(chan struct{})
 	var progress *worker.ProgressTracker
 	var importErr error
@@ -155,41 +145,22 @@ func runImportCmd(cmd *cobra.Command, args []string) error {
 		close(done)
 	}()
 
-	// Update progress bar periodically
-	ticker := time.NewTicker(100 * time.Millisecond)
-	defer ticker.Stop()
+	// Create context for progress bar
+	progressCtx, progressCancel := context.WithCancel(ctx)
+	defer progressCancel()
 
-	lastParsed := int64(0)
-	for {
-		select {
-		case <-done:
-			// Import finished, update bar to completion
-			if progress != nil {
-				progressInfo := progress.GetProgressDetailed()
-				remaining := progressInfo.ParsedFiles - lastParsed
-				for i := int64(0); i < remaining; i++ {
-					_ = bar.Add(1)
-				}
-			}
-			goto ImportDone
-		case <-ticker.C:
-			// Update progress bar based on parsed files
-			if progress != nil {
-				progressInfo := progress.GetProgressDetailed()
-				diff := progressInfo.ParsedFiles - lastParsed
-				if diff > 0 {
-					for i := int64(0); i < diff; i++ {
-						_ = bar.Add(1)
-					}
-					lastParsed = progressInfo.ParsedFiles
-				}
-			}
-		}
-	}
+	// Start progress bar updates in goroutine
+	go func() {
+		<-done
+		progressCancel() // Signal progress bar to stop
+	}()
 
-ImportDone:
+	// Start progress bar (blocks until context is cancelled)
+	progressBar.Start(progressCtx, progress)
+
+	// Import finished
+	progressBar.Finish()
 	duration := time.Since(startTime)
-	fmt.Println() // New line after progress bar
 
 	if importErr != nil {
 		if importErr == context.Canceled {
