@@ -7,20 +7,55 @@ import (
 	apperrors "github.com/Sternrassler/EVE-SDE-Database-Builder/internal/errors"
 )
 
-// ErrorCollector collects errors from multiple workers in a thread-safe manner
+// ErrorCollector collects errors from multiple workers in a thread-safe manner.
+//
+// ErrorCollector ermöglicht das sichere Sammeln von Fehlern aus parallelen
+// Worker-Goroutines. Alle Operationen sind Thread-Safe und können ohne
+// externe Synchronisierung aus mehreren Goroutines aufgerufen werden.
+//
+// ErrorCollector unterstützt erweiterte Fehleranalyse über Summary(),
+// das Fehler nach Typ, Datei und Tabelle gruppiert.
+//
+// Beispiel:
+//
+//	ec := worker.NewErrorCollector()
+//	var wg sync.WaitGroup
+//	for i := 0; i < 10; i++ {
+//	    wg.Add(1)
+//	    go func() {
+//	        defer wg.Done()
+//	        if err := processItem(); err != nil {
+//	            ec.Collect(err)
+//	        }
+//	    }()
+//	}
+//	wg.Wait()
+//	errors := ec.GetErrors()
 type ErrorCollector struct {
 	errors []error
 	mu     sync.Mutex
 }
 
-// NewErrorCollector creates a new ErrorCollector
+// NewErrorCollector creates a new ErrorCollector.
+//
+// Der zurückgegebene ErrorCollector ist sofort einsatzbereit und
+// Thread-Safe für parallele Collect-Aufrufe.
 func NewErrorCollector() *ErrorCollector {
 	return &ErrorCollector{
 		errors: make([]error, 0),
 	}
 }
 
-// Collect adds an error to the collection in a thread-safe manner
+// Collect adds an error to the collection in a thread-safe manner.
+//
+// nil-Fehler werden automatisch ignoriert. Collect kann sicher aus
+// mehreren Goroutines gleichzeitig aufgerufen werden.
+//
+// Beispiel:
+//
+//	if err := processFile(file); err != nil {
+//	    ec.Collect(err)
+//	}
 func (ec *ErrorCollector) Collect(err error) {
 	if err == nil {
 		return
@@ -30,7 +65,13 @@ func (ec *ErrorCollector) Collect(err error) {
 	ec.errors = append(ec.errors, err)
 }
 
-// GetErrors returns all collected errors
+// GetErrors returns all collected errors.
+//
+// GetErrors gibt eine Kopie des internen Error-Slices zurück, um
+// externe Modifikationen zu verhindern. Die Methode ist Thread-Safe.
+//
+// Rückgabewert:
+//   - []error: Kopie aller gesammelten Fehler (leeres Slice wenn keine Fehler)
 func (ec *ErrorCollector) GetErrors() []error {
 	ec.mu.Lock()
 	defer ec.mu.Unlock()
@@ -40,20 +81,42 @@ func (ec *ErrorCollector) GetErrors() []error {
 	return result
 }
 
-// ErrorSummary provides a summary of collected errors grouped by type and context
+// ErrorSummary provides a summary of collected errors grouped by type and context.
+//
+// ErrorSummary aggregiert Fehler nach verschiedenen Kriterien und ermöglicht
+// detaillierte Fehleranalyse. Die Gruppierung basiert auf AppError-Metadaten
+// (Type, Context).
+//
+// Felder:
+//   - TotalErrors: Gesamtzahl aller gesammelten Fehler
+//   - ByType: Fehler gruppiert nach ErrorType (Fatal, Retryable, etc.)
+//   - ByFile: Fehler gruppiert nach betroffener Datei (aus Context["file"])
+//   - ByTable: Fehler gruppiert nach betroffener Tabelle (aus Context["table"])
+//   - Fatal, Retryable, Validation, Skippable: Fehler nach Kategorie
+//   - Other: Nicht-AppError Fehler
 type ErrorSummary struct {
-	TotalErrors int
-	ByType      map[string]int
-	ByFile      map[string]int
-	ByTable     map[string]int
-	Fatal       []error
-	Retryable   []error
-	Validation  []error
-	Skippable   []error
-	Other       []error
+	TotalErrors int            // Gesamtzahl aller Fehler
+	ByType      map[string]int // Fehler nach ErrorType
+	ByFile      map[string]int // Fehler nach Datei
+	ByTable     map[string]int // Fehler nach Tabelle
+	Fatal       []error        // Fatal-Fehler (kritisch)
+	Retryable   []error        // Retryable-Fehler (temporär)
+	Validation  []error        // Validation-Fehler (Datenproblem)
+	Skippable   []error        // Skippable-Fehler (überspringbar)
+	Other       []error        // Sonstige Fehler (nicht-AppError)
 }
 
-// Summary generates an ErrorSummary from collected errors
+// Summary generates an ErrorSummary from collected errors.
+//
+// Summary analysiert alle gesammelten Fehler und erstellt eine
+// strukturierte Zusammenfassung mit Gruppierungen und Kategorisierungen.
+// Die Methode ist Thread-Safe.
+//
+// Beispiel:
+//
+//	summary := ec.Summary()
+//	log.Printf("Total: %d, Fatal: %d, Retryable: %d",
+//	    summary.TotalErrors, len(summary.Fatal), len(summary.Retryable))
 func (ec *ErrorCollector) Summary() ErrorSummary {
 	ec.mu.Lock()
 	defer ec.mu.Unlock()
@@ -107,7 +170,24 @@ func (ec *ErrorCollector) Summary() ErrorSummary {
 	return summary
 }
 
-// String returns a human-readable summary report
+// String returns a human-readable summary report.
+//
+// String formatiert den ErrorSummary als mehrzeiligen Text-Report
+// mit Gruppierungen nach Typ, Datei und Tabelle. Ideal für Logging
+// und Fehlerberichte.
+//
+// Beispiel Output:
+//
+//	Error Summary: 5 total errors
+//
+//	By Type:
+//	  Fatal: 1
+//	  Retryable: 2
+//	  Skippable: 2
+//
+//	By File:
+//	  types.jsonl: 3 errors
+//	  agents.jsonl: 2 errors
 func (es ErrorSummary) String() string {
 	if es.TotalErrors == 0 {
 		return "No errors collected"

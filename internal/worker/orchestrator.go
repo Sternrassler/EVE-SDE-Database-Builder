@@ -12,7 +12,18 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
-// Progress repräsentiert den aktuellen Import-Fortschritt mit detaillierten Metriken
+// Progress repräsentiert den aktuellen Import-Fortschritt mit detaillierten Metriken.
+//
+// Progress wird von ProgressTracker.GetProgressDetailed() zurückgegeben und
+// bietet umfassende Informationen über den aktuellen Stand eines Worker-Pool-basierten
+// Imports, inklusive ETA-Berechnung und Durchsatz-Metriken.
+//
+// Beispiel:
+//
+//	progress := tracker.GetProgressDetailed()
+//	log.Printf("Fortschritt: %.1f%% (%d/%d Dateien, %.0f Zeilen/s, ETA: %v)",
+//	    progress.PercentFiles, progress.ParsedFiles, progress.TotalFiles,
+//	    progress.RowsPerSecond, progress.ETA)
 type Progress struct {
 	ParsedFiles   int64         // Anzahl vollständig geparster Dateien
 	InsertedFiles int64         // Anzahl erfolgreich eingefügter Dateien
@@ -27,7 +38,24 @@ type Progress struct {
 	RowsPerSecond float64       // Durchsatz (Zeilen/Sekunde)
 }
 
-// ProgressTracker verfolgt den Fortschritt des Imports mit atomaren Zählern
+// ProgressTracker verfolgt den Fortschritt des Imports mit atomaren Zählern.
+//
+// ProgressTracker ist Thread-Safe und kann aus mehreren Goroutines gleichzeitig
+// aktualisiert werden. Verwendet atomic.Int64 für Lock-freie Updates.
+//
+// ProgressTracker unterstützt sowohl File- als auch Row-basiertes Tracking,
+// was detaillierte Fortschrittsanzeigen mit ETA-Berechnung ermöglicht.
+//
+// Beispiel:
+//
+//	tracker := worker.NewProgressTracker(100) // 100 Dateien
+//	tracker.SetTotalRows(1000000)             // 1M Zeilen erwartet
+//
+//	// In Worker-Goroutines
+//	tracker.Update(1, 10000) // 1 Datei geparst, 10k Zeilen eingefügt
+//
+//	// Fortschritt abrufen
+//	progress := tracker.GetProgressDetailed()
 type ProgressTracker struct {
 	parsedFiles  atomic.Int64
 	insertedRows atomic.Int64
@@ -37,7 +65,12 @@ type ProgressTracker struct {
 	startTime    time.Time
 }
 
-// NewProgressTracker erstellt einen neuen ProgressTracker
+// NewProgressTracker erstellt einen neuen ProgressTracker.
+//
+// Parameter:
+//   - total: Gesamtzahl der zu verarbeitenden Dateien
+//
+// Der Tracker ist sofort einsatzbereit. StartTime wird auf time.Now() gesetzt.
 func NewProgressTracker(total int) *ProgressTracker {
 	return &ProgressTracker{
 		totalFiles: int64(total),
@@ -45,12 +78,18 @@ func NewProgressTracker(total int) *ProgressTracker {
 	}
 }
 
-// SetTotalRows setzt die Gesamtzahl der zu verarbeitenden Zeilen
+// SetTotalRows setzt die Gesamtzahl der zu verarbeitenden Zeilen.
+//
+// Diese Methode sollte aufgerufen werden, wenn die erwartete Gesamtzeilenzahl
+// bekannt ist (z.B. nach Parsing-Phase). Ermöglicht präzisere ETA-Berechnung.
 func (p *ProgressTracker) SetTotalRows(total int64) {
 	p.totalRows.Store(total)
 }
 
-// IncrementParsed erhöht den Parse-Counter
+// IncrementParsed erhöht den Parse-Counter.
+//
+// Sollte aufgerufen werden, wenn eine Datei erfolgreich geparst wurde.
+// Thread-Safe.
 func (p *ProgressTracker) IncrementParsed() {
 	p.parsedFiles.Add(1)
 }
@@ -61,14 +100,26 @@ func (p *ProgressTracker) IncrementInserted() {
 	// Wird nur für Tests benötigt
 }
 
-// IncrementFailed erhöht den Failed-Counter
+// IncrementFailed erhöht den Failed-Counter.
+//
+// Sollte aufgerufen werden, wenn die Verarbeitung einer Datei fehlschlägt.
+// Thread-Safe.
 func (p *ProgressTracker) IncrementFailed() {
 	p.failed.Add(1)
 }
 
-// Update aktualisiert den Fortschritt mit Anzahl geparster Dateien und eingefügter Zeilen
-// parsed: Anzahl neu geparster Dateien (typischerweise 1)
-// inserted: Anzahl neu eingefügter Zeilen
+// Update aktualisiert den Fortschritt mit Anzahl geparster Dateien und eingefügter Zeilen.
+//
+// Dies ist eine Convenience-Methode für atomare Updates von parsed und inserted.
+// Thread-Safe.
+//
+// Parameter:
+//   - parsed: Anzahl neu geparster Dateien (typischerweise 1)
+//   - inserted: Anzahl neu eingefügter Zeilen
+//
+// Beispiel:
+//
+//	tracker.Update(1, 5000) // 1 Datei geparst, 5000 Zeilen eingefügt
 func (p *ProgressTracker) Update(parsed int, inserted int) {
 	if parsed > 0 {
 		p.parsedFiles.Add(int64(parsed))
@@ -78,12 +129,23 @@ func (p *ProgressTracker) Update(parsed int, inserted int) {
 	}
 }
 
-// AddInsertedRows fügt die Anzahl eingefügter Zeilen hinzu
+// AddInsertedRows fügt die Anzahl eingefügter Zeilen hinzu.
+//
+// Thread-Safe. Verwendet für Bulk-Insert-Tracking.
 func (p *ProgressTracker) AddInsertedRows(count int64) {
 	p.insertedRows.Add(count)
 }
 
-// GetProgress gibt die aktuellen Zähler zurück (für Rückwärtskompatibilität)
+// GetProgress gibt die aktuellen Zähler zurück (für Rückwärtskompatibilität).
+//
+// Deprecated: Verwenden Sie stattdessen GetProgressDetailed() für detaillierte
+// Fortschrittsinformationen inkl. ETA und Durchsatz.
+//
+// Rückgabewerte:
+//   - parsed: Anzahl geparster Dateien
+//   - inserted: Anzahl erfolgreich eingefügter Dateien (parsed - failed)
+//   - failed: Anzahl fehlgeschlagener Dateien
+//   - total: Gesamtzahl der Dateien
 func (p *ProgressTracker) GetProgress() (parsed, inserted, failed, total int) {
 	parsedFiles := p.parsedFiles.Load()
 	failedFiles := p.failed.Load()
@@ -94,7 +156,15 @@ func (p *ProgressTracker) GetProgress() (parsed, inserted, failed, total int) {
 	return int(parsedFiles), int(insertedFiles), int(failedFiles), int(p.totalFiles)
 }
 
-// GetProgressDetailed gibt detaillierte Fortschrittsinformationen zurück
+// GetProgressDetailed gibt detaillierte Fortschrittsinformationen zurück.
+//
+// GetProgressDetailed berechnet erweiterte Metriken wie Prozent-Fortschritt,
+// ETA (Estimated Time to Arrival) und Durchsatz (Zeilen/Sekunde).
+//
+// Die ETA wird bevorzugt aus Zeilen-Metriken berechnet (präziser), mit
+// Fallback auf Datei-Metriken.
+//
+// Thread-Safe.
 func (p *ProgressTracker) GetProgressDetailed() Progress {
 	parsedFiles := p.parsedFiles.Load()
 	insertedRows := p.insertedRows.Load()
@@ -154,14 +224,38 @@ func (p *ProgressTracker) GetProgressDetailed() Progress {
 	}
 }
 
-// Orchestrator koordiniert Parser → Worker Pool → Database
+// Orchestrator koordiniert Parser → Worker Pool → Database.
+//
+// Orchestrator implementiert das 2-Phasen-Import-Pattern für EVE SDE:
+//   - Phase 1: Paralleles JSONL-Parsing mit Worker Pool
+//   - Phase 2: Sequenzielles Database-Insert (SQLite 1-Writer-Constraint)
+//
+// Der Orchestrator verwaltet die Koordination zwischen Parsern, Worker Pool
+// und Datenbank-Connection, inkl. Fortschritts-Tracking und Error-Handling.
+//
+// Beispiel:
+//
+//	parsers := map[string]parser.Parser{
+//	    "types": parser.NewTypesParser(),
+//	    "agents": parser.NewAgentsParser(),
+//	}
+//	orch := worker.NewOrchestrator(db, pool, parsers)
+//	tracker, err := orch.ImportAll(ctx, sdeDir)
 type Orchestrator struct {
 	db      *sqlx.DB
 	pool    *Pool
 	parsers map[string]parser.Parser
 }
 
-// NewOrchestrator erstellt einen neuen Orchestrator
+// NewOrchestrator erstellt einen neuen Orchestrator.
+//
+// Parameter:
+//   - db: SQLite-Datenbankverbindung (für Phase 2: Insert)
+//   - pool: Worker Pool (für Phase 1: Parsing)
+//   - parsers: Map von Parser-Name zu Parser-Implementierung
+//
+// Der Pool sollte bereits mit Start(ctx) gestartet sein, bevor ImportAll()
+// aufgerufen wird.
 func NewOrchestrator(db *sqlx.DB, pool *Pool, parsers map[string]parser.Parser) *Orchestrator {
 	return &Orchestrator{
 		db:      db,
@@ -170,19 +264,25 @@ func NewOrchestrator(db *sqlx.DB, pool *Pool, parsers map[string]parser.Parser) 
 	}
 }
 
-// ParseTask repräsentiert eine Parse-Aufgabe mit Dateinamen
+// ParseTask repräsentiert eine Parse-Aufgabe mit Dateinamen.
+//
+// ParseTask wird intern vom Orchestrator verwendet, um JSONL-Dateien
+// mit dem passenden Parser zu verknüpfen.
 type ParseTask struct {
-	File   string
-	Parser parser.Parser
+	File   string        // Pfad zur JSONL-Datei
+	Parser parser.Parser // Zugeordneter Parser
 }
 
-// ParseResult repräsentiert das Ergebnis eines Parse-Vorgangs
+// ParseResultData repräsentiert das Ergebnis eines Parse-Vorgangs.
+//
+// ParseResultData wird vom Orchestrator verwendet, um Parse-Ergebnisse
+// zwischen Phase 1 (Parsing) und Phase 2 (Insert) zu übergeben.
 type ParseResultData struct {
-	File    string
-	Table   string
-	Columns []string
-	Records []interface{}
-	Err     error
+	File    string        // Quelldatei (für Error-Reporting)
+	Table   string        // Ziel-Tabelle für Insert
+	Columns []string      // Spalten-Namen für Insert
+	Records []interface{} // Geparste Records
+	Err     error         // Parse-Fehler (falls aufgetreten)
 }
 
 // ImportAll führt 2-Phase Import aus: Parse parallel → Insert sequentiell
