@@ -9,6 +9,53 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Epic #5 Complete: CLI Interface Implementation** (PR #148-159)
+  - **Phase 1: Core Commands** (Tasks #42, #43)
+    - `esdedb import`: Vollständiger Import-Befehl mit Worker-Pool-Integration
+      - File Discovery: Automatische JSONL-Datei-Erkennung im SDE-Verzeichnis
+      - Progress Bar: Live-Metriken (Fortschritt, Geschwindigkeit, ETA, Worker-Status)
+      - Error Handling: `--skip-errors` Flag für fehlertoleranten Import
+      - Worker-Pool: Konfigurierbare Parallelität via `--workers` Flag
+    - `esdedb validate`: Config-Validierung mit detailliertem Feedback
+      - TOML-Syntax-Prüfung
+      - Semantische Validierung (Pfade, Worker-Counts, Log-Levels)
+      - Env-Var-Override-Unterstützung
+  - **Phase 2: User Experience** (Tasks #44, #45, #46)
+    - Progress Bar: Live-Updates mit Spinner, Prozent, Geschwindigkeit, ETA
+    - Colored Output: Success/Error/Warning-Highlighting mit `--no-color` Flag
+    - Help Text: Erweiterte Beispiele und Beschreibungen für alle Commands
+  - **Phase 3: Extended Commands** (Tasks #47, #48)
+    - `esdedb version`: Detaillierte Version-Info (Version, Go-Version, Commit, Build-Zeit)
+      - `--json` Flag für maschinenlesbares Format
+    - `esdedb stats`: Datenbank-Statistiken (Tabellen, Zeilen, Größe)
+      - Detaillierte Auflistung aller Tabellen mit Zeilenzahlen
+      - Gesamtstatistik: Anzahl Tabellen, Gesamtzeilen, DB-Dateigröße
+  - **Phase 4: Shell Completion** (Task #49)
+    - `esdedb completion bash/zsh/fish`: Shell-Completion-Generierung
+    - Automatische Flag/Subcommand-Vervollständigung
+    - Installation-Dokumentation für alle unterstützten Shells
+  - **Phase 5: Configuration Management** (Task #50)
+    - `esdedb config init`: Interaktive Config-Erstellung
+    - `esdedb config convert`: Konvertierung vorhandener Configs
+  - **Integration Tests** (Task #51)
+    - 15+ Integration-Tests für alle Commands
+    - Exit-Code-Validierung
+    - Error-Handling-Tests
+  - **Dokumentation** (Task #52)
+    - Vollständige CLI-Dokumentation in `docs/cli/README.md`
+    - Command-Referenz mit Beispielen
+    - Installation- und Usage-Guides
+- **CI/CD: Automated Quality Gates** (PR #149, commit 18993fe, 501df55)
+  - GitHub Actions Lint Workflow
+    - Automatische golangci-lint Ausführung bei jedem Push/PR
+    - Security-gehärtet mit expliziten Permissions (CWE-275 fix)
+    - Auto-Approval für established GitHub accounts (Copilot, Dependabot)
+  - Dokumentation: `docs/ci-cd/bot-workflow-approval.md`
+- **Code Quality: Comprehensive Lint Fixes** (commit a8fceb4)
+  - 60+ errcheck Warnings behoben über 27 Files
+  - Patterns: Explizite Error-Ignorierung (`_ =`), defer-Wrapper
+  - Bereiche: cmd, internal/cli, config, database, parser, worker, tools
+  - Alle Tests passing, Kompilierung clean
 - **Epic #4 Complete: All 51 EVE SDE Parsers** (PR #135, PR #136)
   - **Phase 1 (Task #37)**: 7 zusätzliche Core Parsers
     - Inventory: InvCategoriesParser, InvMarketGroupsParser, InvMetaGroupsParser
