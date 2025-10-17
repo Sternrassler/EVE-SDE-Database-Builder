@@ -48,7 +48,7 @@ func (p *JSONLParser[T]) ParseFile(ctx context.Context, path string) ([]interfac
 	if err != nil {
 		return nil, fmt.Errorf("failed to open file %s: %w", path, err)
 	}
-	defer file.Close()
+	defer func() { _ = file.Close() }()
 
 	return p.parseReader(ctx, file)
 }

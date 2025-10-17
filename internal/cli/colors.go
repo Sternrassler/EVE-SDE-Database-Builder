@@ -69,19 +69,19 @@ func colorize(color, text string) string {
 // Success gibt eine grüne Success-Nachricht aus
 func Success(format string, args ...interface{}) {
 	msg := fmt.Sprintf(format, args...)
-	fmt.Fprintln(colorOutput, colorize(colorGreen, "✅ "+msg))
+	_, _ = fmt.Fprintln(colorOutput, colorize(colorGreen, "✅ "+msg))
 }
 
 // Error gibt eine rote Error-Nachricht aus
 func Error(format string, args ...interface{}) {
 	msg := fmt.Sprintf(format, args...)
-	fmt.Fprintln(colorError, colorize(colorRed, "❌ "+msg))
+	_, _ = fmt.Fprintln(colorError, colorize(colorRed, "❌ "+msg))
 }
 
 // Warning gibt eine gelbe Warning-Nachricht aus
 func Warning(format string, args ...interface{}) {
 	msg := fmt.Sprintf(format, args...)
-	fmt.Fprintln(colorOutput, colorize(colorYellow, "⚠️  "+msg))
+	_, _ = fmt.Fprintln(colorOutput, colorize(colorYellow, "⚠️  "+msg))
 }
 
 // ColoredText gibt eingefärbten Text zurück (ohne Ausgabe)

@@ -76,7 +76,7 @@ func TestMigration_001_InvTypes_Schema(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to get table info: %v", err)
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 
 	columnMap := make(map[string]bool)
 	for rows.Next() {
@@ -141,7 +141,7 @@ func TestMigration_001_InvTypes_Indexes(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to query indexes: %v", err)
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 
 	for rows.Next() {
 		var indexName string
@@ -261,7 +261,7 @@ func TestMigration_001_InvTypes_IndexPerformance(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to query by groupID: %v", err)
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 
 	count := 0
 	for rows.Next() {
@@ -276,7 +276,7 @@ func TestMigration_001_InvTypes_IndexPerformance(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to query by marketGroupID: %v", err)
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 
 	count = 0
 	for rows.Next() {
@@ -390,7 +390,7 @@ func TestMigration_002_InvGroups_Schema(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to get table info: %v", err)
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 
 	columnMap := make(map[string]bool)
 	for rows.Next() {
@@ -454,7 +454,7 @@ func TestMigration_002_InvGroups_Indexes(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to query indexes: %v", err)
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 
 	for rows.Next() {
 		var indexName string
@@ -574,7 +574,7 @@ func TestMigration_002_InvGroups_IndexPerformance(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to query by categoryID: %v", err)
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 
 	count := 0
 	for rows.Next() {
@@ -694,7 +694,7 @@ func TestMigration_003_Blueprints_Schema(t *testing.T) {
 		if err != nil {
 			t.Fatalf("Failed to get table info: %v", err)
 		}
-		defer rows.Close()
+		defer func() { _ = rows.Close() }()
 
 		columnMap := make(map[string]bool)
 		for rows.Next() {
@@ -729,7 +729,7 @@ func TestMigration_003_Blueprints_Schema(t *testing.T) {
 		if err != nil {
 			t.Fatalf("Failed to get table info: %v", err)
 		}
-		defer rows.Close()
+		defer func() { _ = rows.Close() }()
 
 		columnMap := make(map[string]bool)
 		pkCount := 0
@@ -770,7 +770,7 @@ func TestMigration_003_Blueprints_Schema(t *testing.T) {
 		if err != nil {
 			t.Fatalf("Failed to get table info: %v", err)
 		}
-		defer rows.Close()
+		defer func() { _ = rows.Close() }()
 
 		columnMap := make(map[string]bool)
 		pkCount := 0
@@ -811,7 +811,7 @@ func TestMigration_003_Blueprints_Schema(t *testing.T) {
 		if err != nil {
 			t.Fatalf("Failed to get table info: %v", err)
 		}
-		defer rows.Close()
+		defer func() { _ = rows.Close() }()
 
 		columnMap := make(map[string]bool)
 		pkCount := 0
@@ -878,7 +878,7 @@ func TestMigration_003_Blueprints_Indexes(t *testing.T) {
 		if err != nil {
 			t.Fatalf("Failed to query indexes: %v", err)
 		}
-		defer rows.Close()
+		defer func() { _ = rows.Close() }()
 
 		for rows.Next() {
 			var indexName string
@@ -908,7 +908,7 @@ func TestMigration_003_Blueprints_Indexes(t *testing.T) {
 		if err != nil {
 			t.Fatalf("Failed to query indexes: %v", err)
 		}
-		defer rows.Close()
+		defer func() { _ = rows.Close() }()
 
 		for rows.Next() {
 			var indexName string
@@ -938,7 +938,7 @@ func TestMigration_003_Blueprints_Indexes(t *testing.T) {
 		if err != nil {
 			t.Fatalf("Failed to query indexes: %v", err)
 		}
-		defer rows.Close()
+		defer func() { _ = rows.Close() }()
 
 		for rows.Next() {
 			var indexName string
@@ -1124,7 +1124,7 @@ func TestMigration_003_Blueprints_IndexPerformance(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to query by blueprintTypeID: %v", err)
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 
 	count := 0
 	for rows.Next() {
@@ -1139,7 +1139,7 @@ func TestMigration_003_Blueprints_IndexPerformance(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to query by materialTypeID: %v", err)
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 
 	count = 0
 	for rows.Next() {
@@ -1154,7 +1154,7 @@ func TestMigration_003_Blueprints_IndexPerformance(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to query by productTypeID: %v", err)
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 
 	count = 0
 	for rows.Next() {
@@ -1408,7 +1408,7 @@ func TestMigration_004_Dogma_Schema(t *testing.T) {
 		if err != nil {
 			t.Fatalf("Failed to get table info: %v", err)
 		}
-		defer rows.Close()
+		defer func() { _ = rows.Close() }()
 
 		columnMap := make(map[string]bool)
 		for rows.Next() {
@@ -1451,7 +1451,7 @@ func TestMigration_004_Dogma_Schema(t *testing.T) {
 		if err != nil {
 			t.Fatalf("Failed to get table info: %v", err)
 		}
-		defer rows.Close()
+		defer func() { _ = rows.Close() }()
 
 		columnMap := make(map[string]bool)
 		for rows.Next() {
@@ -1486,7 +1486,7 @@ func TestMigration_004_Dogma_Schema(t *testing.T) {
 		if err != nil {
 			t.Fatalf("Failed to get table info: %v", err)
 		}
-		defer rows.Close()
+		defer func() { _ = rows.Close() }()
 
 		columnMap := make(map[string]bool)
 		pkCount := 0
@@ -1522,16 +1522,16 @@ func TestMigration_004_Dogma_Schema(t *testing.T) {
 
 	// Verify dogmaTypeEffects schema
 	t.Run("dogmaTypeEffects", func(t *testing.T) {
-		expectedColumns := []string{"typeID", "effectID", "isDefault"}
-		rows, err := db.Query("PRAGMA table_info(dogmaTypeEffects)")
-		if err != nil {
-			t.Fatalf("Failed to get table info: %v", err)
-		}
-		defer rows.Close()
+	expectedColumns := []string{"typeID", "effectID", "isDefault"}
+	rows, err := db.Query("PRAGMA table_info(dogmaTypeEffects)")
+	if err != nil {
+		t.Fatalf("Failed to get table info: %v", err)
+	}
+	defer func() { _ = rows.Close() }()
 
-		columnMap := make(map[string]bool)
-		pkCount := 0
-		for rows.Next() {
+	columnMap := make(map[string]bool)
+	pkCount := 0
+	for rows.Next() {
 			var cid int
 			var name, colType string
 			var notNull, pk int
@@ -1589,13 +1589,14 @@ func TestMigration_004_Dogma_Indexes(t *testing.T) {
 			"idx_dogmaAttributes_attributeName": false,
 		}
 
-		rows, err := db.Query("SELECT name FROM sqlite_master WHERE type='index' AND tbl_name='dogmaAttributes' AND name NOT LIKE 'sqlite_%'")
-		if err != nil {
-			t.Fatalf("Failed to query indexes: %v", err)
-		}
-		defer rows.Close()
 
-		for rows.Next() {
+	rows, err := db.Query("SELECT name FROM sqlite_master WHERE type='index' AND tbl_name='dogmaAttributes' AND name NOT LIKE 'sqlite_%'")
+	if err != nil {
+		t.Fatalf("Failed to query indexes: %v", err)
+	}
+	defer func() { _ = rows.Close() }()
+
+	for rows.Next() {
 			var indexName string
 			if err := rows.Scan(&indexName); err != nil {
 				t.Fatalf("Failed to scan index name: %v", err)
@@ -1619,13 +1620,14 @@ func TestMigration_004_Dogma_Indexes(t *testing.T) {
 			"idx_dogmaEffects_effectCategory": false,
 		}
 
-		rows, err := db.Query("SELECT name FROM sqlite_master WHERE type='index' AND tbl_name='dogmaEffects' AND name NOT LIKE 'sqlite_%'")
-		if err != nil {
-			t.Fatalf("Failed to query indexes: %v", err)
-		}
-		defer rows.Close()
 
-		for rows.Next() {
+	rows, err := db.Query("SELECT name FROM sqlite_master WHERE type='index' AND tbl_name='dogmaEffects' AND name NOT LIKE 'sqlite_%'")
+	if err != nil {
+		t.Fatalf("Failed to query indexes: %v", err)
+	}
+	defer func() { _ = rows.Close() }()
+
+	for rows.Next() {
 			var indexName string
 			if err := rows.Scan(&indexName); err != nil {
 				t.Fatalf("Failed to scan index name: %v", err)
@@ -1653,7 +1655,7 @@ func TestMigration_004_Dogma_Indexes(t *testing.T) {
 		if err != nil {
 			t.Fatalf("Failed to query indexes: %v", err)
 		}
-		defer rows.Close()
+		defer func() { _ = rows.Close() }()
 
 		for rows.Next() {
 			var indexName string
@@ -1683,7 +1685,7 @@ func TestMigration_004_Dogma_Indexes(t *testing.T) {
 		if err != nil {
 			t.Fatalf("Failed to query indexes: %v", err)
 		}
-		defer rows.Close()
+		defer func() { _ = rows.Close() }()
 
 		for rows.Next() {
 			var indexName string
@@ -1875,7 +1877,7 @@ func TestMigration_004_Dogma_IndexPerformance(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to query by attributeName: %v", err)
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 
 	count := 0
 	for rows.Next() {
@@ -1890,7 +1892,7 @@ func TestMigration_004_Dogma_IndexPerformance(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to query by effectCategory: %v", err)
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 
 	count = 0
 	for rows.Next() {
@@ -1905,7 +1907,7 @@ func TestMigration_004_Dogma_IndexPerformance(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to query by typeID: %v", err)
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 
 	count = 0
 	for rows.Next() {
@@ -1920,7 +1922,7 @@ func TestMigration_004_Dogma_IndexPerformance(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to query by effectID: %v", err)
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 
 	count = 0
 	for rows.Next() {
@@ -2144,7 +2146,7 @@ func TestMigration_005_Universe_Schema(t *testing.T) {
 		if err != nil {
 			t.Fatalf("Failed to get table info: %v", err)
 		}
-		defer rows.Close()
+		defer func() { _ = rows.Close() }()
 
 		columnMap := make(map[string]bool)
 		for rows.Next() {
@@ -2181,7 +2183,7 @@ func TestMigration_005_Universe_Schema(t *testing.T) {
 		if err != nil {
 			t.Fatalf("Failed to get table info: %v", err)
 		}
-		defer rows.Close()
+		defer func() { _ = rows.Close() }()
 
 		columnMap := make(map[string]bool)
 		for rows.Next() {
@@ -2219,7 +2221,7 @@ func TestMigration_005_Universe_Schema(t *testing.T) {
 		if err != nil {
 			t.Fatalf("Failed to get table info: %v", err)
 		}
-		defer rows.Close()
+		defer func() { _ = rows.Close() }()
 
 		columnMap := make(map[string]bool)
 		for rows.Next() {
@@ -2256,7 +2258,7 @@ func TestMigration_005_Universe_Schema(t *testing.T) {
 		if err != nil {
 			t.Fatalf("Failed to get table info: %v", err)
 		}
-		defer rows.Close()
+		defer func() { _ = rows.Close() }()
 
 		columnMap := make(map[string]bool)
 		for rows.Next() {
@@ -2293,7 +2295,7 @@ func TestMigration_005_Universe_Schema(t *testing.T) {
 		if err != nil {
 			t.Fatalf("Failed to get table info: %v", err)
 		}
-		defer rows.Close()
+		defer func() { _ = rows.Close() }()
 
 		columnMap := make(map[string]bool)
 		for rows.Next() {
@@ -2353,7 +2355,7 @@ func TestMigration_005_Universe_Indexes(t *testing.T) {
 		if err != nil {
 			t.Fatalf("Failed to query indexes: %v", err)
 		}
-		defer rows.Close()
+		defer func() { _ = rows.Close() }()
 
 		for rows.Next() {
 			var indexName string
@@ -2383,7 +2385,7 @@ func TestMigration_005_Universe_Indexes(t *testing.T) {
 		if err != nil {
 			t.Fatalf("Failed to query indexes: %v", err)
 		}
-		defer rows.Close()
+		defer func() { _ = rows.Close() }()
 
 		for rows.Next() {
 			var indexName string
@@ -2413,7 +2415,7 @@ func TestMigration_005_Universe_Indexes(t *testing.T) {
 		if err != nil {
 			t.Fatalf("Failed to query indexes: %v", err)
 		}
-		defer rows.Close()
+		defer func() { _ = rows.Close() }()
 
 		for rows.Next() {
 			var indexName string
@@ -2443,7 +2445,7 @@ func TestMigration_005_Universe_Indexes(t *testing.T) {
 		if err != nil {
 			t.Fatalf("Failed to query indexes: %v", err)
 		}
-		defer rows.Close()
+		defer func() { _ = rows.Close() }()
 
 		for rows.Next() {
 			var indexName string

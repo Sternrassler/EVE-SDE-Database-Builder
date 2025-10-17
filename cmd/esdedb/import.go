@@ -115,7 +115,7 @@ func runImportCmd(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return fmt.Errorf("failed to open database: %w", err)
 	}
-	defer db.Close()
+	defer func() { _ = db.Close() }()
 
 	// Run Migrations (Schema Creation)
 	// TODO: Implement schema migration

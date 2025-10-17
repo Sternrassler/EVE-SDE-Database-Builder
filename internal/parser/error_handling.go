@@ -81,7 +81,7 @@ func ParseWithErrorHandlingContext[T any](ctx context.Context, path string, mode
 			TotalLines:   0,
 		}
 	}
-	defer file.Close()
+	defer func() { _ = file.Close() }()
 
 	return parseReaderWithErrorHandling[T](ctx, file, mode, maxErrors)
 }

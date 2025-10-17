@@ -43,7 +43,7 @@ func NewTestDB(t *testing.T) *sqlx.DB {
 
 	// Apply all migrations
 	if err := ApplyMigrations(db); err != nil {
-		db.Close()
+		_ = db.Close()
 		t.Fatalf("NewTestDB: failed to apply migrations: %v", err)
 	}
 

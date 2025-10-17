@@ -178,7 +178,7 @@ func scrapeTableSchema(ctx context.Context, client *http.Client, cfg *Config, ta
 			// HTTP errors are typically retryable (network issues, timeouts)
 			return errors.NewRetryable(fmt.Sprintf("HTTP request failed for %s", table), err)
 		}
-		defer resp.Body.Close()
+		defer func() { _ = resp.Body.Close() }()
 
 		if resp.StatusCode != http.StatusOK {
 			if resp.StatusCode >= 500 {

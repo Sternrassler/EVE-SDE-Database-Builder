@@ -75,7 +75,7 @@ func TestNewOrchestrator(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed to create test database: %v", err)
 	}
-	defer db.Close()
+	defer func() { _ = db.Close() }()
 
 	pool := NewPool(2)
 	parsers := make(map[string]parser.Parser)
@@ -119,7 +119,7 @@ func TestOrchestrator_CreateParseTasks(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed to create test database: %v", err)
 	}
-	defer db.Close()
+	defer func() { _ = db.Close() }()
 
 	pool := NewPool(2)
 	parsers := map[string]parser.Parser{
@@ -151,7 +151,7 @@ func TestOrchestrator_ConvertToRows(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed to create test database: %v", err)
 	}
-	defer db.Close()
+	defer func() { _ = db.Close() }()
 
 	pool := NewPool(2)
 	orch := NewOrchestrator(db, pool, nil)
@@ -195,7 +195,7 @@ func TestOrchestrator_ConvertToRows_Empty(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed to create test database: %v", err)
 	}
-	defer db.Close()
+	defer func() { _ = db.Close() }()
 
 	pool := NewPool(2)
 	orch := NewOrchestrator(db, pool, nil)
@@ -219,7 +219,7 @@ func TestOrchestrator_ImportAll_EmptyParsers(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed to create test database: %v", err)
 	}
-	defer db.Close()
+	defer func() { _ = db.Close() }()
 
 	pool := NewPool(2)
 	parsers := make(map[string]parser.Parser)
@@ -252,7 +252,7 @@ func TestOrchestrator_ImportAll_WithMockParsers(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed to create test database: %v", err)
 	}
-	defer db.Close()
+	defer func() { _ = db.Close() }()
 
 	// Create test table
 	_, err = db.Exec("CREATE TABLE test_types (id INTEGER, name TEXT)")
@@ -303,7 +303,7 @@ func TestOrchestrator_ImportAll_WithParseError(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed to create test database: %v", err)
 	}
-	defer db.Close()
+	defer func() { _ = db.Close() }()
 
 	pool := NewPool(2)
 	parsers := map[string]parser.Parser{
@@ -351,7 +351,7 @@ func TestOrchestrator_ImportAll_ContextCancellation(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed to create test database: %v", err)
 	}
-	defer db.Close()
+	defer func() { _ = db.Close() }()
 
 	pool := NewPool(2)
 	parsers := map[string]parser.Parser{
@@ -407,7 +407,7 @@ func TestOrchestrator_ImportAll_MultipleFiles(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed to create test database: %v", err)
 	}
-	defer db.Close()
+	defer func() { _ = db.Close() }()
 
 	// Create test tables
 	_, err = db.Exec("CREATE TABLE types (id INTEGER)")
@@ -469,7 +469,7 @@ func TestOrchestrator_ImportAll_MixedResults(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed to create test database: %v", err)
 	}
-	defer db.Close()
+	defer func() { _ = db.Close() }()
 
 	// Create test table
 	_, err = db.Exec("CREATE TABLE success_table (id INTEGER)")
@@ -519,7 +519,7 @@ func benchmarkOrchestrator(b *testing.B, workers, files int) {
 	if err != nil {
 		b.Fatalf("failed to create test database: %v", err)
 	}
-	defer db.Close()
+	defer func() { _ = db.Close() }()
 
 	// Create test table
 	_, err = db.Exec("CREATE TABLE bench_table (id INTEGER)")
@@ -564,7 +564,7 @@ func BenchmarkOrchestrator_4Workers_10Files(b *testing.B) {
 func Example_orchestratorBasicUsage() {
 	// Setup in-memory database
 	db, _ := database.NewDB(":memory:")
-	defer db.Close()
+	defer func() { _ = db.Close() }()
 
 	// Create test table
 	_, _ = db.Exec("CREATE TABLE types (typeID INTEGER, typeName TEXT)")
@@ -589,7 +589,7 @@ func Example_orchestratorBasicUsage() {
 
 	// Create temporary directory for the example
 	tmpDir, _ := os.MkdirTemp("", "sde-example")
-	defer os.RemoveAll(tmpDir)
+	defer func() { _ = os.RemoveAll(tmpDir) }()
 
 	// Create a test file
 	_ = os.WriteFile(filepath.Join(tmpDir, "types.jsonl"), []byte(`{"typeID":1,"typeName":"test"}`), 0644)
@@ -611,7 +611,7 @@ func Example_orchestratorBasicUsage() {
 // Example_orchestratorWithContextCancellation demonstrates graceful cancellation
 func Example_orchestratorWithContextCancellation() {
 	db, _ := database.NewDB(":memory:")
-	defer db.Close()
+	defer func() { _ = db.Close() }()
 
 	pool := NewPool(2)
 	parsers := map[string]parser.Parser{

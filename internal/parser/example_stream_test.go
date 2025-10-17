@@ -20,7 +20,7 @@ func ExampleStreamFile() {
 {"id":3,"name":"Mexallon"}
 `
 	_ = os.WriteFile(testFile, []byte(content), 0644)
-	defer os.Remove(testFile)
+	defer func() { _ = os.Remove(testFile) }()
 
 	// Stream the file
 	ctx := context.Background()
@@ -54,11 +54,11 @@ func ExampleStreamFile_withCancellation() {
 	// Create a large file to ensure cancellation happens before all items are read
 	file, _ := os.Create(testFile)
 	for i := 1; i <= 1000; i++ {
-		fmt.Fprintf(file, `{"id":%d,"name":"Item %d"}`, i, i)
-		fmt.Fprintln(file)
+		_, _ = fmt.Fprintf(file, `{"id":%d,"name":"Item %d"}`, i, i)
+		_, _ = fmt.Fprintln(file)
 	}
-	file.Close()
-	defer os.Remove(testFile)
+	_ = file.Close()
+	defer func() { _ = os.Remove(testFile) }()
 
 	// Create a cancellable context
 	ctx, cancel := context.WithCancel(context.Background())
@@ -98,11 +98,11 @@ func ExampleStreamFile_memoryEfficient() {
 	// Create a large file (simulated)
 	file, _ := os.Create(testFile)
 	for i := 1; i <= 100; i++ {
-		fmt.Fprintf(file, `{"id":%d,"name":"Item %d"}`, i, i)
-		fmt.Fprintln(file)
+		_, _ = fmt.Fprintf(file, `{"id":%d,"name":"Item %d"}`, i, i)
+		_, _ = fmt.Fprintln(file)
 	}
-	file.Close()
-	defer os.Remove(testFile)
+	_ = file.Close()
+	defer func() { _ = os.Remove(testFile) }()
 
 	ctx := context.Background()
 	dataChan, errChan := parser.StreamFile[TestRow](ctx, testFile)

@@ -62,7 +62,7 @@ func TestParseJob_Execute(t *testing.T) {
 	}
 
 	// Verify result implements JobResult interface
-	var _ JobResult = result
+	_ = JobResult(result)
 
 	parseResult, ok := result.(ParseResult)
 	if !ok {

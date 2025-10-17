@@ -51,7 +51,7 @@ func ExampleJSONLParser_ParseFile() {
 {"typeID":36,"groupID":18,"typeName":{"en":"Mexallon","de":"Mexallon"},"mass":0.01,"volume":0.01}
 `
 	_ = os.WriteFile(testFile, []byte(content), 0644)
-	defer os.Remove(testFile)
+	defer func() { _ = os.Remove(testFile) }()
 
 	// Create a parser for TypeRow with table name and columns
 	p := parser.NewJSONLParser[TypeRow](

@@ -9,8 +9,8 @@ import (
 
 // TestEnvVarOverrideDatabasePath tests that ESDEDB_DATABASE_PATH overrides TOML config
 func TestEnvVarOverrideDatabasePath(t *testing.T) {
-	os.Setenv("ESDEDB_DATABASE_PATH", "/custom/database.db")
-	defer os.Unsetenv("ESDEDB_DATABASE_PATH")
+	_ = os.Setenv("ESDEDB_DATABASE_PATH", "/custom/database.db")
+	defer func() { _ = os.Unsetenv("ESDEDB_DATABASE_PATH") }()
 
 	configPath := filepath.Join("testdata", "valid-config.toml")
 	cfg, err := Load(configPath)
@@ -25,8 +25,8 @@ func TestEnvVarOverrideDatabasePath(t *testing.T) {
 
 // TestEnvVarOverrideWorkerCount tests that ESDEDB_IMPORT_WORKER_COUNT overrides TOML config
 func TestEnvVarOverrideWorkerCount(t *testing.T) {
-	os.Setenv("ESDEDB_IMPORT_WORKER_COUNT", "16")
-	defer os.Unsetenv("ESDEDB_IMPORT_WORKER_COUNT")
+	_ = os.Setenv("ESDEDB_IMPORT_WORKER_COUNT", "16")
+	defer func() { _ = os.Unsetenv("ESDEDB_IMPORT_WORKER_COUNT") }()
 
 	configPath := filepath.Join("testdata", "valid-config.toml")
 	cfg, err := Load(configPath)
@@ -41,8 +41,8 @@ func TestEnvVarOverrideWorkerCount(t *testing.T) {
 
 // TestEnvVarOverrideLogLevel tests that ESDEDB_LOG_LEVEL overrides TOML config
 func TestEnvVarOverrideLogLevel(t *testing.T) {
-	os.Setenv("ESDEDB_LOG_LEVEL", "warn")
-	defer os.Unsetenv("ESDEDB_LOG_LEVEL")
+	_ = os.Setenv("ESDEDB_LOG_LEVEL", "warn")
+	defer func() { _ = os.Unsetenv("ESDEDB_LOG_LEVEL") }()
 
 	configPath := filepath.Join("testdata", "valid-config.toml")
 	cfg, err := Load(configPath)
@@ -57,8 +57,8 @@ func TestEnvVarOverrideLogLevel(t *testing.T) {
 
 // TestEnvVarOverrideLogFormat tests that ESDEDB_LOGGING_FORMAT overrides TOML config
 func TestEnvVarOverrideLogFormat(t *testing.T) {
-	os.Setenv("ESDEDB_LOGGING_FORMAT", "text")
-	defer os.Unsetenv("ESDEDB_LOGGING_FORMAT")
+	_ = os.Setenv("ESDEDB_LOGGING_FORMAT", "text")
+	defer func() { _ = os.Unsetenv("ESDEDB_LOGGING_FORMAT") }()
 
 	configPath := filepath.Join("testdata", "valid-config.toml")
 	cfg, err := Load(configPath)
@@ -73,8 +73,8 @@ func TestEnvVarOverrideLogFormat(t *testing.T) {
 
 // TestEnvVarOverrideSdePath tests that ESDEDB_SDE_PATH overrides TOML config
 func TestEnvVarOverrideSdePath(t *testing.T) {
-	os.Setenv("ESDEDB_SDE_PATH", "/custom/sde-path")
-	defer os.Unsetenv("ESDEDB_SDE_PATH")
+	_ = os.Setenv("ESDEDB_SDE_PATH", "/custom/sde-path")
+	defer func() { _ = os.Unsetenv("ESDEDB_SDE_PATH") }()
 
 	configPath := filepath.Join("testdata", "valid-config.toml")
 	cfg, err := Load(configPath)
@@ -89,8 +89,8 @@ func TestEnvVarOverrideSdePath(t *testing.T) {
 
 // TestEnvVarOverrideLanguage tests that ESDEDB_LANGUAGE overrides TOML config
 func TestEnvVarOverrideLanguage(t *testing.T) {
-	os.Setenv("ESDEDB_LANGUAGE", "ja")
-	defer os.Unsetenv("ESDEDB_LANGUAGE")
+	_ = os.Setenv("ESDEDB_LANGUAGE", "ja")
+	defer func() { _ = os.Unsetenv("ESDEDB_LANGUAGE") }()
 
 	configPath := filepath.Join("testdata", "valid-config.toml")
 	cfg, err := Load(configPath)
@@ -135,8 +135,8 @@ func TestEnvVarTypeMismatch(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if tt.workerValue != "" {
-				os.Setenv("ESDEDB_IMPORT_WORKER_COUNT", tt.workerValue)
-				defer os.Unsetenv("ESDEDB_IMPORT_WORKER_COUNT")
+				_ = os.Setenv("ESDEDB_IMPORT_WORKER_COUNT", tt.workerValue)
+				defer func() { _ = os.Unsetenv("ESDEDB_IMPORT_WORKER_COUNT") }()
 			}
 
 			configPath := filepath.Join("testdata", "valid-config.toml")
@@ -156,12 +156,12 @@ func TestEnvVarTypeMismatch(t *testing.T) {
 // TestEnvVarMissing tests that TOML defaults are used when env vars are not set
 func TestEnvVarMissing(t *testing.T) {
 	// Ensure no env vars are set
-	os.Unsetenv("ESDEDB_DATABASE_PATH")
-	os.Unsetenv("ESDEDB_SDE_PATH")
-	os.Unsetenv("ESDEDB_LANGUAGE")
-	os.Unsetenv("ESDEDB_LOG_LEVEL")
-	os.Unsetenv("ESDEDB_LOGGING_FORMAT")
-	os.Unsetenv("ESDEDB_IMPORT_WORKER_COUNT")
+	_ = os.Unsetenv("ESDEDB_DATABASE_PATH")
+	_ = os.Unsetenv("ESDEDB_SDE_PATH")
+	_ = os.Unsetenv("ESDEDB_LANGUAGE")
+	_ = os.Unsetenv("ESDEDB_LOG_LEVEL")
+	_ = os.Unsetenv("ESDEDB_LOGGING_FORMAT")
+	_ = os.Unsetenv("ESDEDB_IMPORT_WORKER_COUNT")
 
 	configPath := filepath.Join("testdata", "valid-config.toml")
 	cfg, err := Load(configPath)
@@ -193,19 +193,19 @@ func TestEnvVarMissing(t *testing.T) {
 // TestEnvVarEmptyString tests that empty env vars don't override config
 func TestEnvVarEmptyString(t *testing.T) {
 	// Set all env vars to empty strings
-	os.Setenv("ESDEDB_DATABASE_PATH", "")
-	os.Setenv("ESDEDB_SDE_PATH", "")
-	os.Setenv("ESDEDB_LANGUAGE", "")
-	os.Setenv("ESDEDB_LOG_LEVEL", "")
-	os.Setenv("ESDEDB_LOGGING_FORMAT", "")
-	os.Setenv("ESDEDB_IMPORT_WORKER_COUNT", "")
+	_ = os.Setenv("ESDEDB_DATABASE_PATH", "")
+	_ = os.Setenv("ESDEDB_SDE_PATH", "")
+	_ = os.Setenv("ESDEDB_LANGUAGE", "")
+	_ = os.Setenv("ESDEDB_LOG_LEVEL", "")
+	_ = os.Setenv("ESDEDB_LOGGING_FORMAT", "")
+	_ = os.Setenv("ESDEDB_IMPORT_WORKER_COUNT", "")
 	defer func() {
-		os.Unsetenv("ESDEDB_DATABASE_PATH")
-		os.Unsetenv("ESDEDB_SDE_PATH")
-		os.Unsetenv("ESDEDB_LANGUAGE")
-		os.Unsetenv("ESDEDB_LOG_LEVEL")
-		os.Unsetenv("ESDEDB_LOGGING_FORMAT")
-		os.Unsetenv("ESDEDB_IMPORT_WORKER_COUNT")
+		_ = os.Unsetenv("ESDEDB_DATABASE_PATH")
+		_ = os.Unsetenv("ESDEDB_SDE_PATH")
+		_ = os.Unsetenv("ESDEDB_LANGUAGE")
+		_ = os.Unsetenv("ESDEDB_LOG_LEVEL")
+		_ = os.Unsetenv("ESDEDB_LOGGING_FORMAT")
+		_ = os.Unsetenv("ESDEDB_IMPORT_WORKER_COUNT")
 	}()
 
 	configPath := filepath.Join("testdata", "valid-config.toml")
@@ -238,19 +238,19 @@ func TestEnvVarEmptyString(t *testing.T) {
 // TestEnvVarAllOverrides tests that all env vars work simultaneously
 func TestEnvVarAllOverrides(t *testing.T) {
 	// Set all env vars
-	os.Setenv("ESDEDB_DATABASE_PATH", "/env/db.db")
-	os.Setenv("ESDEDB_SDE_PATH", "/env/sde")
-	os.Setenv("ESDEDB_LANGUAGE", "ru")
-	os.Setenv("ESDEDB_LOG_LEVEL", "error")
-	os.Setenv("ESDEDB_LOGGING_FORMAT", "text")
-	os.Setenv("ESDEDB_IMPORT_WORKER_COUNT", "24")
+	_ = os.Setenv("ESDEDB_DATABASE_PATH", "/env/db.db")
+	_ = os.Setenv("ESDEDB_SDE_PATH", "/env/sde")
+	_ = os.Setenv("ESDEDB_LANGUAGE", "ru")
+	_ = os.Setenv("ESDEDB_LOG_LEVEL", "error")
+	_ = os.Setenv("ESDEDB_LOGGING_FORMAT", "text")
+	_ = os.Setenv("ESDEDB_IMPORT_WORKER_COUNT", "24")
 	defer func() {
-		os.Unsetenv("ESDEDB_DATABASE_PATH")
-		os.Unsetenv("ESDEDB_SDE_PATH")
-		os.Unsetenv("ESDEDB_LANGUAGE")
-		os.Unsetenv("ESDEDB_LOG_LEVEL")
-		os.Unsetenv("ESDEDB_LOGGING_FORMAT")
-		os.Unsetenv("ESDEDB_IMPORT_WORKER_COUNT")
+		_ = os.Unsetenv("ESDEDB_DATABASE_PATH")
+		_ = os.Unsetenv("ESDEDB_SDE_PATH")
+		_ = os.Unsetenv("ESDEDB_LANGUAGE")
+		_ = os.Unsetenv("ESDEDB_LOG_LEVEL")
+		_ = os.Unsetenv("ESDEDB_LOGGING_FORMAT")
+		_ = os.Unsetenv("ESDEDB_IMPORT_WORKER_COUNT")
 	}()
 
 	configPath := filepath.Join("testdata", "valid-config.toml")
@@ -314,8 +314,8 @@ func TestEnvVarWorkerCountValidation(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			os.Setenv("ESDEDB_IMPORT_WORKER_COUNT", tt.workerValue)
-			defer os.Unsetenv("ESDEDB_IMPORT_WORKER_COUNT")
+			_ = os.Setenv("ESDEDB_IMPORT_WORKER_COUNT", tt.workerValue)
+			defer func() { _ = os.Unsetenv("ESDEDB_IMPORT_WORKER_COUNT") }()
 
 			configPath := filepath.Join("testdata", "valid-config.toml")
 			cfg, err := Load(configPath)
@@ -342,11 +342,11 @@ func TestEnvVarWorkerCountValidation(t *testing.T) {
 
 // TestEnvVarOverridesDefaultsWhenNoTOML tests env vars override default config when no TOML file
 func TestEnvVarOverridesDefaultsWhenNoTOML(t *testing.T) {
-	os.Setenv("ESDEDB_DATABASE_PATH", "/env/default.db")
-	os.Setenv("ESDEDB_IMPORT_WORKER_COUNT", "12")
+	_ = os.Setenv("ESDEDB_DATABASE_PATH", "/env/default.db")
+	_ = os.Setenv("ESDEDB_IMPORT_WORKER_COUNT", "12")
 	defer func() {
-		os.Unsetenv("ESDEDB_DATABASE_PATH")
-		os.Unsetenv("ESDEDB_IMPORT_WORKER_COUNT")
+		_ = os.Unsetenv("ESDEDB_DATABASE_PATH")
+		_ = os.Unsetenv("ESDEDB_IMPORT_WORKER_COUNT")
 	}()
 
 	// Load with non-existent config file (should use defaults + env overrides)
@@ -375,8 +375,8 @@ func TestEnvVarOverridesDefaultsWhenNoTOML(t *testing.T) {
 
 // TestEnvVarInvalidLogLevel tests that invalid log level from env var fails validation
 func TestEnvVarInvalidLogLevel(t *testing.T) {
-	os.Setenv("ESDEDB_LOG_LEVEL", "invalid")
-	defer os.Unsetenv("ESDEDB_LOG_LEVEL")
+	_ = os.Setenv("ESDEDB_LOG_LEVEL", "invalid")
+	defer func() { _ = os.Unsetenv("ESDEDB_LOG_LEVEL") }()
 
 	configPath := filepath.Join("testdata", "valid-config.toml")
 	_, err := Load(configPath)
@@ -393,8 +393,8 @@ func TestEnvVarInvalidLogLevel(t *testing.T) {
 
 // TestEnvVarInvalidLanguage tests that invalid language from env var fails validation
 func TestEnvVarInvalidLanguage(t *testing.T) {
-	os.Setenv("ESDEDB_LANGUAGE", "invalid")
-	defer os.Unsetenv("ESDEDB_LANGUAGE")
+	_ = os.Setenv("ESDEDB_LANGUAGE", "invalid")
+	defer func() { _ = os.Unsetenv("ESDEDB_LANGUAGE") }()
 
 	configPath := filepath.Join("testdata", "valid-config.toml")
 	_, err := Load(configPath)

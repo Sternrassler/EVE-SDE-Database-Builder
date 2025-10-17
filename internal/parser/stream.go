@@ -52,7 +52,7 @@ func StreamFile[T any](ctx context.Context, path string) (<-chan T, <-chan error
 			errChan <- fmt.Errorf("failed to open file %s: %w", path, err)
 			return
 		}
-		defer file.Close()
+		defer func() { _ = file.Close() }()
 
 		// Create scanner for line-by-line reading
 		scanner := bufio.NewScanner(file)

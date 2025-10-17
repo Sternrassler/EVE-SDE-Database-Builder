@@ -31,13 +31,13 @@ func NewDB(path string) (*sqlx.DB, error) {
 
 	// Apply performance PRAGMAs
 	if err := applyPragmas(db); err != nil {
-		db.Close()
+		_ = db.Close()
 		return nil, fmt.Errorf("failed to apply PRAGMAs: %w", err)
 	}
 
 	// Verify connection is working
 	if err := db.Ping(); err != nil {
-		db.Close()
+		_ = db.Close()
 		return nil, fmt.Errorf("failed to ping database: %w", err)
 	}
 

@@ -80,7 +80,7 @@ func runStatsCmd(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return fmt.Errorf("failed to open database: %w", err)
 	}
-	defer db.Close()
+	defer func() { _ = db.Close() }()
 
 	// Collect statistics
 	stats, err := collectStats(db)
@@ -118,7 +118,7 @@ func collectStats(db *sqlx.DB) (*DatabaseStats, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to query tables: %w", err)
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 
 	var tableNames []string
 	for rows.Next() {

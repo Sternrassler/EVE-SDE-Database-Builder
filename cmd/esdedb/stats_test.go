@@ -43,7 +43,7 @@ func TestStatsCmd_ValidDatabase(t *testing.T) {
 		t.Fatalf("failed to insert into test_table2: %v", err)
 	}
 
-	db.Close()
+	_ = db.Close()
 
 	// Set up the command with proper args
 	cmd := newStatsCmd()
@@ -61,7 +61,7 @@ func TestStatsCmd_NonExistentDatabase(t *testing.T) {
 	nonExistentPath := "/tmp/does-not-exist-stats-test.db"
 
 	// Make sure the file doesn't exist
-	os.Remove(nonExistentPath)
+	_ = os.Remove(nonExistentPath)
 
 	// Set up the command
 	cmd := newStatsCmd()
@@ -83,7 +83,7 @@ func TestStatsCmd_EmptyDatabase(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed to create empty database: %v", err)
 	}
-	db.Close()
+	_ = db.Close()
 
 	// Set up the command
 	cmd := newStatsCmd()
@@ -177,7 +177,7 @@ func TestStatsCmd_Integration(t *testing.T) {
 		}
 	}
 
-	db.Close()
+	_ = db.Close()
 
 	// Simulate CLI execution
 	rootCmd := &cobra.Command{Use: "esdedb"}
@@ -201,7 +201,7 @@ func TestCollectStats(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed to create test database: %v", err)
 	}
-	defer db.Close()
+	defer func() { _ = db.Close() }()
 
 	// Create test table
 	_, err = db.Exec(`CREATE TABLE test_count (id INTEGER PRIMARY KEY)`)

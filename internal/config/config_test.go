@@ -118,15 +118,15 @@ func TestLoadConfigNonExistent(t *testing.T) {
 // TestEnvVarOverride tests that environment variables override TOML config
 func TestEnvVarOverride(t *testing.T) {
 	// Set environment variables
-	os.Setenv("ESDEDB_DATABASE_PATH", "/custom/db.db")
-	os.Setenv("ESDEDB_SDE_PATH", "/custom/sde")
-	os.Setenv("ESDEDB_LANGUAGE", "fr")
-	os.Setenv("ESDEDB_LOG_LEVEL", "error")
+	_ = os.Setenv("ESDEDB_DATABASE_PATH", "/custom/db.db")
+	_ = os.Setenv("ESDEDB_SDE_PATH", "/custom/sde")
+	_ = os.Setenv("ESDEDB_LANGUAGE", "fr")
+	_ = os.Setenv("ESDEDB_LOG_LEVEL", "error")
 	defer func() {
-		os.Unsetenv("ESDEDB_DATABASE_PATH")
-		os.Unsetenv("ESDEDB_SDE_PATH")
-		os.Unsetenv("ESDEDB_LANGUAGE")
-		os.Unsetenv("ESDEDB_LOG_LEVEL")
+		_ = os.Unsetenv("ESDEDB_DATABASE_PATH")
+		_ = os.Unsetenv("ESDEDB_SDE_PATH")
+		_ = os.Unsetenv("ESDEDB_LANGUAGE")
+		_ = os.Unsetenv("ESDEDB_LOG_LEVEL")
 	}()
 
 	configPath := filepath.Join("testdata", "valid-config.toml")
@@ -152,8 +152,8 @@ func TestEnvVarOverride(t *testing.T) {
 
 // TestEnvVarOverrideDefaults tests env vars override defaults when no config file
 func TestEnvVarOverrideDefaults(t *testing.T) {
-	os.Setenv("ESDEDB_DATABASE_PATH", "/env/db.db")
-	defer os.Unsetenv("ESDEDB_DATABASE_PATH")
+	_ = os.Setenv("ESDEDB_DATABASE_PATH", "/env/db.db")
+	defer func() { _ = os.Unsetenv("ESDEDB_DATABASE_PATH") }()
 
 	configPath := filepath.Join("testdata", "nonexistent.toml")
 	cfg, err := Load(configPath)
@@ -361,7 +361,7 @@ format = "text"
 	if err != nil {
 		t.Fatalf("failed to create temp config: %v", err)
 	}
-	defer os.Remove(configPath)
+	defer func() { _ = os.Remove(configPath) }()
 
 	cfg, err := Load(configPath)
 	if err != nil {
@@ -396,8 +396,8 @@ func TestLoadEmptyConfig(t *testing.T) {
 // TestApplyEnvVarsWithEmptyValues tests that empty env vars don't override config
 func TestApplyEnvVarsWithEmptyValues(t *testing.T) {
 	// Set empty environment variable
-	os.Setenv("ESDEDB_DATABASE_PATH", "")
-	defer os.Unsetenv("ESDEDB_DATABASE_PATH")
+	_ = os.Setenv("ESDEDB_DATABASE_PATH", "")
+	defer func() { _ = os.Unsetenv("ESDEDB_DATABASE_PATH") }()
 
 	cfg := DefaultConfig()
 	originalPath := cfg.Database.Path
@@ -421,7 +421,7 @@ path = "missing bracket"
 	if err != nil {
 		t.Fatalf("failed to create temp config: %v", err)
 	}
-	defer os.Remove(configPath)
+	defer func() { _ = os.Remove(configPath) }()
 
 	_, err = Load(configPath)
 	if err == nil {

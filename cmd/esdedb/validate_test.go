@@ -170,7 +170,7 @@ func TestValidateCmd_NonExistentFile_UsesDefaults(t *testing.T) {
 	configPath = "/tmp/does-not-exist-validate-test.toml"
 
 	// Make sure the file doesn't exist
-	os.Remove(configPath)
+	_ = os.Remove(configPath)
 
 	// Set up the command
 	cmd := newValidateCmd()

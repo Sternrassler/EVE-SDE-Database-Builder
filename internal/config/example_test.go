@@ -26,7 +26,7 @@ func ExampleDefaultConfig() {
 func ExampleLoad() {
 	// Create a temporary config file for demonstration
 	tmpfile, _ := os.CreateTemp("", "config-*.toml")
-	defer os.Remove(tmpfile.Name())
+	defer func() { _ = os.Remove(tmpfile.Name()) }()
 
 	content := `version = "1.0.0"
 
@@ -48,7 +48,7 @@ format = "json"
 		fmt.Printf("Error: %v\n", err)
 		return
 	}
-	tmpfile.Close()
+	_ = tmpfile.Close()
 
 	cfg, err := config.Load(tmpfile.Name())
 	if err != nil {
@@ -141,10 +141,10 @@ func ExampleConfig_Validate_autoWorkers() {
 // Example_envOverride demonstrates environment variable override
 func Example_envOverride() {
 	// Set environment variable
-	os.Setenv("ESDEDB_DATABASE_PATH", "/custom/path.db")
-	os.Setenv("ESDEDB_LANGUAGE", "de")
-	defer os.Unsetenv("ESDEDB_DATABASE_PATH")
-	defer os.Unsetenv("ESDEDB_LANGUAGE")
+	_ = os.Setenv("ESDEDB_DATABASE_PATH", "/custom/path.db")
+	_ = os.Setenv("ESDEDB_LANGUAGE", "de")
+	defer func() { _ = os.Unsetenv("ESDEDB_DATABASE_PATH") }()
+	defer func() { _ = os.Unsetenv("ESDEDB_LANGUAGE") }()
 
 	// Load config (env vars will override defaults)
 	cfg, err := config.Load("/nonexistent/config.toml")

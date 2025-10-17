@@ -59,7 +59,7 @@ func QueryRow[T any](ctx context.Context, db sqlx.QueryerContext, query string, 
 		if err != nil {
 			return result, fmt.Errorf("failed to execute query: %w", err)
 		}
-		defer rows.Close()
+		defer func() { _ = rows.Close() }()
 
 		if !rows.Next() {
 			if err := rows.Err(); err != nil {
@@ -121,7 +121,7 @@ func QueryAll[T any](ctx context.Context, db sqlx.QueryerContext, query string, 
 		if err != nil {
 			return nil, fmt.Errorf("failed to execute query: %w", err)
 		}
-		defer rows.Close()
+		defer func() { _ = rows.Close() }()
 
 		for rows.Next() {
 			var result T
@@ -171,7 +171,7 @@ func Exists(ctx context.Context, db sqlx.QueryerContext, query string, args ...i
 	if err != nil {
 		return false, fmt.Errorf("failed to execute existence check: %w", err)
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 
 	// Check if at least one row exists
 	exists := rows.Next()

@@ -343,7 +343,7 @@ func ExampleJSONLParser() {
 {"id":2,"name":"Another Item"}
 `
 	_ = os.WriteFile(testFile, []byte(content), 0644)
-	defer os.Remove(testFile)
+	defer func() { _ = os.Remove(testFile) }()
 
 	// Create and use parser
 	p := parser.NewJSONLParser[TestRow]("items", []string{"id", "name"})

@@ -19,7 +19,7 @@ invalid json line
 {"id":2,"name":"Another Valid Item"}
 `
 	_ = os.WriteFile(testFile, []byte(content), 0644)
-	defer os.Remove(testFile)
+	defer func() { _ = os.Remove(testFile) }()
 
 	// Parse with Skip mode - invalid lines are logged and skipped
 	records, errors := parser.ParseWithErrorHandling[TestRow](
@@ -46,7 +46,7 @@ invalid json line
 {"id":2,"name":"This won't be parsed"}
 `
 	_ = os.WriteFile(testFile, []byte(content), 0644)
-	defer os.Remove(testFile)
+	defer func() { _ = os.Remove(testFile) }()
 
 	// Parse with FailFast mode - stops at first error
 	records, errors := parser.ParseWithErrorHandling[TestRow](
@@ -75,7 +75,7 @@ invalid line 2
 invalid line 3
 `
 	_ = os.WriteFile(testFile, []byte(content), 0644)
-	defer os.Remove(testFile)
+	defer func() { _ = os.Remove(testFile) }()
 
 	// Parse with Skip mode and max 2 errors
 	records, errors := parser.ParseWithErrorHandling[TestRow](
@@ -102,7 +102,7 @@ invalid line
 {"id":2,"name":"Item Two"}
 `
 	_ = os.WriteFile(testFile, []byte(content), 0644)
-	defer os.Remove(testFile)
+	defer func() { _ = os.Remove(testFile) }()
 
 	// Use ParseWithErrorHandlingContext for detailed results
 	ctx := context.Background()

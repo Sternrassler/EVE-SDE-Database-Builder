@@ -169,7 +169,7 @@ func TestApplyMigrations_AllMigrationsExecuted(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to query tables: %v", err)
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 
 	for rows.Next() {
 		var tableName string

@@ -67,9 +67,9 @@ func runVersionCmd(cmd *cobra.Command, args []string, format string) error {
 		encoder.SetIndent("", "  ")
 		return encoder.Encode(info)
 	case "text":
-		fmt.Fprintf(cmd.OutOrStdout(), "Version:    %s\n", info.Version)
-		fmt.Fprintf(cmd.OutOrStdout(), "Commit:     %s\n", info.Commit)
-		fmt.Fprintf(cmd.OutOrStdout(), "Build Time: %s\n", info.BuildTime)
+		_, _ = fmt.Fprintf(cmd.OutOrStdout(), "Version:    %s\n", info.Version)
+		_, _ = fmt.Fprintf(cmd.OutOrStdout(), "Commit:     %s\n", info.Commit)
+		_, _ = fmt.Fprintf(cmd.OutOrStdout(), "Build Time: %s\n", info.BuildTime)
 		return nil
 	default:
 		return fmt.Errorf("unsupported format: %s (use 'text' or 'json')", format)

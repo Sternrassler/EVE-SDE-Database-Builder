@@ -169,7 +169,7 @@ func (pb *ProgressBar) updateToCompletion(lastParsed int64) {
 // Finish schließt die ProgressBar ab und gibt eine Zusammenfassung aus.
 func (pb *ProgressBar) Finish() {
 	_ = pb.bar.Finish()
-	fmt.Fprintln(pb.output) // Neue Zeile nach Progress Bar
+	_, _ = fmt.Fprintln(pb.output) // Neue Zeile nach Progress Bar
 }
 
 // StartSpinner startet einen Spinner für eine einzelne Datei.
@@ -258,11 +258,11 @@ func (s *Spinner) Stop() {
 	s.done = make(chan struct{}) // Für nächsten Start
 
 	// Zeile löschen
-	fmt.Fprint(s.output, "\r"+strings.Repeat(" ", 80)+"\r")
+	_, _ = fmt.Fprint(s.output, "\r"+strings.Repeat(" ", 80)+"\r")
 }
 
 // render rendert den aktuellen Spinner-Frame.
 func (s *Spinner) render(message string) {
 	frame := s.frames[s.current]
-	fmt.Fprintf(s.output, "\r%s %s", frame, message)
+	_, _ = fmt.Fprintf(s.output, "\r%s %s", frame, message)
 }

@@ -17,7 +17,7 @@ func ExampleNewDB() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer database.Close(db)
+	defer func() { _ = database.Close(db) }()
 
 	// Create a test table
 	_, err = db.Exec(`
@@ -55,7 +55,7 @@ func ExampleNewDB_fileDatabase() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer database.Close(db)
+	defer func() { _ = database.Close(db) }()
 
 	// Verify connection
 	if err := db.Ping(); err != nil {
@@ -73,7 +73,7 @@ func ExampleBatchInsert() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer database.Close(db)
+	defer func() { _ = database.Close(db) }()
 
 	// Create a test table
 	_, err = db.Exec(`
@@ -122,7 +122,7 @@ func ExampleBatchInsertWithProgress() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer database.Close(db)
+	defer func() { _ = database.Close(db) }()
 
 	// Create a test table
 	_, err = db.Exec(`CREATE TABLE test_data (id INTEGER, value INTEGER)`)
@@ -162,7 +162,7 @@ func ExampleWithTransaction() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer database.Close(db)
+	defer func() { _ = database.Close(db) }()
 
 	// Create tables
 	_, err = db.Exec(`
@@ -209,7 +209,7 @@ func ExampleWithTransaction_rollback() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer database.Close(db)
+	defer func() { _ = database.Close(db) }()
 
 	// Create table
 	_, err = db.Exec(`CREATE TABLE users (id INTEGER PRIMARY KEY, name TEXT NOT NULL)`)
@@ -249,13 +249,13 @@ func ExampleWithTransaction_rollback() {
 }
 
 // ExampleWithTransaction_withOptions demonstrates using transaction options
-func ExampleWithTransaction_withOptions() {
+func ExampleWithTransaction_options() {
 	// Create an in-memory database
 	db, err := database.NewDB(":memory:")
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer database.Close(db)
+	defer func() { _ = database.Close(db) }()
 
 	// Create and populate table
 	_, err = db.Exec(`
@@ -288,7 +288,7 @@ func ExampleQueryRow() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer database.Close(db)
+	defer func() { _ = database.Close(db) }()
 
 	// Create and populate table
 	_, err = db.Exec(`
@@ -324,7 +324,7 @@ func ExampleQueryAll() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer database.Close(db)
+	defer func() { _ = database.Close(db) }()
 
 	// Create and populate table
 	_, err = db.Exec(`
@@ -369,7 +369,7 @@ func ExampleExists() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer database.Close(db)
+	defer func() { _ = database.Close(db) }()
 
 	// Create and populate table
 	_, err = db.Exec(`
@@ -423,7 +423,7 @@ func ExampleNewTestDB() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer database.Close(db)
+	defer func() { _ = database.Close(db) }()
 
 	// In NewTestDB, migrations are automatically applied
 	// Here we manually apply them for demonstration

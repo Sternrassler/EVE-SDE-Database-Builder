@@ -379,10 +379,10 @@ func TestStreamFile_MemoryEfficiency(t *testing.T) {
 
 	// Each line is roughly 100 bytes
 	for i := 1; i <= 500000; i++ {
-		fmt.Fprintf(file, `{"id":%d,"name":"Item %d with some extra data to make it realistic"}`, i, i)
-		fmt.Fprintln(file)
+		_, _ = fmt.Fprintf(file, `{"id":%d,"name":"Item %d with some extra data to make it realistic"}`, i, i)
+		_, _ = fmt.Fprintln(file)
 	}
-	file.Close()
+	_ = file.Close()
 
 	// Measure memory before
 	runtime.GC()
