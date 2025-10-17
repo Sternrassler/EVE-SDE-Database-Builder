@@ -159,15 +159,15 @@ func runImportCmd(cmd *cobra.Command, args []string) error {
 	ticker := time.NewTicker(100 * time.Millisecond)
 	defer ticker.Stop()
 
-	lastParsed := 0
+	lastParsed := int64(0)
 	for {
 		select {
 		case <-done:
 			// Import finished, update bar to completion
 			if progress != nil {
-				parsed, _, _, _ := progress.GetProgress()
-				remaining := parsed - lastParsed
-				for i := 0; i < remaining; i++ {
+				progressInfo := progress.GetProgressDetailed()
+				remaining := progressInfo.ParsedFiles - lastParsed
+				for i := int64(0); i < remaining; i++ {
 					_ = bar.Add(1)
 				}
 			}
@@ -175,13 +175,13 @@ func runImportCmd(cmd *cobra.Command, args []string) error {
 		case <-ticker.C:
 			// Update progress bar based on parsed files
 			if progress != nil {
-				parsed, _, _, _ := progress.GetProgress()
-				diff := parsed - lastParsed
+				progressInfo := progress.GetProgressDetailed()
+				diff := progressInfo.ParsedFiles - lastParsed
 				if diff > 0 {
-					for i := 0; i < diff; i++ {
+					for i := int64(0); i < diff; i++ {
 						_ = bar.Add(1)
 					}
-					lastParsed = parsed
+					lastParsed = progressInfo.ParsedFiles
 				}
 			}
 		}
@@ -200,8 +200,11 @@ ImportDone:
 	}
 
 	// Report Results
-	parsed, inserted, failed, total := progress.GetProgress()
 	progressDetailed := progress.GetProgressDetailed()
+	parsed := progressDetailed.ParsedFiles
+	inserted := progressDetailed.InsertedFiles
+	failed := progressDetailed.FailedFiles
+	total := progressDetailed.TotalFiles
 
 	log.Info("Import completed",
 		logger.Field{Key: "total_files", Value: total},
