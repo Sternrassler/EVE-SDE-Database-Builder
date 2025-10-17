@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+# pre-push – Führt Tests vor Push aus
+# Aktivierung: git config core.hooksPath .githooks
+# Referenz: copilot-instructions.md Abschnitt 3
+
+set -euo pipefail
+
+echo "[pre-push] Führe Tests vor Push aus..."
+
+if [ ! -f Makefile ]; then
+    echo "[pre-push] ERROR: Makefile nicht gefunden – kann Tests nicht ausführen" >&2
+    exit 1
+fi
+
+# Linting ausführen
+echo "[pre-push] Führe 'make lint' aus..."
+if ! make lint; then
+    echo "[pre-push] ❌ Linting fehlgeschlagen – Push abgebrochen" >&2
+    exit 1
+fi
+
+# Tests ausführen
+echo "[pre-push] Führe 'make test' aus..."
+if ! make test; then
+    echo "[pre-push] ❌ Tests fehlgeschlagen – Push abgebrochen" >&2
+    exit 1
+fi
+
+echo "[pre-push] ✅ Lint und Tests erfolgreich – Push wird fortgesetzt"
+exit 0
