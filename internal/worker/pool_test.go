@@ -76,6 +76,104 @@ func TestPool_WithFourWorkers(t *testing.T) {
 	}
 }
 
+// TestPool_StartStop tests pool start and stop behavior
+func TestPool_StartStop(t *testing.T) {
+	ctx := context.Background()
+	pool := NewPool(3)
+
+	// Verify pool is created but not started
+	if pool.workers != 3 {
+		t.Errorf("expected 3 workers, got %d", pool.workers)
+	}
+
+	// Start the pool
+	pool.Start(ctx)
+
+	// Submit a simple job to verify workers are running
+	var executed atomic.Int32
+	pool.Submit(Job{
+		ID: "test-job",
+		Fn: func(ctx context.Context) (interface{}, error) {
+			executed.Add(1)
+			return "done", nil
+		},
+	})
+
+	// Stop the pool via Wait
+	results, errs := pool.Wait()
+
+	// Verify job was executed
+	if executed.Load() != 1 {
+		t.Errorf("expected job to be executed once, got %d", executed.Load())
+	}
+
+	if len(results) != 1 {
+		t.Errorf("expected 1 result, got %d", len(results))
+	}
+
+	if len(errs) != 0 {
+		t.Errorf("expected no errors, got %d", len(errs))
+	}
+}
+
+// TestPool_JobDistribution tests that jobs are distributed across workers
+func TestPool_JobDistribution(t *testing.T) {
+	ctx := context.Background()
+	workerCount := 4
+	pool := NewPool(workerCount)
+	pool.Start(ctx)
+
+	jobCount := 20
+	var jobsExecuted atomic.Int32
+	results := make(chan string, jobCount)
+
+	// Submit multiple jobs
+	for i := 0; i < jobCount; i++ {
+		jobNum := i
+		pool.Submit(Job{
+			ID: fmt.Sprintf("job-%d", jobNum),
+			Fn: func(ctx context.Context) (interface{}, error) {
+				jobsExecuted.Add(1)
+				// Small delay to allow concurrent execution
+				time.Sleep(10 * time.Millisecond)
+				result := fmt.Sprintf("result-%d", jobNum)
+				results <- result
+				return result, nil
+			},
+		})
+	}
+
+	// Wait for all jobs to complete
+	poolResults, errs := pool.Wait()
+	close(results)
+
+	// Verify all jobs were executed
+	if jobsExecuted.Load() != int32(jobCount) {
+		t.Errorf("expected %d jobs executed, got %d", jobCount, jobsExecuted.Load())
+	}
+
+	if len(poolResults) != jobCount {
+		t.Errorf("expected %d results, got %d", jobCount, len(poolResults))
+	}
+
+	if len(errs) != 0 {
+		t.Errorf("expected no errors, got %d", len(errs))
+	}
+
+	// Verify all job IDs are unique and present
+	jobIDs := make(map[string]bool)
+	for _, result := range poolResults {
+		if jobIDs[result.JobID] {
+			t.Errorf("duplicate job ID: %s", result.JobID)
+		}
+		jobIDs[result.JobID] = true
+	}
+
+	if len(jobIDs) != jobCount {
+		t.Errorf("expected %d unique job IDs, got %d", jobCount, len(jobIDs))
+	}
+}
+
 // TestPool_ContextCancellation tests graceful shutdown via context cancellation
 func TestPool_ContextCancellation(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
