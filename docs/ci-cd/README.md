@@ -102,9 +102,34 @@ git commit -m "chore: Update benchmark baseline"
 
 **Features:**
 - ✅ Coverage-Report-Generierung
-- ✅ Upload zu Codecov (optional, benötigt `CODECOV_TOKEN`)
+- ✅ Upload zu Codecov.io mit Trend Tracking
 - ✅ HTML Coverage Report als Artifact
 - ✅ Text Coverage Summary
+- ✅ Codecov Badge im README mit Echtzeit-Prozentsatz
+
+**Codecov.io Integration:**
+
+Die Codecov-Integration ermöglicht:
+- 📊 Visuelle Coverage-Dashboards
+- 📈 Trend Tracking über Zeit
+- 🎯 Coverage-Ziele und Thresholds
+- 💬 Automatische PR-Kommentare mit Coverage-Diff
+- 🚨 Warnung bei Coverage-Rückgang
+
+**Konfiguration:** Siehe `codecov.yml` im Repository-Root
+
+**Thresholds:**
+- Project Coverage: Auto-Target mit 0.5% Threshold
+- Patch Coverage: Auto-Target mit 0.5% Threshold
+- Range: 70-100%
+- Precision: 2 Dezimalstellen
+
+**Ignorierte Pfade:**
+- `tools/**` - Code-Generierungs-Tools
+- `**/*_test.go` - Test-Dateien selbst
+- `testdata/**` - Test-Fixtures
+- `migrations/**` - SQL-Migrations
+- `schemas/**` - JSON-Schemas
 
 **Artifacts:**
 - `coverage-report` - `coverage.out` und `coverage.txt`
@@ -118,6 +143,10 @@ make coverage
 # HTML Report anzeigen:
 go tool cover -html=coverage.out
 ```
+
+**Codecov Dashboard:**
+- URL: https://codecov.io/gh/Sternrassler/EVE-SDE-Database-Builder
+- Badge: ![codecov](https://codecov.io/gh/Sternrassler/EVE-SDE-Database-Builder/branch/main/graph/badge.svg)
 
 ---
 
@@ -244,11 +273,26 @@ Der Workflow extrahiert automatisch den relevanten Abschnitt aus `CHANGELOG.md`:
 
 ### Erforderliche Secrets
 
-**Optional:**
+**Codecov Integration:**
 - `CODECOV_TOKEN` - Für Codecov.io Upload (Coverage Workflow)
+  - Quelle: https://codecov.io/gh/Sternrassler/EVE-SDE-Database-Builder/settings
+  - Scope: Repository-spezifischer Upload-Token
+  - Setup: GitHub Settings → Secrets → Actions → New repository secret
+  - Name: `CODECOV_TOKEN`
+  - Value: Token von Codecov.io Dashboard
 
 **Automatisch verfügbar:**
 - `GITHUB_TOKEN` - Automatisch von GitHub Actions bereitgestellt
+
+**Token Setup (Codecov.io):**
+
+1. Account erstellen/einloggen auf https://codecov.io/
+2. Repository autorisieren (via GitHub App)
+3. Upload Token kopieren aus Repository Settings
+4. Als GitHub Secret hinzufügen (siehe oben)
+5. Nach erstem Coverage-Upload: Badge-Link verfügbar
+
+**Hinweis:** Der Coverage-Workflow funktioniert auch ohne Token (mit reduzierter Funktionalität), aber für vollständige Features und private Repos ist der Token erforderlich.
 
 ### Branch Protection
 

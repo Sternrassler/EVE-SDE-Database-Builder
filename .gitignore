@@ -31,6 +31,8 @@ Root Directory/*
 *.test
 *.out
 coverage.out
+coverage.txt
+coverage.html
 vendor/
 /esdedb
 
