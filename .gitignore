@@ -43,3 +43,5 @@ dist/
 # Benchmark temporary files (keep baselines committed)
 benchmarks/archive/
 
+# Fuzz test artifacts (corpus files in testdata/fuzz/ are committed)
+**/testdata/fuzz/Fuzz*/
