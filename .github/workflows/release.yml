@@ -1,0 +1,157 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build Release Binaries
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - goos: linux
+            goarch: amd64
+            platform: linux-amd64
+          - goos: linux
+            goarch: arm64
+            platform: linux-arm64
+          - goos: darwin
+            goarch: amd64
+            platform: darwin-amd64
+          - goos: darwin
+            goarch: arm64
+            platform: darwin-arm64
+          - goos: windows
+            goarch: amd64
+            platform: windows-amd64
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: 'go.mod'
+
+      - name: Get version from tag
+        id: version
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/v}
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Version: $VERSION"
+
+      - name: Build binary
+        env:
+          GOOS: ${{ matrix.goos }}
+          GOARCH: ${{ matrix.goarch }}
+          CGO_ENABLED: ${{ matrix.goos == 'linux' && '1' || '0' }}
+        run: |
+          OUTPUT_NAME="esdedb-${{ steps.version.outputs.version }}-${{ matrix.platform }}"
+          if [ "${{ matrix.goos }}" = "windows" ]; then
+            OUTPUT_NAME="${OUTPUT_NAME}.exe"
+          fi
+          
+          go build -v -ldflags="-s -w -X main.Version=${{ steps.version.outputs.version }}" \
+            -o "dist/${OUTPUT_NAME}" \
+            ./cmd/esdedb/
+
+      - name: Create archive
+        run: |
+          cd dist
+          if [ "${{ matrix.goos }}" = "windows" ]; then
+            zip "esdedb-${{ steps.version.outputs.version }}-${{ matrix.platform }}.zip" \
+              "esdedb-${{ steps.version.outputs.version }}-${{ matrix.platform }}.exe"
+          else
+            tar czf "esdedb-${{ steps.version.outputs.version }}-${{ matrix.platform }}.tar.gz" \
+              "esdedb-${{ steps.version.outputs.version }}-${{ matrix.platform }}"
+          fi
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: binary-${{ matrix.platform }}
+          path: dist/*
+          retention-days: 7
+
+  release:
+    name: Create GitHub Release
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get version from tag
+        id: version
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/v}
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Consolidate artifacts
+        run: |
+          mkdir -p release-assets
+          find artifacts -type f \( -name "*.tar.gz" -o -name "*.zip" \) -exec cp {} release-assets/ \;
+          ls -lh release-assets/
+
+      - name: Extract changelog for this version
+        id: changelog
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          
+          # Extract the changelog section for this version
+          if grep -q "\[${VERSION}\]" CHANGELOG.md; then
+            # Extract content between this version and the next version or end
+            CHANGELOG=$(sed -n "/\[${VERSION}\]/,/\[.*\]/p" CHANGELOG.md | sed '1!{/^\[.*\]/Q}' | sed '1d')
+          else
+            # If version not found in changelog, extract from Unreleased
+            if grep -q "\[Unreleased\]" CHANGELOG.md; then
+              CHANGELOG=$(sed -n "/\[Unreleased\]/,/\[.*\]/p" CHANGELOG.md | sed '1!{/^\[.*\]/Q}' | sed '1d')
+            else
+              CHANGELOG="Release $VERSION"
+            fi
+          fi
+          
+          # Save to file for multiline
+          echo "$CHANGELOG" > changelog.txt
+          
+          # Print for debugging
+          echo "=== Changelog for version $VERSION ==="
+          cat changelog.txt
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: Release v${{ steps.version.outputs.version }}
+          body_path: changelog.txt
+          files: release-assets/*
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Release summary
+        run: |
+          echo "## 🚀 Release v${{ steps.version.outputs.version }} Created!"
+          echo ""
+          echo "### Artifacts:"
+          ls -lh release-assets/
+          echo ""
+          echo "### Platforms:"
+          echo "- Linux (amd64, arm64)"
+          echo "- macOS (amd64, arm64)"
+          echo "- Windows (amd64)"
