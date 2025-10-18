@@ -1,0 +1,7 @@
+goos: linux
+goarch: amd64
+pkg: github.com/Sternrassler/EVE-SDE-Database-Builder/internal/database
+cpu: AMD EPYC 7763 64-Core Processor
+BenchmarkBatchInsert_10k-4       	      10	  14000000 ns/op	  500000 B/op	    1000 allocs/op
+BenchmarkBatchInsert_100k-4      	       1	 134000000 ns/op	 5000000 B/op	   10000 allocs/op
+PASS

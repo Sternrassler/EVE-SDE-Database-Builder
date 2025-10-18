@@ -39,3 +39,7 @@ internal/parser/generated/
 
 # Build artifacts
 dist/
+
+# Benchmark temporary files (keep baselines committed)
+benchmarks/archive/
+

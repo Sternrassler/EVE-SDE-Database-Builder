@@ -1,4 +1,4 @@
-.PHONY: help setup test test-tools lint build clean coverage fmt vet tidy check-hooks secrets-check commit-lint generate-parsers
+.PHONY: help setup test test-tools lint build clean coverage fmt vet tidy check-hooks secrets-check commit-lint generate-parsers bench bench-baseline bench-compare
 
 help: ## Display this help message
 	@echo "Available targets:"
@@ -81,6 +81,24 @@ commit-lint: ## Placeholder for commit message validation
 
 generate-parsers: ## Generate Go parsers from JSON schemas (requires quicktype)
 	@bash tools/generate-parsers.sh
+
+bench: ## Run benchmarks for key packages
+	@echo "Running benchmarks..."
+	@echo ""
+	@echo "Worker Pool Benchmarks:"
+	@go test -bench='^BenchmarkPool_.*Workers[^_]' -benchmem ./internal/worker/
+	@echo ""
+	@echo "Parser Benchmarks:"
+	@go test -bench='^BenchmarkParseJSONL' -benchmem ./internal/parser/
+	@echo ""
+	@echo "Database Benchmarks:"
+	@go test -bench=. -benchmem ./internal/database/
+
+bench-baseline: ## Capture benchmark baseline for regression testing
+	@bash scripts/capture-baseline.sh
+
+bench-compare: ## Compare current benchmarks against baseline
+	@bash scripts/compare-benchmarks.sh
 
 # Database Migration Targets
 DB_FILE ?= eve_sde.db

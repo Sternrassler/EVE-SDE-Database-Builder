@@ -1,0 +1,10 @@
+goos: linux
+goarch: amd64
+pkg: github.com/Sternrassler/EVE-SDE-Database-Builder/internal/worker
+cpu: AMD EPYC 7763 64-Core Processor
+BenchmarkPool_1Worker-4                              8784    132768 ns/op   24117 B/op     315 allocs/op
+BenchmarkPool_2Workers-4                             8630    131716 ns/op   24217 B/op     316 allocs/op
+BenchmarkPool_4Workers-4                             9452    113007 ns/op   24407 B/op     318 allocs/op
+BenchmarkPool_8Workers-4                            10000    108589 ns/op   24795 B/op     322 allocs/op
+BenchmarkPool_16Workers-4                            9696    113058 ns/op   25698 B/op     330 allocs/op
+PASS
