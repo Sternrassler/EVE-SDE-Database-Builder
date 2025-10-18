@@ -13,6 +13,7 @@ jobs:
   test:
     name: Test with Race Detector
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -23,4 +24,4 @@ jobs:
           go-version-file: 'go.mod'
 
       - name: Run tests with race detector
-        run: go test -race ./...
+        run: go test -race -timeout 8m ./...

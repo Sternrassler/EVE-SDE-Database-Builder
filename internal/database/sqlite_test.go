@@ -223,7 +223,7 @@ func TestApplyPragmas_DirectCall(t *testing.T) {
 	}()
 
 	// applyPragmas is already called in NewDB, but we test it's idempotent
-	if err := applyPragmas(db); err != nil {
+	if err := applyPragmas(db, ":memory:"); err != nil {
 		t.Errorf("applyPragmas failed on second call: %v", err)
 	}
 }
