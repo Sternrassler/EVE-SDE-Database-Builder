@@ -1,0 +1,26 @@
+[
+  {
+    "starID": 40000000,
+    "solarSystemID": 30000001,
+    "typeID": 3800,
+    "radius": 1400000000,
+    "temperature": null,
+    "luminosity": null
+  },
+  {
+    "starID": 40000141,
+    "solarSystemID": 30000142,
+    "typeID": 3802,
+    "radius": 1600000000,
+    "temperature": null,
+    "luminosity": null
+  },
+  {
+    "starID": 40000200,
+    "solarSystemID": 30000003,
+    "typeID": 3801,
+    "radius": 1200000000,
+    "temperature": null,
+    "luminosity": null
+  }
+]

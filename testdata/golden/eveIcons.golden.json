@@ -1,0 +1,17 @@
+[
+  {
+    "iconID": 1,
+    "iconFile": "res:/UI/Texture/Icons/1_64_1.png",
+    "description": "Basic icon 1"
+  },
+  {
+    "iconID": 2,
+    "iconFile": "res:/UI/Texture/Icons/1_64_2.png",
+    "description": "Basic icon 2"
+  },
+  {
+    "iconID": 22,
+    "iconFile": "res:/UI/Texture/Icons/22_64_1.png",
+    "description": "Mineral icon"
+  }
+]

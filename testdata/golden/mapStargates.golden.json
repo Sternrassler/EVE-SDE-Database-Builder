@@ -1,0 +1,17 @@
+[
+  {
+    "stargateID": 50000001,
+    "solarSystemID": 30000001,
+    "destinationID": null
+  },
+  {
+    "stargateID": 50000002,
+    "solarSystemID": 30000142,
+    "destinationID": null
+  },
+  {
+    "stargateID": 50000003,
+    "solarSystemID": 30000003,
+    "destinationID": null
+  }
+]

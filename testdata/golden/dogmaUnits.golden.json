@@ -1,0 +1,20 @@
+[
+  {
+    "unitID": 1,
+    "unitName": "m/sec",
+    "displayName": "m/sec",
+    "description": "Velocity unit"
+  },
+  {
+    "unitID": 2,
+    "unitName": "mm",
+    "displayName": "mm",
+    "description": "Millimeter unit"
+  },
+  {
+    "unitID": 3,
+    "unitName": "x",
+    "displayName": "x",
+    "description": "Multiplier unit"
+  }
+]

@@ -1,0 +1,14 @@
+[
+  {
+    "blueprintTypeID": 1234,
+    "maxProductionLimit": 10
+  },
+  {
+    "blueprintTypeID": 5678,
+    "maxProductionLimit": 5
+  },
+  {
+    "blueprintTypeID": 9012,
+    "maxProductionLimit": 1
+  }
+]

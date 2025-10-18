@@ -1,0 +1,29 @@
+[
+  {
+    "bloodlineID": 1,
+    "bloodlineName": "Deteis",
+    "raceID": 1,
+    "description": "Caldari bloodline focused on logic.",
+    "corporationID": 1000006,
+    "iconID": null,
+    "shipTypeID": 601
+  },
+  {
+    "bloodlineID": 2,
+    "bloodlineName": "Brutor",
+    "raceID": 2,
+    "description": "Minmatar bloodline of warriors.",
+    "corporationID": 1000049,
+    "iconID": null,
+    "shipTypeID": 588
+  },
+  {
+    "bloodlineID": 4,
+    "bloodlineName": "Amarr",
+    "raceID": 4,
+    "description": "Religious and traditional.",
+    "corporationID": 1000083,
+    "iconID": null,
+    "shipTypeID": 596
+  }
+]

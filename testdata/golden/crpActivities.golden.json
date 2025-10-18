@@ -1,0 +1,17 @@
+[
+  {
+    "activityID": 1,
+    "activityName": "Manufacturing",
+    "description": "Manufacturing items from blueprints"
+  },
+  {
+    "activityID": 3,
+    "activityName": "Research Time Efficiency",
+    "description": "Researching time efficiency"
+  },
+  {
+    "activityID": 4,
+    "activityName": "Research Material Efficiency",
+    "description": "Researching material efficiency"
+  }
+]

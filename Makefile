@@ -1,4 +1,4 @@
-.PHONY: help setup test test-tools lint build clean coverage fmt vet tidy check-hooks secrets-check commit-lint generate-parsers bench bench-baseline bench-compare fuzz fuzz-quick
+.PHONY: help setup test test-tools test-golden update-golden lint build clean coverage fmt vet tidy check-hooks secrets-check commit-lint generate-parsers bench bench-baseline bench-compare fuzz fuzz-quick
 
 help: ## Display this help message
 	@echo "Available targets:"
@@ -42,6 +42,17 @@ test-tools: ## Run tests for tools (separate main packages)
 	@echo ""
 	@echo "Testing scrape-rift-schemas..."
 	@go test -v -p 2 -parallel 4 ./tools/scrape-rift-schemas/...
+
+test-golden: ## Run golden file tests (parser output verification)
+	@echo "Running golden file tests..."
+	@go test -v ./internal/parser/golden/...
+
+update-golden: ## Update golden files (after intentional parser changes)
+	@echo "Updating golden files..."
+	@go test -v ./internal/parser/golden/... -update
+	@echo ""
+	@echo "✅ Golden files updated"
+	@echo "⚠️  Review changes with: git diff testdata/golden/"
 
 coverage: ## Run tests with coverage report
 	go test -coverprofile=coverage.out -p 4 -parallel 8 ./...
@@ -183,4 +194,4 @@ release-check: ## Check if repository is ready for release
 	@echo "  4. Create tag: git tag vX.Y.Z"
 	@echo "  5. Push: git push origin main && git push origin vX.Y.Z"
 
-.PHONY: migrate-status migrate-up migrate-down migrate-clean migrate-reset release-check
+.PHONY: migrate-status migrate-up migrate-down migrate-clean migrate-reset release-check test-golden update-golden

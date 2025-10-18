@@ -1,0 +1,32 @@
+[
+  {
+    "landmarkID": 60000001,
+    "landmarkName": "EVE Gate",
+    "description": "The EVE Gate is a collapsed wormhole.",
+    "locationID": 30000001,
+    "x": 0,
+    "y": 0,
+    "z": 0,
+    "iconID": null
+  },
+  {
+    "landmarkID": 60000002,
+    "landmarkName": "Jita Trade Hub",
+    "description": "The largest trade hub in New Eden.",
+    "locationID": 30000142,
+    "x": 0,
+    "y": 0,
+    "z": 0,
+    "iconID": null
+  },
+  {
+    "landmarkID": 60000003,
+    "landmarkName": "Null Sec Monument",
+    "description": "Monument to capsuleer conflicts.",
+    "locationID": 30000003,
+    "x": 0,
+    "y": 0,
+    "z": 0,
+    "iconID": null
+  }
+]

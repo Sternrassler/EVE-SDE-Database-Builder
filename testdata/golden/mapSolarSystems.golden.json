@@ -1,0 +1,35 @@
+[
+  {
+    "solarSystemID": 30000001,
+    "solarSystemName": "Tanoo",
+    "regionID": 10000001,
+    "constellationID": 20000001,
+    "x": 45000000000000000,
+    "y": 20000000000000000,
+    "z": -180000000000000000,
+    "security": 0.9,
+    "securityClass": "B"
+  },
+  {
+    "solarSystemID": 30000142,
+    "solarSystemName": "Jita",
+    "regionID": 10000002,
+    "constellationID": 20000020,
+    "x": 120000000000000000,
+    "y": 50000000000000000,
+    "z": -30000000000000000,
+    "security": 0.9,
+    "securityClass": "B"
+  },
+  {
+    "solarSystemID": 30000003,
+    "solarSystemName": "H-PA29",
+    "regionID": 10000003,
+    "constellationID": 20000003,
+    "x": -80000000000000000,
+    "y": 150000000000000000,
+    "z": 50000000000000000,
+    "security": -0.5,
+    "securityClass": "G"
+  }
+]
