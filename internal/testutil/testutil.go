@@ -40,7 +40,11 @@ func LoadJSONLFile(t *testing.T, tableName string) []string {
 	if err != nil {
 		t.Fatalf("failed to open test data file %s: %v", filePath, err)
 	}
-	defer file.Close()
+	defer func() {
+		if closeErr := file.Close(); closeErr != nil {
+			t.Errorf("failed to close file %s: %v", filePath, closeErr)
+		}
+	}()
 
 	var lines []string
 	scanner := bufio.NewScanner(file)
@@ -93,7 +97,9 @@ func CreateTempDir(t *testing.T, pattern string) string {
 	}
 
 	t.Cleanup(func() {
-		os.RemoveAll(dir)
+		if err := os.RemoveAll(dir); err != nil {
+			t.Errorf("failed to remove temp dir %s: %v", dir, err)
+		}
 	})
 
 	return dir
@@ -107,10 +113,18 @@ func WriteJSONLFile[T any](t *testing.T, filePath string, records []T) {
 	if err != nil {
 		t.Fatalf("failed to create file %s: %v", filePath, err)
 	}
-	defer file.Close()
+	defer func() {
+		if closeErr := file.Close(); closeErr != nil {
+			t.Errorf("failed to close file %s: %v", filePath, closeErr)
+		}
+	}()
 
 	writer := bufio.NewWriter(file)
-	defer writer.Flush()
+	defer func() {
+		if flushErr := writer.Flush(); flushErr != nil {
+			t.Errorf("failed to flush writer for %s: %v", filePath, flushErr)
+		}
+	}()
 
 	for i, record := range records {
 		data, err := json.Marshal(record)

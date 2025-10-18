@@ -143,7 +143,11 @@ func TestWriteJSONLFile(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed to open written file: %v", err)
 	}
-	defer file.Close()
+	defer func() {
+		if closeErr := file.Close(); closeErr != nil {
+			t.Errorf("failed to close file: %v", closeErr)
+		}
+	}()
 
 	scanner := bufio.NewScanner(file)
 	lineCount := 0

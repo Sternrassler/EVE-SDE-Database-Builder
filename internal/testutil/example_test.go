@@ -41,14 +41,13 @@ func ExampleLoadJSONLFileAsRecords() {
 	// This would normally be in a test function with *testing.T
 	// For demonstration, we'll use a mock that panics on error
 
-	type InvType struct {
-		TypeID   int      `json:"typeID"`
-		TypeName string   `json:"typeName"`
-		GroupID  *int     `json:"groupID"`
-		Mass     *float64 `json:"mass"`
-	}
-
-	// In a real test, you'd pass testing.T:
+	// In a real test, you'd define your type and pass testing.T:
+	// type InvType struct {
+	//     TypeID   int      `json:"typeID"`
+	//     TypeName string   `json:"typeName"`
+	//     GroupID  *int     `json:"groupID"`
+	//     Mass     *float64 `json:"mass"`
+	// }
 	// records := testutil.LoadJSONLFileAsRecords[InvType](t, "invTypes")
 
 	// For this example, we'll just show the concept
