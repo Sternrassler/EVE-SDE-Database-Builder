@@ -1,0 +1,20 @@
+[
+  {
+    "certificateID": 0,
+    "description": "Basic gunnery certificate",
+    "groupID": 266,
+    "name": "Gunnery"
+  },
+  {
+    "certificateID": 0,
+    "description": "Basic missile certificate",
+    "groupID": 267,
+    "name": "Missile Operation"
+  },
+  {
+    "certificateID": 0,
+    "description": "Basic shield operation",
+    "groupID": 268,
+    "name": "Shield Operation"
+  }
+]

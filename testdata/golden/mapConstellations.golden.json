@@ -1,0 +1,29 @@
+[
+  {
+    "constellationID": 20000001,
+    "constellationName": "Tanoo",
+    "regionID": 10000001,
+    "x": 45000000000000000,
+    "y": 20000000000000000,
+    "z": -180000000000000000,
+    "factionID": null
+  },
+  {
+    "constellationID": 20000002,
+    "constellationName": "Kimotoro",
+    "regionID": 10000002,
+    "x": 120000000000000000,
+    "y": 50000000000000000,
+    "z": -30000000000000000,
+    "factionID": 500001
+  },
+  {
+    "constellationID": 20000003,
+    "constellationName": "H-PA29",
+    "regionID": 10000003,
+    "x": -80000000000000000,
+    "y": 150000000000000000,
+    "z": 50000000000000000,
+    "factionID": null
+  }
+]

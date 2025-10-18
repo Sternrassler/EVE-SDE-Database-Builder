@@ -1,0 +1,26 @@
+[
+  {
+    "marketGroupID": 1857,
+    "parentGroupID": 1031,
+    "marketGroupName": "Minerals",
+    "description": "Basic building blocks for manufacturing.",
+    "iconID": 22,
+    "hasTypes": 1
+  },
+  {
+    "marketGroupID": 1031,
+    "parentGroupID": 2,
+    "marketGroupName": "Materials",
+    "description": "Raw materials and refined goods.",
+    "iconID": null,
+    "hasTypes": 0
+  },
+  {
+    "marketGroupID": 2,
+    "parentGroupID": null,
+    "marketGroupName": "Blueprints \u0026 Reactions",
+    "description": "Top level market group.",
+    "iconID": null,
+    "hasTypes": 0
+  }
+]

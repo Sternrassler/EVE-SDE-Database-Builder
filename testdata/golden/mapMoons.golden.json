@@ -1,0 +1,29 @@
+[
+  {
+    "moonID": 40000101,
+    "moonName": "Tanoo I - Moon 1",
+    "solarSystemID": 30000001,
+    "planetID": 40000001,
+    "x": 150000000000,
+    "y": 500000000,
+    "z": 0
+  },
+  {
+    "moonID": 40000102,
+    "moonName": "Jita IV - Moon 4",
+    "solarSystemID": 30000142,
+    "planetID": 40000002,
+    "x": 200000000000,
+    "y": 10000000000,
+    "z": -50000000000
+  },
+  {
+    "moonID": 40000103,
+    "moonName": "H-PA29 III - Moon 1",
+    "solarSystemID": 30000003,
+    "planetID": 40000003,
+    "x": -300000000000,
+    "y": 200000000000,
+    "z": 100000000000
+  }
+]

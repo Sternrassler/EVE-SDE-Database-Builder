@@ -1,0 +1,17 @@
+[
+  {
+    "graphicID": 20,
+    "graphicFile": "res:/UI/Texture/Icons/1_64_1.png",
+    "description": "Generic icon 1"
+  },
+  {
+    "graphicID": 21,
+    "graphicFile": "res:/UI/Texture/Icons/1_64_2.png",
+    "description": "Generic icon 2"
+  },
+  {
+    "graphicID": 22,
+    "graphicFile": "res:/UI/Texture/Icons/1_64_3.png",
+    "description": "Generic icon 3"
+  }
+]

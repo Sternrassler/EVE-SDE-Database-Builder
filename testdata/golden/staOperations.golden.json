@@ -1,0 +1,50 @@
+[
+  {
+    "operationID": 1,
+    "operationName": "Manufacturing",
+    "description": "Standard manufacturing operations",
+    "fractionID": null,
+    "border": 0,
+    "fringe": 0,
+    "corridor": 1,
+    "hub": 1,
+    "ratio": 50,
+    "caldariStationTypeID": null,
+    "minmatarStationTypeID": null,
+    "amarrStationTypeID": null,
+    "gallenteStationTypeID": null,
+    "joveStationTypeID": null
+  },
+  {
+    "operationID": 2,
+    "operationName": "Research",
+    "description": "Research and development operations",
+    "fractionID": null,
+    "border": 0,
+    "fringe": 0,
+    "corridor": 1,
+    "hub": 1,
+    "ratio": 30,
+    "caldariStationTypeID": null,
+    "minmatarStationTypeID": null,
+    "amarrStationTypeID": null,
+    "gallenteStationTypeID": null,
+    "joveStationTypeID": null
+  },
+  {
+    "operationID": 3,
+    "operationName": "Trade Hub",
+    "description": "Major trading operations",
+    "fractionID": null,
+    "border": 0,
+    "fringe": 0,
+    "corridor": 0,
+    "hub": 1,
+    "ratio": 100,
+    "caldariStationTypeID": null,
+    "minmatarStationTypeID": null,
+    "amarrStationTypeID": null,
+    "gallenteStationTypeID": null,
+    "joveStationTypeID": null
+  }
+]

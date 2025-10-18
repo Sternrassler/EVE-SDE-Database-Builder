@@ -1,0 +1,20 @@
+[
+  {
+    "skinID": 1001,
+    "internalName": "aurgoralight_federation_navy_aurgoralight",
+    "skinMaterialID": 123,
+    "typeID": 587
+  },
+  {
+    "skinID": 1002,
+    "internalName": "aurgoralight_federation_navy_coercer",
+    "skinMaterialID": 124,
+    "typeID": 588
+  },
+  {
+    "skinID": 1003,
+    "internalName": "aurgoralight_federation_navy_tristan",
+    "skinMaterialID": 125,
+    "typeID": 606
+  }
+]

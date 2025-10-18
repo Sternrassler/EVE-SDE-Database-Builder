@@ -1,0 +1,20 @@
+[
+  {
+    "raceID": 1,
+    "raceName": "Caldari",
+    "description": "The Caldari State is a corporate dictatorship.",
+    "iconID": 1441
+  },
+  {
+    "raceID": 2,
+    "raceName": "Minmatar",
+    "description": "The Minmatar Republic is a tribal society.",
+    "iconID": 1442
+  },
+  {
+    "raceID": 4,
+    "raceName": "Amarr",
+    "description": "The Amarr Empire is a theocratic empire.",
+    "iconID": 1443
+  }
+]

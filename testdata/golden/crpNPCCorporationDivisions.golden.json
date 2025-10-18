@@ -1,0 +1,23 @@
+[
+  {
+    "corporationID": 0,
+    "divisionID": 1,
+    "size": null,
+    "divisionName": "Accounting",
+    "leaderID": null
+  },
+  {
+    "corporationID": 0,
+    "divisionID": 2,
+    "size": null,
+    "divisionName": "Security",
+    "leaderID": null
+  },
+  {
+    "corporationID": 0,
+    "divisionID": 3,
+    "size": null,
+    "divisionName": "Production",
+    "leaderID": null
+  }
+]

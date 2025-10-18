@@ -1,0 +1,14 @@
+[
+  {
+    "agentTypeID": 1,
+    "agentType": "Non-Agent"
+  },
+  {
+    "agentTypeID": 2,
+    "agentType": "Basic Agent"
+  },
+  {
+    "agentTypeID": 7,
+    "agentType": "Research Agent"
+  }
+]

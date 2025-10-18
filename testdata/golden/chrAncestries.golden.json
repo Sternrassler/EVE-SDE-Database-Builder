@@ -1,0 +1,26 @@
+[
+  {
+    "ancestryID": 1,
+    "ancestryName": "Liberal Holders",
+    "bloodlineID": 4,
+    "description": "Wealthy Amarr nobles.",
+    "iconID": null,
+    "shortDescription": "Wealthy nobles"
+  },
+  {
+    "ancestryID": 2,
+    "ancestryName": "Entrepreneurs",
+    "bloodlineID": 1,
+    "description": "Caldari business elite.",
+    "iconID": null,
+    "shortDescription": "Business elite"
+  },
+  {
+    "ancestryID": 11,
+    "ancestryName": "Traders",
+    "bloodlineID": 2,
+    "description": "Minmatar merchants.",
+    "iconID": null,
+    "shortDescription": "Merchants"
+  }
+]

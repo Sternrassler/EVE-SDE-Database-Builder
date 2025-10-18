@@ -1,0 +1,26 @@
+[
+  {
+    "attributeID": 164,
+    "attributeName": "charisma",
+    "description": "Charisma of the character.",
+    "iconID": 21,
+    "shortDescription": "Social ability",
+    "notes": "Social skills"
+  },
+  {
+    "attributeID": 165,
+    "attributeName": "intelligence",
+    "description": "Intelligence of the character.",
+    "iconID": 21,
+    "shortDescription": "Mental capacity",
+    "notes": "Learning skills"
+  },
+  {
+    "attributeID": 166,
+    "attributeName": "memory",
+    "description": "Memory of the character.",
+    "iconID": 21,
+    "shortDescription": "Knowledge retention",
+    "notes": "Training speed"
+  }
+]

@@ -1,0 +1,53 @@
+[
+  {
+    "typeID": 34,
+    "typeName": "Tritanium",
+    "groupID": 18,
+    "description": "Tritanium is the primary building block.",
+    "mass": 0.01,
+    "volume": 0.01,
+    "capacity": null,
+    "portionSize": 1,
+    "raceID": null,
+    "basePrice": 5,
+    "published": 1,
+    "marketGroupID": 1857,
+    "iconID": 22,
+    "soundID": null,
+    "graphicID": null
+  },
+  {
+    "typeID": 35,
+    "typeName": "Pyerite",
+    "groupID": 18,
+    "description": "Pyerite is a common mineral.",
+    "mass": 0.01,
+    "volume": 0.01,
+    "capacity": null,
+    "portionSize": 1,
+    "raceID": null,
+    "basePrice": 6,
+    "published": 1,
+    "marketGroupID": 1857,
+    "iconID": 22,
+    "soundID": null,
+    "graphicID": null
+  },
+  {
+    "typeID": 36,
+    "typeName": "Mexallon",
+    "groupID": 18,
+    "description": "Mexallon is a commonly used industrial mineral.",
+    "mass": 0.01,
+    "volume": 0.01,
+    "capacity": null,
+    "portionSize": 1,
+    "raceID": null,
+    "basePrice": 60,
+    "published": 1,
+    "marketGroupID": 1857,
+    "iconID": 22,
+    "soundID": null,
+    "graphicID": null
+  }
+]
