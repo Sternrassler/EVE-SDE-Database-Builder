@@ -146,7 +146,7 @@ func Example_realWorldRepositoryTesting() {
 	db := testutil.NewMockDB()
 
 	// Setup: Configure mock behavior for Exec
-	db.ExecFunc = func(query string, args ...interface{}) (sql.Result, error) {
+	db.ExecFunc = func(_ string, _ ...interface{}) (sql.Result, error) {
 		// Simulate successful insert with ID 42
 		return testutil.NewMockResult(42, 1), nil
 	}
@@ -204,7 +204,7 @@ func NewRealWorldService(apiClient *RealWorldAPIClient, repo *RealWorldRepositor
 	}
 }
 
-func (s *RealWorldService) SyncUser(ctx context.Context, userID int) error {
+func (s *RealWorldService) SyncUser(_ context.Context, userID int) error {
 	s.log.Info("Starting user sync", logger.Field{Key: "user_id", Value: userID})
 
 	// Fetch from API
@@ -228,13 +228,13 @@ func (s *RealWorldService) SyncUser(ctx context.Context, userID int) error {
 // Example_realWorldServiceIntegrationTesting demonstrates integration testing with all mocks.
 func Example_realWorldServiceIntegrationTesting() {
 	// Setup HTTP mock
-	httpClient := testutil.MockHTTPClient(func(req *http.Request) (*http.Response, error) {
+	httpClient := testutil.MockHTTPClient(func(_ *http.Request) (*http.Response, error) {
 		return testutil.MockJSONResponse(200, `{"id":123,"name":"Alice","email":"alice@example.com"}`), nil
 	})
 
 	// Setup DB mock
 	db := testutil.NewMockDB()
-	db.ExecFunc = func(query string, args ...interface{}) (sql.Result, error) {
+	db.ExecFunc = func(_ string, _ ...interface{}) (sql.Result, error) {
 		return testutil.NewMockResult(1, 1), nil
 	}
 
@@ -278,7 +278,7 @@ func Example_realWorldServiceIntegrationTesting() {
 // Example_realWorldErrorHandling demonstrates testing error scenarios with mocks.
 func Example_realWorldErrorHandling() {
 	// Setup: HTTP client that fails
-	httpClient := testutil.MockHTTPClient(func(req *http.Request) (*http.Response, error) {
+	httpClient := testutil.MockHTTPClient(func(_ *http.Request) (*http.Response, error) {
 		return testutil.MockResponse(500, "Internal Server Error"), nil
 	})
 
@@ -324,7 +324,7 @@ func Example_realWorldPerformanceTesting() {
 	httpClient := testutil.StaticMockClient(200, `{"data":"ok"}`)
 	
 	db := testutil.NewMockDB()
-	db.ExecFunc = func(query string, args ...interface{}) (sql.Result, error) {
+	db.ExecFunc = func(_ string, _ ...interface{}) (sql.Result, error) {
 		return testutil.NewMockResult(1, 1), nil
 	}
 

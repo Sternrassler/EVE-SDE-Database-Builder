@@ -70,7 +70,7 @@ func (l *LoggerStub) Fatal(msg string, fields ...logger.Field) {
 
 // WithContext creates a new logger with context-specific fields.
 // For the stub, this returns a new instance that shares the message buffer.
-func (l *LoggerStub) WithContext(ctx context.Context) *LoggerStub {
+func (l *LoggerStub) WithContext(_ context.Context) *LoggerStub {
 	// For simplicity, return the same logger
 	// In a more sophisticated implementation, we could extract context values
 	return l
@@ -300,7 +300,7 @@ func intToString(v interface{}) string {
 	}
 }
 
-func floatToString(v interface{}) string {
+func floatToString(_ interface{}) string {
 	// Simplified float representation
 	return "<float>"
 }

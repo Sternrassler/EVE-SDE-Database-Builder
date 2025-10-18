@@ -90,16 +90,16 @@ type QueryCall struct {
 // NewMockDB creates a new MockDB with default no-op implementations.
 func NewMockDB() *MockDB {
 	return &MockDB{
-		ExecFunc: func(query string, args ...interface{}) (sql.Result, error) {
+		ExecFunc: func(_ string, _ ...interface{}) (sql.Result, error) {
 			return MockResult{}, nil
 		},
-		QueryFunc: func(query string, args ...interface{}) (*sql.Rows, error) {
+		QueryFunc: func(_ string, _ ...interface{}) (*sql.Rows, error) {
 			return nil, errors.New("not implemented")
 		},
-		QueryRowFunc: func(query string, args ...interface{}) *sql.Row {
+		QueryRowFunc: func(_ string, _ ...interface{}) *sql.Row {
 			return nil
 		},
-		PrepareFunc: func(query string) (*sql.Stmt, error) {
+		PrepareFunc: func(_ string) (*sql.Stmt, error) {
 			return nil, errors.New("not implemented")
 		},
 		BeginFunc: func() (*sql.Tx, error) {
@@ -260,7 +260,7 @@ func (a *SQLXAdapter) Ping() error {
 type MockDriver struct{}
 
 // Open implements driver.Driver
-func (d MockDriver) Open(name string) (driver.Conn, error) {
+func (d MockDriver) Open(_ string) (driver.Conn, error) {
 	return &MockConn{}, nil
 }
 
@@ -268,7 +268,7 @@ func (d MockDriver) Open(name string) (driver.Conn, error) {
 type MockConn struct{}
 
 // Prepare implements driver.Conn
-func (c *MockConn) Prepare(query string) (driver.Stmt, error) {
+func (c *MockConn) Prepare(_ string) (driver.Stmt, error) {
 	return &MockStmt{}, nil
 }
 
@@ -296,12 +296,12 @@ func (s *MockStmt) NumInput() int {
 }
 
 // Exec implements driver.Stmt
-func (s *MockStmt) Exec(args []driver.Value) (driver.Result, error) {
+func (s *MockStmt) Exec(_ []driver.Value) (driver.Result, error) {
 	return driver.ResultNoRows, nil
 }
 
 // Query implements driver.Stmt
-func (s *MockStmt) Query(args []driver.Value) (driver.Rows, error) {
+func (s *MockStmt) Query(_ []driver.Value) (driver.Rows, error) {
 	return &MockRows{}, nil
 }
 
@@ -322,7 +322,7 @@ func (r *MockRows) Close() error {
 }
 
 // Next implements driver.Rows
-func (r *MockRows) Next(dest []driver.Value) error {
+func (r *MockRows) Next(_ []driver.Value) error {
 	return fmt.Errorf("no rows")
 }
 

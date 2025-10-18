@@ -99,7 +99,7 @@ func Example_dbMock() {
 	db := testutil.NewMockDB()
 
 	// Configure mock behavior for Exec
-	db.ExecFunc = func(query string, args ...interface{}) (sql.Result, error) {
+	db.ExecFunc = func(_ string, _ ...interface{}) (sql.Result, error) {
 		return testutil.NewMockResult(1, 1), nil
 	}
 
@@ -131,7 +131,7 @@ func Example_dbMockErrors() {
 
 	// Configure mock to return an error
 	expectedErr := errors.New("unique constraint violation")
-	db.ExecFunc = func(query string, args ...interface{}) (sql.Result, error) {
+	db.ExecFunc = func(_ string, _ ...interface{}) (sql.Result, error) {
 		return nil, expectedErr
 	}
 
@@ -198,7 +198,7 @@ type ServiceWithDependencies struct {
 	log        *testutil.LoggerStub
 }
 
-func (s *ServiceWithDependencies) FetchAndStore(ctx context.Context, url string) error {
+func (s *ServiceWithDependencies) FetchAndStore(_ context.Context, url string) error {
 	// Fetch data from HTTP
 	resp, err := s.httpClient.Get(url)
 	if err != nil {
@@ -226,12 +226,12 @@ func (s *ServiceWithDependencies) FetchAndStore(ctx context.Context, url string)
 // Example_integrationWithMocks demonstrates testing with all mocks together.
 func Example_integrationWithMocks() {
 	// Setup all mocks
-	httpClient := testutil.MockHTTPClient(func(req *http.Request) (*http.Response, error) {
+	httpClient := testutil.MockHTTPClient(func(_ *http.Request) (*http.Response, error) {
 		return testutil.MockJSONResponse(200, `{"data":"test"}`), nil
 	})
 
 	db := testutil.NewMockDB()
-	db.ExecFunc = func(query string, args ...interface{}) (sql.Result, error) {
+	db.ExecFunc = func(_ string, _ ...interface{}) (sql.Result, error) {
 		return testutil.NewMockResult(1, 1), nil
 	}
 
@@ -267,7 +267,7 @@ func Example_integrationWithMocks() {
 // Example_errorScenarioTesting demonstrates testing error scenarios.
 func Example_errorScenarioTesting() {
 	// Test HTTP error
-	httpClient := testutil.MockHTTPClient(func(req *http.Request) (*http.Response, error) {
+	httpClient := testutil.MockHTTPClient(func(_ *http.Request) (*http.Response, error) {
 		return nil, errors.New("network timeout")
 	})
 

@@ -13,7 +13,7 @@ func TestMockDB_Exec(t *testing.T) {
 	db := testutil.NewMockDB()
 
 	expectedResult := testutil.NewMockResult(123, 5)
-	db.ExecFunc = func(query string, args ...interface{}) (sql.Result, error) {
+	db.ExecFunc = func(_ string, _ ...interface{}) (sql.Result, error) {
 		return expectedResult, nil
 	}
 
@@ -59,7 +59,7 @@ func TestMockDB_ExecError(t *testing.T) {
 	db := testutil.NewMockDB()
 	expectedErr := errors.New("exec failed")
 
-	db.ExecFunc = func(query string, args ...interface{}) (sql.Result, error) {
+	db.ExecFunc = func(_ string, _ ...interface{}) (sql.Result, error) {
 		return testutil.MockResult{}, expectedErr
 	}
 
@@ -248,7 +248,7 @@ func TestMockDB_MultipleOperations(t *testing.T) {
 	db := testutil.NewMockDB()
 
 	// Configure exec to return specific result
-	db.ExecFunc = func(query string, args ...interface{}) (sql.Result, error) {
+	db.ExecFunc = func(_ string, _ ...interface{}) (sql.Result, error) {
 		return testutil.NewMockResult(100, 10), nil
 	}
 

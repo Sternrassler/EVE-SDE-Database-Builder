@@ -81,7 +81,7 @@ func MockErrorResponse(err error) (*http.Response, error) {
 //
 //	client := testutil.StaticMockClient(200, `{"result":"ok"}`)
 func StaticMockClient(statusCode int, body string) *http.Client {
-	return MockHTTPClient(func(req *http.Request) (*http.Response, error) {
+	return MockHTTPClient(func(_ *http.Request) (*http.Response, error) {
 		return MockResponse(statusCode, body), nil
 	})
 }
@@ -114,14 +114,14 @@ func NewRequestRecorder(response *http.Response) *RequestRecorder {
 
 // Client returns an HTTP client that uses this recorder as transport.
 func (r *RequestRecorder) Client() *http.Client {
-	return MockHTTPClient(func(req *http.Request) (*http.Response, error) {
+	return MockHTTPClient(func(reqOrig *http.Request) (*http.Response, error) {
 		// Clone the request to avoid modifications affecting the recorded version
-		clonedReq := req.Clone(req.Context())
+		clonedReq := reqOrig.Clone(reqOrig.Context())
 
 		// If request has a body, we need to read and restore it
-		if req.Body != nil {
-			bodyBytes, _ := io.ReadAll(req.Body)
-			req.Body = io.NopCloser(bytes.NewBuffer(bodyBytes))
+		if reqOrig.Body != nil {
+			bodyBytes, _ := io.ReadAll(reqOrig.Body)
+			reqOrig.Body = io.NopCloser(bytes.NewBuffer(bodyBytes))
 			clonedReq.Body = io.NopCloser(bytes.NewBuffer(bodyBytes))
 		}
 

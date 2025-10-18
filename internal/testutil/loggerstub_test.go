@@ -366,7 +366,7 @@ func TestLoggerStub_Concurrency(t *testing.T) {
 	// Test concurrent logging
 	done := make(chan bool, 10)
 	for i := 0; i < 10; i++ {
-		go func(id int) {
+		go func(_ int) {
 			for j := 0; j < 10; j++ {
 				stub.Info("concurrent message")
 			}

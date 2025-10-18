@@ -13,7 +13,7 @@ import (
 func TestMockHTTPClient(t *testing.T) {
 	expectedBody := `{"test": "data"}`
 
-	client := testutil.MockHTTPClient(func(req *http.Request) (*http.Response, error) {
+	client := testutil.MockHTTPClient(func(_ *http.Request) (*http.Response, error) {
 		return testutil.MockResponse(200, expectedBody), nil
 	})
 
@@ -84,7 +84,7 @@ func TestMockJSONResponse(t *testing.T) {
 func TestMockErrorResponse(t *testing.T) {
 	expectedErr := errors.New("connection timeout")
 
-	client := testutil.MockHTTPClient(func(req *http.Request) (*http.Response, error) {
+	client := testutil.MockHTTPClient(func(_ *http.Request) (*http.Response, error) {
 		return testutil.MockErrorResponse(expectedErr)
 	})
 
