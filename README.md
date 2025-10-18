@@ -87,6 +87,13 @@ make lint
 
 # Security Scan
 make scan
+
+# Run Benchmarks
+make bench
+
+# Performance Regression Testing
+make bench-baseline  # Capture baseline
+make bench-compare   # Compare against baseline
 ```
 
 **Nach `git clone`:** Führe `make setup` aus, um alle Dependencies zu installieren und Parser-Code zu generieren.
@@ -177,10 +184,12 @@ Vollständig automatisierte CI/CD-Pipeline mit GitHub Actions:
 - **🔍 Lint:** Automatische Code-Qualitätsprüfung mit golangci-lint
 - **✅ Test:** Alle Tests mit Race Detector auf PRs und Main
 - **📊 Coverage:** Automatische Coverage-Reports und Trend-Tracking
+- **🏁 Benchmark:** Performance-Regression Tests gegen Baseline
 - **🚀 Release:** Multi-Platform Builds (Linux, macOS, Windows) bei Git Tags
 
 **Workflows:**
 - [`pr-check.yml`](.github/workflows/pr-check.yml) - PR Quality Gates (Lint + Test + Coverage)
+- [`benchmark.yml`](.github/workflows/benchmark.yml) - Performance Regression Detection
 - [`coverage.yml`](.github/workflows/coverage.yml) - Detaillierte Coverage-Reports
 - [`release.yml`](.github/workflows/release.yml) - Automatisierte Release-Erstellung
 

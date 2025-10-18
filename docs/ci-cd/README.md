@@ -7,10 +7,11 @@ Umfassende Dokumentation der GitHub Actions Workflows für EVE SDE Database Buil
 Das Projekt verwendet mehrere GitHub Actions Workflows für Continuous Integration und Continuous Deployment:
 
 1. **PR Quality Check** - Qualitätsprüfungen für Pull Requests
-2. **Coverage** - Test Coverage Tracking
-3. **Lint** - Code Linting
-4. **Test** - Unit Tests mit Race Detector
-5. **Release** - Automatisierte Release-Erstellung
+2. **Benchmark** - Performance-Regression Tests
+3. **Coverage** - Test Coverage Tracking
+4. **Lint** - Code Linting
+5. **Test** - Unit Tests mit Race Detector
+6. **Release** - Automatisierte Release-Erstellung
 
 ---
 
@@ -44,7 +45,56 @@ make build
 
 ---
 
-### 2. Coverage (`.github/workflows/coverage.yml`)
+### 2. Benchmark (`.github/workflows/benchmark.yml`)
+
+**Trigger:**
+- Pull Request auf `main` oder `master` Branch (bei Go-Datei-Änderungen)
+- Workflow Dispatch (manueller Trigger)
+
+**Features:**
+- ✅ Performance-Regression Tests gegen Baseline
+- ✅ Worker Pool, Parser und Database Benchmarks
+- ✅ Automatischer Vergleich mit `benchstat`
+- ✅ PR-Kommentar mit Benchmark-Ergebnissen
+- ✅ Warnung bei >15% Performance-Regression
+
+**Baseline-Dateien:**
+- `benchmarks/baseline-worker.txt` - Worker Pool Benchmarks
+- `benchmarks/baseline-parser.txt` - Parser Benchmarks
+- `benchmarks/baseline-database.txt` - Database Benchmarks
+
+**Nutzung:**
+```bash
+# Lokal Benchmarks ausführen:
+make bench
+
+# Neue Baseline erfassen:
+make bench-baseline
+
+# Gegen Baseline vergleichen:
+make bench-compare
+```
+
+**Benchmark-Metriken:**
+- `ns/op` - Nanosekunden pro Operation
+- `B/op` - Bytes alloziert pro Operation
+- `allocs/op` - Anzahl Allocations pro Operation
+
+**Regression-Schwellwerte:**
+- Performance: >15% langsamer → CI fails
+- Memory: >20% mehr Allocations → Warnung
+
+**Baseline aktualisieren:**
+```bash
+# Nach Performance-Optimierungen oder Architektur-Änderungen
+make bench-baseline
+git add benchmarks/
+git commit -m "chore: Update benchmark baseline"
+```
+
+---
+
+### 3. Coverage (`.github/workflows/coverage.yml`)
 
 **Trigger:** 
 - Push auf `main` oder `master` Branch
@@ -71,7 +121,7 @@ go tool cover -html=coverage.out
 
 ---
 
-### 3. Lint (`.github/workflows/lint.yml`)
+### 4. Lint (`.github/workflows/lint.yml`)
 
 **Trigger:**
 - Push auf `main` oder `master` Branch
@@ -92,7 +142,7 @@ make lint
 
 ---
 
-### 4. Test (`.github/workflows/test.yml`)
+### 5. Test (`.github/workflows/test.yml`)
 
 **Trigger:**
 - Push auf `main` oder `master` Branch
@@ -114,7 +164,7 @@ make test-race
 
 ---
 
-### 5. Release (`.github/workflows/release.yml`)
+### 6. Release (`.github/workflows/release.yml`)
 
 **Trigger:** Git Tag mit Format `v*.*.*` (z.B. `v0.3.0`)
 
@@ -260,6 +310,9 @@ make build
 # Mit Coverage:
 make coverage
 
+# Performance Regression Check:
+make bench-compare
+
 # Optional: CI lokal simulieren mit act
 # https://github.com/nektos/act
 act pull_request
@@ -346,6 +399,7 @@ go tool cover -html=coverage.out
 - **Lint**: ~1-2 Minuten
 - **Test**: ~2-5 Minuten
 - **Coverage**: ~3-5 Minuten
+- **Benchmark**: ~5-10 Minuten
 - **Release**: ~5-10 Minuten (alle Plattformen)
 
 ### Optimierungen

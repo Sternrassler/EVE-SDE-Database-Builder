@@ -1,0 +1,8 @@
+goos: linux
+goarch: amd64
+pkg: github.com/Sternrassler/EVE-SDE-Database-Builder/internal/parser
+cpu: AMD EPYC 7763 64-Core Processor
+BenchmarkParseJSONL_1k-4         	     100	   981000 ns/op	 1360000 B/op	    7016 allocs/op
+BenchmarkParseJSONL_10k-4        	      10	  9170000 ns/op	 4510000 B/op	   70023 allocs/op
+BenchmarkParseJSONL_100k-4       	       1	101000000 ns/op	37970000 B/op	  700033 allocs/op
+PASS
