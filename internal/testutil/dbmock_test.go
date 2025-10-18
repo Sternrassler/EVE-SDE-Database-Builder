@@ -200,11 +200,11 @@ func TestMockDB_Reset(t *testing.T) {
 	db := testutil.NewMockDB()
 
 	// Make some calls
-	db.Exec("INSERT INTO test VALUES (?)", 1)
-	db.Query("SELECT * FROM test")
+	_, _ = db.Exec("INSERT INTO test VALUES (?)", 1)
+	_, _ = db.Query("SELECT * FROM test")
 	db.QueryRow("SELECT * FROM test WHERE id = ?", 1)
-	db.Prepare("SELECT * FROM test")
-	db.Close()
+	_, _ = db.Prepare("SELECT * FROM test")
+	_ = db.Close()
 
 	// Verify calls were recorded
 	if len(db.ExecCalls) != 1 {

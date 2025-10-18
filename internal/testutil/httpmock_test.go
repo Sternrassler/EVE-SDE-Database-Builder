@@ -21,7 +21,7 @@ func TestMockHTTPClient(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode != 200 {
 		t.Errorf("expected status 200, got %d", resp.StatusCode)
@@ -113,7 +113,7 @@ func TestStaticMockClient(t *testing.T) {
 		if err != nil {
 			t.Fatalf("request %d: unexpected error: %v", i, err)
 		}
-		defer resp.Body.Close()
+		defer func() { _ = resp.Body.Close() }()
 
 		if resp.StatusCode != 201 {
 			t.Errorf("request %d: expected status 201, got %d", i, resp.StatusCode)
@@ -139,7 +139,7 @@ func TestRequestRecorder_Basic(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	// Verify request was recorded
 	if recorder.RequestCount() != 1 {
@@ -176,7 +176,7 @@ func TestRequestRecorder_MultipleRequests(t *testing.T) {
 		if err != nil {
 			t.Fatalf("unexpected error for %s: %v", url, err)
 		}
-		resp.Body.Close()
+		_ = resp.Body.Close()
 	}
 
 	// Verify all requests were recorded
@@ -206,7 +206,7 @@ func TestRequestRecorder_WithBody(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	// Verify request was recorded
 	if recorder.RequestCount() != 1 {
@@ -248,7 +248,7 @@ func TestRequestRecorder_Reset(t *testing.T) {
 		if err != nil {
 			t.Fatalf("unexpected error: %v", err)
 		}
-		resp.Body.Close()
+		_ = resp.Body.Close()
 	}
 
 	if recorder.RequestCount() != 3 {

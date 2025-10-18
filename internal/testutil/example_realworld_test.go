@@ -35,7 +35,7 @@ func (c *RealWorldAPIClient) FetchUserData(userID int) (string, error) {
 		c.log.Error("HTTP request failed", logger.Field{Key: "error", Value: err.Error()})
 		return "", err
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode != 200 {
 		c.log.Warn("Non-200 status", logger.Field{Key: "status", Value: resp.StatusCode})

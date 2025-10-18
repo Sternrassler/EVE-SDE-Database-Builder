@@ -20,7 +20,7 @@ func Example_httpMockBasic() {
 	if err != nil {
 		panic(err)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	fmt.Printf("Status: %d\n", resp.StatusCode)
 	// Output: Status: 200
@@ -46,21 +46,21 @@ func Example_httpMockDynamic() {
 	if err != nil {
 		panic(err)
 	}
-	defer resp1.Body.Close()
+	defer func() { _ = resp1.Body.Close() }()
 	fmt.Printf("Users endpoint: %d\n", resp1.StatusCode)
 
 	resp2, err := client.Get("http://api.example.com/error")
 	if err != nil {
 		panic(err)
 	}
-	defer resp2.Body.Close()
+	defer func() { _ = resp2.Body.Close() }()
 	fmt.Printf("Error endpoint: %d\n", resp2.StatusCode)
 
 	resp3, err := client.Get("http://api.example.com/unknown")
 	if err != nil {
 		panic(err)
 	}
-	defer resp3.Body.Close()
+	defer func() { _ = resp3.Body.Close() }()
 	fmt.Printf("Unknown endpoint: %d\n", resp3.StatusCode)
 
 	// Output:
@@ -76,9 +76,9 @@ func Example_httpMockRecorder() {
 	client := recorder.Client()
 
 	// Make multiple requests
-	client.Get("http://api.example.com/endpoint1")
-	client.Get("http://api.example.com/endpoint2")
-	client.Post("http://api.example.com/data", "application/json", nil)
+	_, _ = client.Get("http://api.example.com/endpoint1")
+	_, _ = client.Get("http://api.example.com/endpoint2")
+	_, _ = client.Post("http://api.example.com/data", "application/json", nil)
 
 	// Verify requests were made
 	fmt.Printf("Total requests: %d\n", recorder.RequestCount())
@@ -205,7 +205,7 @@ func (s *ServiceWithDependencies) FetchAndStore(_ context.Context, url string) e
 		s.log.Error("HTTP request failed", logger.Field{Key: "error", Value: err.Error()})
 		return err
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode != 200 {
 		s.log.Warn("Non-200 status", logger.Field{Key: "status", Value: resp.StatusCode})
