@@ -56,8 +56,8 @@ This implementation adds comprehensive property-based testing using gopter to ve
 
 ## Test Results
 All property tests pass with 100 test cases each:
-- **Total property tests**: 19
-- **Total test cases executed**: 1,900
+- **Total property tests**: 20
+- **Total test cases executed**: 2,000
 - **Pass rate**: 100%
 - **Execution time**: ~1 second total
 
