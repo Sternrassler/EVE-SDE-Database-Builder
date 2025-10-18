@@ -112,3 +112,82 @@ func ApplyMigrations(db *sqlx.DB) error {
 
 	return nil
 }
+
+// ApplyMigrationsFromCLI applies all SQL migration files to an existing database file
+// by opening a connection, applying migrations, and closing the connection.
+// This is a convenience function for CLI usage where you already have a db path.
+//
+// Parameters:
+//   - dbPath: Path to the database file
+//
+// Returns:
+//   - error: Any error encountered during the process
+//
+// Example:
+//
+//	if err := ApplyMigrationsFromCLI("./eve-sde.db"); err != nil {
+//	    log.Fatalf("Failed to apply migrations: %v", err)
+//	}
+func ApplyMigrationsFromCLI(dbPath string) error {
+	// Open a temporary connection just for migrations
+	db, err := NewDB(dbPath)
+	if err != nil {
+		return fmt.Errorf("failed to open database for migrations: %w", err)
+	}
+	defer func() { _ = Close(db) }()
+
+	// Find migrations directory - look for it relative to executable or common locations
+	migrationsDirs := []string{
+		"./migrations/sqlite",          // Current directory
+		"../migrations/sqlite",         // Parent directory
+		"../../migrations/sqlite",      // Two levels up
+		"./EVE-SDE-Database-Builder/migrations/sqlite", // In case we're in a subdirectory
+	}
+
+	var migrationsDir string
+	for _, dir := range migrationsDirs {
+		if _, err := os.Stat(dir); err == nil {
+			migrationsDir = dir
+			break
+		}
+	}
+
+	if migrationsDir == "" {
+		return fmt.Errorf("could not find migrations directory in any of: %v", migrationsDirs)
+	}
+
+	// Read all migration files
+	entries, err := os.ReadDir(migrationsDir)
+	if err != nil {
+		return fmt.Errorf("failed to read migrations directory: %w", err)
+	}
+
+	// Filter and sort SQL files
+	var migrationFiles []string
+	for _, entry := range entries {
+		if !entry.IsDir() && filepath.Ext(entry.Name()) == ".sql" {
+			migrationFiles = append(migrationFiles, entry.Name())
+		}
+	}
+	sort.Strings(migrationFiles)
+
+	if len(migrationFiles) == 0 {
+		return fmt.Errorf("no migration files found in %s", migrationsDir)
+	}
+
+	// Apply each migration in order
+	for _, filename := range migrationFiles {
+		migrationPath := filepath.Join(migrationsDir, filename)
+		migrationSQL, err := os.ReadFile(migrationPath)
+		if err != nil {
+			return fmt.Errorf("failed to read migration file %s: %w", filename, err)
+		}
+
+		// Execute migration
+		if _, err := db.Exec(string(migrationSQL)); err != nil {
+			return fmt.Errorf("failed to execute migration %s: %w", filename, err)
+		}
+	}
+
+	return nil
+}
