@@ -118,8 +118,11 @@ func runImportCmd(cmd *cobra.Command, args []string) error {
 	defer func() { _ = db.Close() }()
 
 	// Run Migrations (Schema Creation)
-	// TODO: Implement schema migration
-	// For now, we assume the schema exists or is created elsewhere
+	log.Info("Applying database migrations...")
+	if err := database.ApplyMigrationsFromCLI(dbPath); err != nil {
+		return fmt.Errorf("failed to apply migrations: %w", err)
+	}
+	log.Info("Database migrations applied successfully")
 
 	// Create Worker Pool
 	pool := worker.NewPool(workerCount)
