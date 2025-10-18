@@ -6,6 +6,7 @@ import (
 	"io"
 	"os"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/Sternrassler/EVE-SDE-Database-Builder/internal/worker"
@@ -204,6 +205,7 @@ func formatDuration(d time.Duration) string {
 
 // Spinner repräsentiert einen rotierenden Spinner für Datei-Verarbeitung.
 type Spinner struct {
+	mu      sync.Mutex
 	frames  []string
 	current int
 	active  bool
@@ -217,28 +219,36 @@ func NewSpinner(output io.Writer) *Spinner {
 	return &Spinner{
 		frames: []string{"⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"},
 		output: output,
-		done:   make(chan struct{}),
 	}
 }
 
 // Start startet den Spinner mit einer Datei-Beschreibung.
 func (s *Spinner) Start(message string) {
+	s.mu.Lock()
 	if s.active {
+		s.mu.Unlock()
 		s.Stop()
+		s.mu.Lock()
 	}
 
 	s.active = true
 	s.current = 0
+	s.done = make(chan struct{}) // Create new channel for this run
 	s.ticker = time.NewTicker(80 * time.Millisecond)
+	done := s.done     // Capture channel for goroutine
+	ticker := s.ticker // Capture ticker for goroutine
+	s.mu.Unlock()
 
 	go func() {
 		for {
 			select {
-			case <-s.done:
+			case <-done:
 				return
-			case <-s.ticker.C:
+			case <-ticker.C:
 				s.render(message)
+				s.mu.Lock()
 				s.current = (s.current + 1) % len(s.frames)
+				s.mu.Unlock()
 			}
 		}
 	}()
@@ -246,7 +256,9 @@ func (s *Spinner) Start(message string) {
 
 // Stop stoppt den Spinner und löscht die Zeile.
 func (s *Spinner) Stop() {
+	s.mu.Lock()
 	if !s.active {
+		s.mu.Unlock()
 		return
 	}
 
@@ -254,8 +266,10 @@ func (s *Spinner) Stop() {
 	if s.ticker != nil {
 		s.ticker.Stop()
 	}
-	close(s.done)
-	s.done = make(chan struct{}) // Für nächsten Start
+	done := s.done // Capture before closing
+	s.mu.Unlock()
+	
+	close(done) // Close outside mutex
 
 	// Zeile löschen
 	_, _ = fmt.Fprint(s.output, "\r"+strings.Repeat(" ", 80)+"\r")
@@ -263,6 +277,8 @@ func (s *Spinner) Stop() {
 
 // render rendert den aktuellen Spinner-Frame.
 func (s *Spinner) render(message string) {
+	s.mu.Lock()
 	frame := s.frames[s.current]
+	s.mu.Unlock()
 	_, _ = fmt.Fprintf(s.output, "\r%s %s", frame, message)
 }

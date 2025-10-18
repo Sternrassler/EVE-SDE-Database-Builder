@@ -33,6 +33,9 @@ setup: ## Complete setup: install dependencies + generate parsers
 test: ## Run all tests (core packages)
 	go test -v ./cmd/... ./internal/...
 
+test-race: ## Run all tests with race detector
+	go test -race ./...
+
 test-tools: ## Run tests for tools (separate main packages)
 	@echo "Testing add-tomap-methods..."
 	@go test -v ./tools/add-tomap-methods/...
