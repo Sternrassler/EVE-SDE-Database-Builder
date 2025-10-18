@@ -9,6 +9,7 @@ import (
 
 // TestErrorTypes tests creation of all error types
 func TestErrorTypes(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		name        string
 		constructor func(string, error) *AppError
@@ -43,6 +44,7 @@ func TestErrorTypes(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			cause := errors.New("underlying error")
 			err := tt.constructor("test error", cause)
 
@@ -75,6 +77,7 @@ func TestErrorTypes(t *testing.T) {
 
 // TestErrorWithNilCause tests error creation with nil cause
 func TestErrorWithNilCause(t *testing.T) {
+	t.Parallel()
 	err := NewFatal("test error", nil)
 
 	if err == nil {
@@ -93,6 +96,7 @@ func TestErrorWithNilCause(t *testing.T) {
 
 // TestErrorMessageFormat tests the error message formatting
 func TestErrorMessageFormat(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		name            string
 		errorFunc       func() *AppError
@@ -116,6 +120,7 @@ func TestErrorMessageFormat(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			err := tt.errorFunc()
 			errMsg := err.Error()
 
@@ -130,6 +135,7 @@ func TestErrorMessageFormat(t *testing.T) {
 
 // TestErrorUnwrap tests error unwrapping
 func TestErrorUnwrap(t *testing.T) {
+	t.Parallel()
 	cause := errors.New("root cause")
 	err := NewRetryable("temporary failure", cause)
 
@@ -148,6 +154,7 @@ func TestErrorUnwrap(t *testing.T) {
 
 // TestErrorIs tests error comparison using errors.Is
 func TestErrorIs(t *testing.T) {
+	t.Parallel()
 	err1 := NewFatal("database error", nil)
 	err2 := NewFatal("database error", nil)
 	err3 := NewFatal("network error", nil)
@@ -177,6 +184,7 @@ func TestErrorIs(t *testing.T) {
 
 // TestErrorAs tests error type assertion using errors.As
 func TestErrorAs(t *testing.T) {
+	t.Parallel()
 	cause := errors.New("underlying")
 	err := NewRetryable("test error", cause)
 
@@ -199,6 +207,7 @@ func TestErrorAs(t *testing.T) {
 
 // TestWithContext tests adding context to errors
 func TestWithContext(t *testing.T) {
+	t.Parallel()
 	err := NewValidation("invalid data", nil)
 
 	// Add single context
@@ -226,6 +235,7 @@ func TestWithContext(t *testing.T) {
 
 // TestWithContextOverwrite tests that context values can be overwritten
 func TestWithContextOverwrite(t *testing.T) {
+	t.Parallel()
 	err := NewFatal("error", nil)
 	err = err.WithContext("key", "value1")
 	err = err.WithContext("key", "value2")
@@ -237,6 +247,7 @@ func TestWithContextOverwrite(t *testing.T) {
 
 // TestErrorTypeHelpers tests the helper functions for error type checking
 func TestErrorTypeHelpers(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		name    string
 		err     error
@@ -289,6 +300,7 @@ func TestErrorTypeHelpers(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			if IsFatal(tt.err) != tt.isFatal {
 				t.Errorf("IsFatal expected %v, got %v", tt.isFatal, IsFatal(tt.err))
 			}
@@ -307,6 +319,7 @@ func TestErrorTypeHelpers(t *testing.T) {
 
 // TestErrorTypeHelpersWithWrappedErrors tests helper functions with wrapped errors
 func TestErrorTypeHelpersWithWrappedErrors(t *testing.T) {
+	t.Parallel()
 	appErr := NewFatal("fatal error", nil)
 	wrapped := fmt.Errorf("wrapper: %w", appErr)
 
@@ -321,6 +334,7 @@ func TestErrorTypeHelpersWithWrappedErrors(t *testing.T) {
 
 // TestErrorTypeString tests the String method of ErrorType
 func TestErrorTypeString(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		errorType ErrorType
 		expected  string
@@ -334,6 +348,7 @@ func TestErrorTypeString(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.expected, func(t *testing.T) {
+			t.Parallel()
 			if tt.errorType.String() != tt.expected {
 				t.Errorf("expected %s, got %s", tt.expected, tt.errorType.String())
 			}
@@ -343,6 +358,7 @@ func TestErrorTypeString(t *testing.T) {
 
 // TestContextInitialization tests that context is properly initialized
 func TestContextInitialization(t *testing.T) {
+	t.Parallel()
 	err := NewFatal("test", nil)
 
 	// Context should be initialized but empty
@@ -357,6 +373,7 @@ func TestContextInitialization(t *testing.T) {
 
 // TestErrorChaining tests complex error wrapping scenarios
 func TestErrorChaining(t *testing.T) {
+	t.Parallel()
 	// Create a chain of errors
 	rootErr := errors.New("root cause")
 	appErr := NewRetryable("service unavailable", rootErr)
@@ -380,6 +397,7 @@ func TestErrorChaining(t *testing.T) {
 
 // TestNilErrorHandling tests handling of nil errors
 func TestNilErrorHandling(t *testing.T) {
+	t.Parallel()
 	// Helper functions should handle nil gracefully
 	if IsFatal(nil) {
 		t.Error("IsFatal(nil) should return false")
@@ -397,6 +415,7 @@ func TestNilErrorHandling(t *testing.T) {
 
 // TestWithContextOnNilContext tests adding context when Context map is nil
 func TestWithContextOnNilContext(t *testing.T) {
+	t.Parallel()
 	// Create AppError without using constructor (to test nil context initialization)
 	err := &AppError{
 		Type:    ErrorTypeFatal,

@@ -11,6 +11,7 @@ import (
 
 // TestNewPolicy tests the creation of a new retry policy
 func TestNewPolicy(t *testing.T) {
+	t.Parallel()
 	policy := NewPolicy(5, 50*time.Millisecond, 10*time.Second)
 
 	if policy.MaxRetries != 5 {
@@ -36,6 +37,7 @@ func TestNewPolicy(t *testing.T) {
 
 // TestDefaultPolicy tests the default policy values
 func TestDefaultPolicy(t *testing.T) {
+	t.Parallel()
 	policy := DefaultPolicy()
 
 	if policy.MaxRetries != 3 {
@@ -61,6 +63,7 @@ func TestDefaultPolicy(t *testing.T) {
 
 // TestDo_Success tests successful execution without retries
 func TestDo_Success(t *testing.T) {
+	t.Parallel()
 	policy := DefaultPolicy()
 	attempts := 0
 
@@ -80,6 +83,7 @@ func TestDo_Success(t *testing.T) {
 
 // TestDo_SuccessAfterRetries tests successful execution after 2 failures
 func TestDo_SuccessAfterRetries(t *testing.T) {
+	t.Parallel()
 	policy := NewPolicy(3, 10*time.Millisecond, 100*time.Millisecond)
 	attempts := 0
 
@@ -102,6 +106,7 @@ func TestDo_SuccessAfterRetries(t *testing.T) {
 
 // TestDo_MaxRetriesReached tests that retry stops after max attempts
 func TestDo_MaxRetriesReached(t *testing.T) {
+	t.Parallel()
 	policy := NewPolicy(2, 10*time.Millisecond, 100*time.Millisecond)
 	attempts := 0
 
@@ -122,6 +127,7 @@ func TestDo_MaxRetriesReached(t *testing.T) {
 
 // TestDo_NonRetryableError tests that non-retryable errors are not retried
 func TestDo_NonRetryableError(t *testing.T) {
+	t.Parallel()
 	policy := DefaultPolicy()
 	attempts := 0
 
@@ -145,6 +151,7 @@ func TestDo_NonRetryableError(t *testing.T) {
 
 // TestDo_StandardError tests that standard errors are not retried
 func TestDo_StandardError(t *testing.T) {
+	t.Parallel()
 	policy := DefaultPolicy()
 	attempts := 0
 
@@ -164,6 +171,7 @@ func TestDo_StandardError(t *testing.T) {
 
 // TestDo_ContextCancellation tests that context cancellation stops retries
 func TestDo_ContextCancellation(t *testing.T) {
+	t.Parallel()
 	policy := NewPolicy(5, 50*time.Millisecond, 1*time.Second)
 	ctx, cancel := context.WithTimeout(context.Background(), 100*time.Millisecond)
 	defer cancel()
@@ -190,6 +198,7 @@ func TestDo_ContextCancellation(t *testing.T) {
 
 // TestDoWithResult_Success tests successful execution with result
 func TestDoWithResult_Success(t *testing.T) {
+	t.Parallel()
 	policy := DefaultPolicy()
 	attempts := 0
 
@@ -213,6 +222,7 @@ func TestDoWithResult_Success(t *testing.T) {
 
 // TestDoWithResult_SuccessAfterRetries tests successful result after retries
 func TestDoWithResult_SuccessAfterRetries(t *testing.T) {
+	t.Parallel()
 	policy := NewPolicy(3, 10*time.Millisecond, 100*time.Millisecond)
 	attempts := 0
 
@@ -239,6 +249,7 @@ func TestDoWithResult_SuccessAfterRetries(t *testing.T) {
 
 // TestDoWithResult_NonRetryableError tests non-retryable error with result
 func TestDoWithResult_NonRetryableError(t *testing.T) {
+	t.Parallel()
 	policy := DefaultPolicy()
 	attempts := 0
 
@@ -262,6 +273,7 @@ func TestDoWithResult_NonRetryableError(t *testing.T) {
 
 // TestCalculateBackoff tests backoff delay calculation
 func TestCalculateBackoff(t *testing.T) {
+	t.Parallel()
 	policy := &Policy{
 		MaxRetries:   5,
 		InitialDelay: 100 * time.Millisecond,
@@ -286,6 +298,7 @@ func TestCalculateBackoff(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run("", func(t *testing.T) {
+			t.Parallel()
 			delay := calculateBackoff(tt.attempt, policy)
 			if delay != tt.expected {
 				t.Errorf("attempt %d: expected %v, got %v", tt.attempt, tt.expected, delay)
@@ -296,6 +309,7 @@ func TestCalculateBackoff(t *testing.T) {
 
 // TestCalculateBackoff_WithJitter tests backoff with jitter enabled
 func TestCalculateBackoff_WithJitter(t *testing.T) {
+	t.Parallel()
 	policy := &Policy{
 		MaxRetries:   3,
 		InitialDelay: 100 * time.Millisecond,
@@ -335,6 +349,7 @@ func TestCalculateBackoff_WithJitter(t *testing.T) {
 
 // TestCalculateBackoff_MaxDelayRespected tests that MaxDelay is never exceeded
 func TestCalculateBackoff_MaxDelayRespected(t *testing.T) {
+	t.Parallel()
 	policy := &Policy{
 		MaxRetries:   10,
 		InitialDelay: 1 * time.Second,
@@ -354,6 +369,7 @@ func TestCalculateBackoff_MaxDelayRespected(t *testing.T) {
 
 // TestDo_Timing tests that retries actually wait
 func TestDo_Timing(t *testing.T) {
+	t.Parallel()
 	policy := NewPolicy(2, 50*time.Millisecond, 200*time.Millisecond)
 	policy.Jitter = false // Disable jitter for predictable timing
 
@@ -386,6 +402,7 @@ func TestDo_Timing(t *testing.T) {
 
 // TestDo_ContextCancelImmediate tests immediate context cancellation
 func TestDo_ContextCancelImmediate(t *testing.T) {
+	t.Parallel()
 	policy := DefaultPolicy()
 	ctx, cancel := context.WithCancel(context.Background())
 	cancel() // Cancel immediately
@@ -408,6 +425,7 @@ func TestDo_ContextCancelImmediate(t *testing.T) {
 
 // TestDoWithResult_ContextCancellation tests context cancellation with result
 func TestDoWithResult_ContextCancellation(t *testing.T) {
+	t.Parallel()
 	policy := NewPolicy(5, 50*time.Millisecond, 1*time.Second)
 	ctx, cancel := context.WithTimeout(context.Background(), 100*time.Millisecond)
 	defer cancel()
@@ -434,6 +452,7 @@ func TestDoWithResult_ContextCancellation(t *testing.T) {
 
 // TestDifferentErrorTypes tests handling of different error types
 func TestDifferentErrorTypes(t *testing.T) {
+	t.Parallel()
 	policy := NewPolicy(2, 10*time.Millisecond, 100*time.Millisecond)
 
 	tests := []struct {
@@ -478,6 +497,7 @@ func TestDifferentErrorTypes(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			attempts := 0
 			err := policy.Do(context.Background(), func() error {
 				attempts++

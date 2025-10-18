@@ -9,6 +9,7 @@ import (
 
 // TestDefaultConfig tests that default configuration values are correct
 func TestDefaultConfig(t *testing.T) {
+	t.Parallel()
 	cfg := DefaultConfig()
 
 	// Version
@@ -54,6 +55,7 @@ func TestDefaultConfig(t *testing.T) {
 
 // TestLoadConfigFromTOML tests loading configuration from a TOML file
 func TestLoadConfigFromTOML(t *testing.T) {
+	t.Parallel()
 	configPath := filepath.Join("testdata", "valid-config.toml")
 
 	cfg, err := Load(configPath)
@@ -99,6 +101,7 @@ func TestLoadConfigFromTOML(t *testing.T) {
 
 // TestLoadConfigNonExistent tests loading when config file doesn't exist
 func TestLoadConfigNonExistent(t *testing.T) {
+	t.Parallel()
 	configPath := filepath.Join("testdata", "nonexistent.toml")
 
 	cfg, err := Load(configPath)
@@ -173,6 +176,7 @@ func TestEnvVarOverrideDefaults(t *testing.T) {
 
 // TestValidationMissingDatabasePath tests validation fails when database path is empty
 func TestValidationMissingDatabasePath(t *testing.T) {
+	t.Parallel()
 	cfg := DefaultConfig()
 	cfg.Database.Path = ""
 
@@ -187,6 +191,7 @@ func TestValidationMissingDatabasePath(t *testing.T) {
 
 // TestValidationMissingPathsFromFile tests validation fails when loading config with empty paths
 func TestValidationMissingPathsFromFile(t *testing.T) {
+	t.Parallel()
 	configPath := filepath.Join("testdata", "invalid-config.toml")
 
 	_, err := Load(configPath)
@@ -201,6 +206,7 @@ func TestValidationMissingPathsFromFile(t *testing.T) {
 
 // TestValidationMissingSdePath tests validation fails when SDE path is missing
 func TestValidationMissingSdePath(t *testing.T) {
+	t.Parallel()
 	cfg := DefaultConfig()
 	cfg.Import.SDEPath = ""
 
@@ -215,6 +221,7 @@ func TestValidationMissingSdePath(t *testing.T) {
 
 // TestValidationInvalidWorkers tests validation fails for invalid worker counts
 func TestValidationInvalidWorkers(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		name    string
 		workers int
@@ -230,6 +237,7 @@ func TestValidationInvalidWorkers(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			cfg := DefaultConfig()
 			cfg.Import.Workers = tt.workers
 
@@ -246,6 +254,7 @@ func TestValidationInvalidWorkers(t *testing.T) {
 
 // TestValidationInvalidWorkersFromFile tests loading config with invalid workers
 func TestValidationInvalidWorkersFromFile(t *testing.T) {
+	t.Parallel()
 	configPath := filepath.Join("testdata", "invalid-workers.toml")
 
 	_, err := Load(configPath)
@@ -260,6 +269,7 @@ func TestValidationInvalidWorkersFromFile(t *testing.T) {
 
 // TestValidationInvalidLanguage tests validation fails for invalid language
 func TestValidationInvalidLanguage(t *testing.T) {
+	t.Parallel()
 	configPath := filepath.Join("testdata", "invalid-language.toml")
 
 	_, err := Load(configPath)
@@ -275,6 +285,7 @@ func TestValidationInvalidLanguage(t *testing.T) {
 
 // TestValidationInvalidLogLevel tests validation fails for invalid log level
 func TestValidationInvalidLogLevel(t *testing.T) {
+	t.Parallel()
 	configPath := filepath.Join("testdata", "invalid-log-level.toml")
 
 	_, err := Load(configPath)
@@ -290,10 +301,12 @@ func TestValidationInvalidLogLevel(t *testing.T) {
 
 // TestValidationAllLanguages tests that all valid languages pass validation
 func TestValidationAllLanguages(t *testing.T) {
+	t.Parallel()
 	validLanguages := []string{"en", "de", "fr", "ja", "ru", "zh", "es", "ko"}
 
 	for _, lang := range validLanguages {
 		t.Run(lang, func(t *testing.T) {
+			t.Parallel()
 			cfg := DefaultConfig()
 			cfg.Import.Language = lang
 
@@ -307,10 +320,12 @@ func TestValidationAllLanguages(t *testing.T) {
 
 // TestValidationAllLogLevels tests that all valid log levels pass validation
 func TestValidationAllLogLevels(t *testing.T) {
+	t.Parallel()
 	validLevels := []string{"debug", "info", "warn", "error"}
 
 	for _, level := range validLevels {
 		t.Run(level, func(t *testing.T) {
+			t.Parallel()
 			cfg := DefaultConfig()
 			cfg.Logging.Level = level
 
@@ -324,6 +339,7 @@ func TestValidationAllLogLevels(t *testing.T) {
 
 // TestWorkerCountAutoDetect tests that workers=0 is converted to runtime.NumCPU()
 func TestWorkerCountAutoDetect(t *testing.T) {
+	t.Parallel()
 	cfg := DefaultConfig()
 	cfg.Import.Workers = 0
 
@@ -377,6 +393,7 @@ format = "text"
 
 // TestLoadEmptyConfig tests loading an empty config file
 func TestLoadEmptyConfig(t *testing.T) {
+	t.Parallel()
 	configPath := filepath.Join("testdata", "empty-config.toml")
 
 	cfg, err := Load(configPath)
@@ -435,6 +452,7 @@ path = "missing bracket"
 
 // TestValidateCompleteConfig tests validation with a fully specified valid config
 func TestValidateCompleteConfig(t *testing.T) {
+	t.Parallel()
 	cfg := Config{
 		Version: "1.0.0",
 		Database: DatabaseConfig{

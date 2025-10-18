@@ -8,6 +8,7 @@ import (
 )
 
 func TestLoggerStub_Debug(t *testing.T) {
+	t.Parallel()
 	stub := testutil.NewLoggerStub()
 
 	stub.Debug("debug message")
@@ -26,6 +27,7 @@ func TestLoggerStub_Debug(t *testing.T) {
 }
 
 func TestLoggerStub_Info(t *testing.T) {
+	t.Parallel()
 	stub := testutil.NewLoggerStub()
 
 	stub.Info("info message")
@@ -44,6 +46,7 @@ func TestLoggerStub_Info(t *testing.T) {
 }
 
 func TestLoggerStub_Warn(t *testing.T) {
+	t.Parallel()
 	stub := testutil.NewLoggerStub()
 
 	stub.Warn("warning message")
@@ -62,6 +65,7 @@ func TestLoggerStub_Warn(t *testing.T) {
 }
 
 func TestLoggerStub_Error(t *testing.T) {
+	t.Parallel()
 	stub := testutil.NewLoggerStub()
 
 	stub.Error("error message")
@@ -80,6 +84,7 @@ func TestLoggerStub_Error(t *testing.T) {
 }
 
 func TestLoggerStub_Fatal(t *testing.T) {
+	t.Parallel()
 	stub := testutil.NewLoggerStub()
 
 	// Fatal should record but NOT exit (unlike real logger)
@@ -99,6 +104,7 @@ func TestLoggerStub_Fatal(t *testing.T) {
 }
 
 func TestLoggerStub_WithFields(t *testing.T) {
+	t.Parallel()
 	stub := testutil.NewLoggerStub()
 
 	fields := []logger.Field{
@@ -127,6 +133,7 @@ func TestLoggerStub_WithFields(t *testing.T) {
 }
 
 func TestLoggerStub_MultipleLevels(t *testing.T) {
+	t.Parallel()
 	stub := testutil.NewLoggerStub()
 
 	stub.Debug("debug 1")
@@ -161,6 +168,7 @@ func TestLoggerStub_MultipleLevels(t *testing.T) {
 }
 
 func TestLoggerStub_MessagesAtLevel(t *testing.T) {
+	t.Parallel()
 	stub := testutil.NewLoggerStub()
 
 	stub.Info("info 1")
@@ -183,6 +191,7 @@ func TestLoggerStub_MessagesAtLevel(t *testing.T) {
 }
 
 func TestLoggerStub_HasMessage(t *testing.T) {
+	t.Parallel()
 	stub := testutil.NewLoggerStub()
 
 	stub.Info("test message")
@@ -202,6 +211,7 @@ func TestLoggerStub_HasMessage(t *testing.T) {
 }
 
 func TestLoggerStub_HasMessageAtLevel(t *testing.T) {
+	t.Parallel()
 	stub := testutil.NewLoggerStub()
 
 	stub.Info("test message")
@@ -221,6 +231,7 @@ func TestLoggerStub_HasMessageAtLevel(t *testing.T) {
 }
 
 func TestLoggerStub_ContainsMessage(t *testing.T) {
+	t.Parallel()
 	stub := testutil.NewLoggerStub()
 
 	stub.Info("processing user request")
@@ -240,6 +251,7 @@ func TestLoggerStub_ContainsMessage(t *testing.T) {
 }
 
 func TestLoggerStub_LastMessage(t *testing.T) {
+	t.Parallel()
 	stub := testutil.NewLoggerStub()
 
 	// No messages initially
@@ -266,6 +278,7 @@ func TestLoggerStub_LastMessage(t *testing.T) {
 }
 
 func TestLoggerStub_Reset(t *testing.T) {
+	t.Parallel()
 	stub := testutil.NewLoggerStub()
 
 	// Add some messages
@@ -290,6 +303,7 @@ func TestLoggerStub_Reset(t *testing.T) {
 }
 
 func TestLoggerStub_String(t *testing.T) {
+	t.Parallel()
 	stub := testutil.NewLoggerStub()
 
 	stub.Info("first")
@@ -323,6 +337,7 @@ func TestLoggerStub_String(t *testing.T) {
 }
 
 func TestLoggerStub_StringWithFields(t *testing.T) {
+	t.Parallel()
 	stub := testutil.NewLoggerStub()
 
 	fields := []logger.Field{
@@ -341,6 +356,7 @@ func TestLoggerStub_StringWithFields(t *testing.T) {
 }
 
 func TestSilentLogger(t *testing.T) {
+	t.Parallel()
 	stub := testutil.NewSilentLogger()
 
 	// Log many messages
@@ -361,6 +377,7 @@ func TestSilentLogger(t *testing.T) {
 }
 
 func TestLoggerStub_Concurrency(t *testing.T) {
+	t.Parallel()
 	stub := testutil.NewLoggerStub()
 
 	// Test concurrent logging

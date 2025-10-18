@@ -10,6 +10,7 @@ import (
 )
 
 func TestGetTestDataPath(t *testing.T) {
+	t.Parallel()
 	path := testutil.GetTestDataPath()
 
 	if path == "" {
@@ -26,6 +27,7 @@ func TestGetTestDataPath(t *testing.T) {
 }
 
 func TestGetTestDataFile(t *testing.T) {
+	t.Parallel()
 	filePath := testutil.GetTestDataFile("invTypes")
 
 	if filePath == "" {
@@ -43,6 +45,7 @@ func TestGetTestDataFile(t *testing.T) {
 }
 
 func TestLoadJSONLFile(t *testing.T) {
+	t.Parallel()
 	lines := testutil.LoadJSONLFile(t, "invTypes")
 
 	if len(lines) == 0 {
@@ -63,6 +66,7 @@ func TestLoadJSONLFile(t *testing.T) {
 }
 
 func TestLoadJSONLFileAsRecords(t *testing.T) {
+	t.Parallel()
 	type InvType struct {
 		TypeID   int      `json:"typeID"`
 		TypeName string   `json:"typeName"`
@@ -92,6 +96,7 @@ func TestLoadJSONLFileAsRecords(t *testing.T) {
 }
 
 func TestFileExists(t *testing.T) {
+	t.Parallel()
 	existingFile := testutil.GetTestDataFile("invTypes")
 	if !testutil.FileExists(existingFile) {
 		t.Errorf("FileExists should return true for existing file: %s", existingFile)
@@ -104,6 +109,7 @@ func TestFileExists(t *testing.T) {
 }
 
 func TestCreateTempDir(t *testing.T) {
+	t.Parallel()
 	dir := testutil.CreateTempDir(t, "test-*")
 
 	if dir == "" {
@@ -118,6 +124,7 @@ func TestCreateTempDir(t *testing.T) {
 }
 
 func TestWriteJSONLFile(t *testing.T) {
+	t.Parallel()
 	type TestRecord struct {
 		ID   int    `json:"id"`
 		Name string `json:"name"`
@@ -161,6 +168,7 @@ func TestWriteJSONLFile(t *testing.T) {
 }
 
 func TestTableNames(t *testing.T) {
+	t.Parallel()
 	tables := testutil.TableNames()
 
 	if len(tables) == 0 {

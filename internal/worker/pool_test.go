@@ -11,6 +11,7 @@ import (
 
 // TestNewPool tests pool creation with different worker counts
 func TestNewPool(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		name            string
 		workers         int
@@ -24,6 +25,7 @@ func TestNewPool(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			pool := NewPool(tt.workers)
 			if pool.workers != tt.expectedWorkers {
 				t.Errorf("expected %d workers, got %d", tt.expectedWorkers, pool.workers)

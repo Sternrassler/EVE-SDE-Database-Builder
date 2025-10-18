@@ -11,6 +11,7 @@ import (
 )
 
 func TestMockHTTPClient(t *testing.T) {
+	t.Parallel()
 	expectedBody := `{"test": "data"}`
 
 	client := testutil.MockHTTPClient(func(_ *http.Request) (*http.Response, error) {
@@ -38,6 +39,7 @@ func TestMockHTTPClient(t *testing.T) {
 }
 
 func TestMockResponse(t *testing.T) {
+	t.Parallel()
 	resp := testutil.MockResponse(404, "not found")
 
 	if resp.StatusCode != 404 {
@@ -59,6 +61,7 @@ func TestMockResponse(t *testing.T) {
 }
 
 func TestMockJSONResponse(t *testing.T) {
+	t.Parallel()
 	jsonBody := `{"id": 123, "name": "test"}`
 	resp := testutil.MockJSONResponse(200, jsonBody)
 
@@ -82,6 +85,7 @@ func TestMockJSONResponse(t *testing.T) {
 }
 
 func TestMockErrorResponse(t *testing.T) {
+	t.Parallel()
 	expectedErr := errors.New("connection timeout")
 
 	client := testutil.MockHTTPClient(func(_ *http.Request) (*http.Response, error) {
@@ -104,6 +108,7 @@ func TestMockErrorResponse(t *testing.T) {
 }
 
 func TestStaticMockClient(t *testing.T) {
+	t.Parallel()
 	expectedBody := "static response"
 	client := testutil.StaticMockClient(201, expectedBody)
 
@@ -131,6 +136,7 @@ func TestStaticMockClient(t *testing.T) {
 }
 
 func TestRequestRecorder_Basic(t *testing.T) {
+	t.Parallel()
 	recorder := testutil.NewRequestRecorder(testutil.MockResponse(200, "ok"))
 	client := recorder.Client()
 
@@ -161,6 +167,7 @@ func TestRequestRecorder_Basic(t *testing.T) {
 }
 
 func TestRequestRecorder_MultipleRequests(t *testing.T) {
+	t.Parallel()
 	recorder := testutil.NewRequestRecorder(testutil.MockResponse(200, "ok"))
 	client := recorder.Client()
 
@@ -197,6 +204,7 @@ func TestRequestRecorder_MultipleRequests(t *testing.T) {
 }
 
 func TestRequestRecorder_WithBody(t *testing.T) {
+	t.Parallel()
 	recorder := testutil.NewRequestRecorder(testutil.MockResponse(201, "created"))
 	client := recorder.Client()
 
@@ -239,6 +247,7 @@ func TestRequestRecorder_WithBody(t *testing.T) {
 }
 
 func TestRequestRecorder_Reset(t *testing.T) {
+	t.Parallel()
 	recorder := testutil.NewRequestRecorder(testutil.MockResponse(200, "ok"))
 	client := recorder.Client()
 
@@ -268,6 +277,7 @@ func TestRequestRecorder_Reset(t *testing.T) {
 }
 
 func TestRequestRecorder_NoRequests(t *testing.T) {
+	t.Parallel()
 	recorder := testutil.NewRequestRecorder(testutil.MockResponse(200, "ok"))
 
 	if recorder.RequestCount() != 0 {
@@ -280,6 +290,7 @@ func TestRequestRecorder_NoRequests(t *testing.T) {
 }
 
 func TestRequestRecorder_WithError(t *testing.T) {
+	t.Parallel()
 	expectedErr := errors.New("mock error")
 	recorder := testutil.NewRequestRecorder(nil)
 	recorder.Error = expectedErr
