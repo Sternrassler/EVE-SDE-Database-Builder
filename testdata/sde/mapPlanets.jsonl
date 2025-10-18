@@ -1,0 +1,3 @@
+{"planetID":40000001,"solarSystemID":30000001,"planetName":"Tanoo I","typeID":2016,"x":1.5e11,"y":0.0,"z":0.0,"celestialIndex":1,"radius":6000000.0}
+{"planetID":40000002,"solarSystemID":30000142,"planetName":"Jita IV","typeID":2016,"x":2.0e11,"y":1.0e10,"z":-5.0e10,"celestialIndex":4,"radius":7000000.0}
+{"planetID":40000003,"solarSystemID":30000003,"planetName":"H-PA29 III","typeID":2063,"x":-3.0e11,"y":2.0e11,"z":1.0e11,"celestialIndex":3,"radius":5500000.0}

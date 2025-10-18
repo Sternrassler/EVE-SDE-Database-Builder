@@ -1,0 +1,3 @@
+{"buffID":1,"collectionID":100,"filterGroupID":null,"filterTypeID":null,"locationGroupID":null,"locationTypeID":null,"modifierType":"locationModifier","modifyingAttributeID":4,"modifyingTypeID":null,"operation":"postMul","value":1.1}
+{"buffID":2,"collectionID":101,"filterGroupID":25,"filterTypeID":null,"locationGroupID":null,"locationTypeID":null,"modifierType":"itemModifier","modifyingAttributeID":37,"modifyingTypeID":null,"operation":"postPercent","value":0.05}
+{"buffID":3,"collectionID":102,"filterGroupID":null,"filterTypeID":587,"locationGroupID":null,"locationTypeID":null,"modifierType":"locationRequiredSkillModifier","modifyingAttributeID":9,"modifyingTypeID":null,"operation":"preAssignment","value":1.0}

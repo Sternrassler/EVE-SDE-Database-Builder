@@ -1,0 +1,3 @@
+{"factionID":500001,"factionName":"Caldari State","description":"Corporate dictatorship","solarSystemID":30000142,"corporationID":1000035,"sizeFactor":5.0,"stationCount":558,"stationSystemCount":216,"militiaCorporationID":null,"iconID":1441}
+{"factionID":500002,"factionName":"Minmatar Republic","description":"Tribal society","solarSystemID":30002187,"corporationID":1000051,"sizeFactor":5.0,"stationCount":547,"stationSystemCount":227,"militiaCorporationID":null,"iconID":1442}
+{"factionID":500003,"factionName":"Amarr Empire","description":"Theocratic empire","solarSystemID":30002187,"corporationID":1000084,"sizeFactor":5.0,"stationCount":623,"stationSystemCount":258,"militiaCorporationID":null,"iconID":1443}
