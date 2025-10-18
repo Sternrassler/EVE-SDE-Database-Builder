@@ -94,9 +94,30 @@ make bench
 # Performance Regression Testing
 make bench-baseline  # Capture baseline
 make bench-compare   # Compare against baseline
+
+# Golden File Tests (Parser Output Verification)
+make test-golden     # Run golden file tests
+make update-golden   # Update golden files after parser changes
 ```
 
 **Nach `git clone`:** Führe `make setup` aus, um alle Dependencies zu installieren und Parser-Code zu generieren.
+
+### Golden File Tests
+
+Golden file tests verify that parser output remains stable and consistent:
+
+```bash
+# Run all golden file tests
+make test-golden
+
+# Update golden files after intentional parser changes
+make update-golden
+
+# Review changes before committing
+git diff testdata/golden/
+```
+
+**Details:** Siehe [testdata/golden/README.md](testdata/golden/README.md)
 
 ### Database Migrations
 
