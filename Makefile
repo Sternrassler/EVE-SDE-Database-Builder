@@ -1,4 +1,4 @@
-.PHONY: help setup test test-tools lint build clean coverage fmt vet tidy check-hooks secrets-check commit-lint generate-parsers bench bench-baseline bench-compare
+.PHONY: help setup test test-tools lint build clean coverage fmt vet tidy check-hooks secrets-check commit-lint generate-parsers bench bench-baseline bench-compare fuzz fuzz-quick
 
 help: ## Display this help message
 	@echo "Available targets:"
@@ -99,6 +99,14 @@ bench-baseline: ## Capture benchmark baseline for regression testing
 
 bench-compare: ## Compare current benchmarks against baseline
 	@bash scripts/compare-benchmarks.sh
+
+fuzz: ## Run fuzz tests (100k iterations for robustness testing)
+	@echo "Running fuzz tests with ~100k iterations..."
+	@bash scripts/run-fuzz-tests.sh 100000
+
+fuzz-quick: ## Run quick fuzz tests (5 seconds for development)
+	@echo "Running quick fuzz tests (5s)..."
+	@FUZZ_TIME=5s bash scripts/run-fuzz-tests.sh
 
 # Database Migration Targets
 DB_FILE ?= eve_sde.db
