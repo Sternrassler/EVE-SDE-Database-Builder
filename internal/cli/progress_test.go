@@ -3,12 +3,30 @@ package cli
 import (
 	"bytes"
 	"context"
+	"io"
 	"strings"
+	"sync"
 	"testing"
 	"time"
 
 	"github.com/Sternrassler/EVE-SDE-Database-Builder/internal/worker"
 )
+
+// syncedWriter wraps an io.Writer with a mutex for thread-safe concurrent writes
+type syncedWriter struct {
+	mu sync.Mutex
+	w  io.Writer
+}
+
+func (sw *syncedWriter) Write(p []byte) (n int, err error) {
+	sw.mu.Lock()
+	defer sw.mu.Unlock()
+	return sw.w.Write(p)
+}
+
+func newSyncedWriter(w io.Writer) *syncedWriter {
+	return &syncedWriter{w: w}
+}
 
 // TestNewProgressBar testet die Erstellung einer neuen ProgressBar
 func TestNewProgressBar(t *testing.T) {
@@ -75,7 +93,11 @@ func TestProgressBar_Start(t *testing.T) {
 	defer cancel()
 
 	// Start Progress Bar in Goroutine
-	go pb.Start(ctx, tracker)
+	done := make(chan struct{})
+	go func() {
+		pb.Start(ctx, tracker)
+		close(done)
+	}()
 
 	// Simuliere Fortschritt
 	time.Sleep(100 * time.Millisecond)
@@ -86,7 +108,7 @@ func TestProgressBar_Start(t *testing.T) {
 
 	// Stop
 	cancel()
-	time.Sleep(150 * time.Millisecond)
+	<-done // Wait for goroutine to finish
 
 	// Prüfe, dass Output generiert wurde
 	output := buf.String()
@@ -286,10 +308,11 @@ func TestProgressBar_UpdateDescription(t *testing.T) {
 // TestProgressBar_ConcurrentAccess testet Thread-Safety
 func TestProgressBar_ConcurrentAccess(t *testing.T) {
 	var buf bytes.Buffer
+	syncedOut := newSyncedWriter(&buf)
 	config := ProgressBarConfig{
 		Total:       100,
 		UpdateRate:  10 * time.Millisecond,
-		Output:      &buf,
+		Output:      syncedOut,
 		ShowSpinner: true,
 	}
 
@@ -300,7 +323,11 @@ func TestProgressBar_ConcurrentAccess(t *testing.T) {
 	defer cancel()
 
 	// Start Progress Bar
-	go pb.Start(ctx, tracker)
+	pbDone := make(chan struct{})
+	go func() {
+		pb.Start(ctx, tracker)
+		close(pbDone)
+	}()
 
 	// Concurrent Updates
 	done := make(chan struct{})
@@ -313,17 +340,20 @@ func TestProgressBar_ConcurrentAccess(t *testing.T) {
 	}()
 
 	// Concurrent Spinner Updates
+	spinnerDone := make(chan struct{})
 	go func() {
 		for i := 0; i < 10; i++ {
 			pb.StartSpinner("file.jsonl")
 			time.Sleep(20 * time.Millisecond)
 			pb.StopSpinner()
 		}
+		close(spinnerDone)
 	}()
 
 	<-done
+	<-spinnerDone
 	cancel()
-	time.Sleep(50 * time.Millisecond)
+	<-pbDone // Wait for progress bar goroutine to finish
 
 	// Sollte nicht paniken
 }
@@ -342,7 +372,11 @@ func BenchmarkProgressBar_Update(b *testing.B) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	go pb.Start(ctx, tracker)
+	pbDone := make(chan struct{})
+	go func() {
+		pb.Start(ctx, tracker)
+		close(pbDone)
+	}()
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
@@ -350,6 +384,7 @@ func BenchmarkProgressBar_Update(b *testing.B) {
 	}
 
 	cancel()
+	<-pbDone // Wait for progress bar goroutine to finish
 }
 
 // BenchmarkSpinner_Render benchmarkt Spinner Rendering
