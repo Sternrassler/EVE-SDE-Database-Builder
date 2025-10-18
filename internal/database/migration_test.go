@@ -1522,16 +1522,16 @@ func TestMigration_004_Dogma_Schema(t *testing.T) {
 
 	// Verify dogmaTypeEffects schema
 	t.Run("dogmaTypeEffects", func(t *testing.T) {
-	expectedColumns := []string{"typeID", "effectID", "isDefault"}
-	rows, err := db.Query("PRAGMA table_info(dogmaTypeEffects)")
-	if err != nil {
-		t.Fatalf("Failed to get table info: %v", err)
-	}
-	defer func() { _ = rows.Close() }()
+		expectedColumns := []string{"typeID", "effectID", "isDefault"}
+		rows, err := db.Query("PRAGMA table_info(dogmaTypeEffects)")
+		if err != nil {
+			t.Fatalf("Failed to get table info: %v", err)
+		}
+		defer func() { _ = rows.Close() }()
 
-	columnMap := make(map[string]bool)
-	pkCount := 0
-	for rows.Next() {
+		columnMap := make(map[string]bool)
+		pkCount := 0
+		for rows.Next() {
 			var cid int
 			var name, colType string
 			var notNull, pk int
@@ -1589,14 +1589,13 @@ func TestMigration_004_Dogma_Indexes(t *testing.T) {
 			"idx_dogmaAttributes_attributeName": false,
 		}
 
+		rows, err := db.Query("SELECT name FROM sqlite_master WHERE type='index' AND tbl_name='dogmaAttributes' AND name NOT LIKE 'sqlite_%'")
+		if err != nil {
+			t.Fatalf("Failed to query indexes: %v", err)
+		}
+		defer func() { _ = rows.Close() }()
 
-	rows, err := db.Query("SELECT name FROM sqlite_master WHERE type='index' AND tbl_name='dogmaAttributes' AND name NOT LIKE 'sqlite_%'")
-	if err != nil {
-		t.Fatalf("Failed to query indexes: %v", err)
-	}
-	defer func() { _ = rows.Close() }()
-
-	for rows.Next() {
+		for rows.Next() {
 			var indexName string
 			if err := rows.Scan(&indexName); err != nil {
 				t.Fatalf("Failed to scan index name: %v", err)
@@ -1620,14 +1619,13 @@ func TestMigration_004_Dogma_Indexes(t *testing.T) {
 			"idx_dogmaEffects_effectCategory": false,
 		}
 
+		rows, err := db.Query("SELECT name FROM sqlite_master WHERE type='index' AND tbl_name='dogmaEffects' AND name NOT LIKE 'sqlite_%'")
+		if err != nil {
+			t.Fatalf("Failed to query indexes: %v", err)
+		}
+		defer func() { _ = rows.Close() }()
 
-	rows, err := db.Query("SELECT name FROM sqlite_master WHERE type='index' AND tbl_name='dogmaEffects' AND name NOT LIKE 'sqlite_%'")
-	if err != nil {
-		t.Fatalf("Failed to query indexes: %v", err)
-	}
-	defer func() { _ = rows.Close() }()
-
-	for rows.Next() {
+		for rows.Next() {
 			var indexName string
 			if err := rows.Scan(&indexName); err != nil {
 				t.Fatalf("Failed to scan index name: %v", err)

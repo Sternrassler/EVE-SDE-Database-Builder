@@ -151,7 +151,7 @@ func TestIntegration_ImportCommand_EmptyDirectory(t *testing.T) {
 	tmpDir := t.TempDir()
 	dbPath := filepath.Join(tmpDir, "test.db")
 	emptyDir := filepath.Join(tmpDir, "empty-sde")
-	
+
 	// Create empty directory
 	if err := os.Mkdir(emptyDir, 0755); err != nil {
 		t.Fatalf("failed to create empty directory: %v", err)
@@ -285,10 +285,10 @@ func TestIntegration_ExitCodes(t *testing.T) {
 	binary := buildTestBinary(t)
 
 	tests := []struct {
-		name           string
-		args           []string
-		expectSuccess  bool
-		description    string
+		name          string
+		args          []string
+		expectSuccess bool
+		description   string
 	}{
 		{
 			name:          "help_command",
@@ -358,7 +358,7 @@ func TestIntegration_ImportCommand_WithSkipErrors(t *testing.T) {
 
 	tmpDir := t.TempDir()
 	dbPath := filepath.Join(tmpDir, "test.db")
-	
+
 	// Create a directory with both valid and intentionally malformed JSONL files
 	testDataDir := filepath.Join(tmpDir, "mixed-sde")
 	if err := os.Mkdir(testDataDir, 0755); err != nil {
