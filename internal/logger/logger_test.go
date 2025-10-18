@@ -11,6 +11,7 @@ import (
 )
 
 func TestNewLogger(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		name   string
 		level  string
@@ -26,6 +27,7 @@ func TestNewLogger(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			logger := NewLogger(tt.level, tt.format)
 			if logger == nil {
 				t.Fatal("NewLogger returned nil")
@@ -35,6 +37,7 @@ func TestNewLogger(t *testing.T) {
 }
 
 func TestParseLogLevel(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		input    string
 		expected zerolog.Level
@@ -52,6 +55,7 @@ func TestParseLogLevel(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.input, func(t *testing.T) {
+			t.Parallel()
 			result := parseLogLevel(tt.input)
 			if result != tt.expected {
 				t.Errorf("parseLogLevel(%q) = %v, want %v", tt.input, result, tt.expected)
@@ -88,8 +92,9 @@ func TestGlobalLogger(t *testing.T) {
 }
 
 func TestLoggerDebug(t *testing.T) {
+	t.Parallel()
 	var buf bytes.Buffer
-	zl := zerolog.New(&buf).With().Timestamp().Logger()
+	zl := zerolog.New(&buf).Level(zerolog.DebugLevel).With().Timestamp().Logger()
 	logger := &Logger{logger: zl}
 
 	logger.Debug("test message")
@@ -104,8 +109,9 @@ func TestLoggerDebug(t *testing.T) {
 }
 
 func TestLoggerInfo(t *testing.T) {
+	t.Parallel()
 	var buf bytes.Buffer
-	zl := zerolog.New(&buf).With().Timestamp().Logger()
+	zl := zerolog.New(&buf).Level(zerolog.InfoLevel).With().Timestamp().Logger()
 	logger := &Logger{logger: zl}
 
 	logger.Info("test message")
@@ -120,8 +126,9 @@ func TestLoggerInfo(t *testing.T) {
 }
 
 func TestLoggerWarn(t *testing.T) {
+	t.Parallel()
 	var buf bytes.Buffer
-	zl := zerolog.New(&buf).With().Timestamp().Logger()
+	zl := zerolog.New(&buf).Level(zerolog.WarnLevel).With().Timestamp().Logger()
 	logger := &Logger{logger: zl}
 
 	logger.Warn("test message")
@@ -136,8 +143,9 @@ func TestLoggerWarn(t *testing.T) {
 }
 
 func TestLoggerError(t *testing.T) {
+	t.Parallel()
 	var buf bytes.Buffer
-	zl := zerolog.New(&buf).With().Timestamp().Logger()
+	zl := zerolog.New(&buf).Level(zerolog.ErrorLevel).With().Timestamp().Logger()
 	logger := &Logger{logger: zl}
 
 	logger.Error("test message")
@@ -152,8 +160,9 @@ func TestLoggerError(t *testing.T) {
 }
 
 func TestLoggerWithFields(t *testing.T) {
+	t.Parallel()
 	var buf bytes.Buffer
-	zl := zerolog.New(&buf).With().Timestamp().Logger()
+	zl := zerolog.New(&buf).Level(zerolog.InfoLevel).With().Timestamp().Logger()
 	logger := &Logger{logger: zl}
 
 	logger.Info("test message",
@@ -174,8 +183,9 @@ func TestLoggerWithFields(t *testing.T) {
 }
 
 func TestLoggerWithContext(t *testing.T) {
+	t.Parallel()
 	var buf bytes.Buffer
-	zl := zerolog.New(&buf).With().Timestamp().Logger()
+	zl := zerolog.New(&buf).Level(zerolog.InfoLevel).With().Timestamp().Logger()
 	logger := &Logger{logger: zl}
 
 	// Create context with values using the exported context keys
@@ -200,8 +210,9 @@ func TestLoggerWithContext(t *testing.T) {
 }
 
 func TestLoggerWithContextNoValues(t *testing.T) {
+	t.Parallel()
 	var buf bytes.Buffer
-	zl := zerolog.New(&buf).With().Timestamp().Logger()
+	zl := zerolog.New(&buf).Level(zerolog.InfoLevel).With().Timestamp().Logger()
 	logger := &Logger{logger: zl}
 
 	// Create context without values
@@ -226,8 +237,9 @@ func TestLoggerWithContextNoValues(t *testing.T) {
 }
 
 func TestLoggerJSONFormat(t *testing.T) {
+	t.Parallel()
 	var buf bytes.Buffer
-	zl := zerolog.New(&buf).With().Timestamp().Logger()
+	zl := zerolog.New(&buf).Level(zerolog.InfoLevel).With().Timestamp().Logger()
 	logger := &Logger{logger: zl}
 
 	logger.Info("test message", Field{Key: "key", Value: "value"})
@@ -252,10 +264,11 @@ func TestLoggerJSONFormat(t *testing.T) {
 }
 
 func TestFatalLogsBeforeExit(t *testing.T) {
+	t.Parallel()
 	// We can't test Fatal() directly as it calls os.Exit()
 	// Instead, we verify the log is written before the fatal event
 	var buf bytes.Buffer
-	zl := zerolog.New(&buf).With().Timestamp().Logger()
+	zl := zerolog.New(&buf).Level(zerolog.FatalLevel).With().Timestamp().Logger()
 	logger := &Logger{logger: zl}
 
 	// We can test that the fatal event is created, but we can't actually call Fatal

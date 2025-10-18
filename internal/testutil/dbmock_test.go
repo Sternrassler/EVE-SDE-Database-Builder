@@ -10,6 +10,7 @@ import (
 )
 
 func TestMockDB_Exec(t *testing.T) {
+	t.Parallel()
 	db := testutil.NewMockDB()
 
 	expectedResult := testutil.NewMockResult(123, 5)
@@ -56,6 +57,7 @@ func TestMockDB_Exec(t *testing.T) {
 }
 
 func TestMockDB_ExecError(t *testing.T) {
+	t.Parallel()
 	db := testutil.NewMockDB()
 	expectedErr := errors.New("exec failed")
 
@@ -75,6 +77,7 @@ func TestMockDB_ExecError(t *testing.T) {
 }
 
 func TestMockDB_Query(t *testing.T) {
+	t.Parallel()
 	db := testutil.NewMockDB()
 
 	query := "SELECT * FROM test WHERE id = ?"
@@ -101,6 +104,7 @@ func TestMockDB_Query(t *testing.T) {
 }
 
 func TestMockDB_QueryRow(t *testing.T) {
+	t.Parallel()
 	db := testutil.NewMockDB()
 
 	query := "SELECT name FROM test WHERE id = ?"
@@ -127,6 +131,7 @@ func TestMockDB_QueryRow(t *testing.T) {
 }
 
 func TestMockDB_Prepare(t *testing.T) {
+	t.Parallel()
 	db := testutil.NewMockDB()
 
 	query := "SELECT * FROM test WHERE id = ?"
@@ -148,6 +153,7 @@ func TestMockDB_Prepare(t *testing.T) {
 }
 
 func TestMockDB_Begin(t *testing.T) {
+	t.Parallel()
 	db := testutil.NewMockDB()
 
 	_, err := db.Begin()
@@ -159,6 +165,7 @@ func TestMockDB_Begin(t *testing.T) {
 }
 
 func TestMockDB_Close(t *testing.T) {
+	t.Parallel()
 	db := testutil.NewMockDB()
 
 	if db.Closed {
@@ -176,6 +183,7 @@ func TestMockDB_Close(t *testing.T) {
 }
 
 func TestMockDB_Ping(t *testing.T) {
+	t.Parallel()
 	db := testutil.NewMockDB()
 
 	// Default implementation returns nil
@@ -197,6 +205,7 @@ func TestMockDB_Ping(t *testing.T) {
 }
 
 func TestMockDB_Reset(t *testing.T) {
+	t.Parallel()
 	db := testutil.NewMockDB()
 
 	// Make some calls
@@ -245,6 +254,7 @@ func TestMockDB_Reset(t *testing.T) {
 }
 
 func TestMockDB_MultipleOperations(t *testing.T) {
+	t.Parallel()
 	db := testutil.NewMockDB()
 
 	// Configure exec to return specific result
@@ -280,6 +290,7 @@ func TestMockDB_MultipleOperations(t *testing.T) {
 }
 
 func TestMockResult(t *testing.T) {
+	t.Parallel()
 	result := testutil.NewMockResult(42, 7)
 
 	lastID, err := result.LastInsertId()
@@ -300,6 +311,7 @@ func TestMockResult(t *testing.T) {
 }
 
 func TestMockResultWithError(t *testing.T) {
+	t.Parallel()
 	expectedErr := errors.New("database error")
 	result := testutil.NewMockResultWithError(expectedErr)
 
@@ -321,6 +333,7 @@ func TestMockResultWithError(t *testing.T) {
 }
 
 func TestSQLXAdapter(t *testing.T) {
+	t.Parallel()
 	// Create a real test database
 	db := database.NewTestDB(t)
 

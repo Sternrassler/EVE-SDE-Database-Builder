@@ -10,6 +10,7 @@ import (
 
 // TestDatabasePolicy tests the database-specific retry policy
 func TestDatabasePolicy(t *testing.T) {
+	t.Parallel()
 	policy := DatabasePolicy()
 
 	if policy.MaxRetries != 5 {
@@ -35,6 +36,7 @@ func TestDatabasePolicy(t *testing.T) {
 
 // TestHTTPPolicy tests the HTTP-specific retry policy
 func TestHTTPPolicy(t *testing.T) {
+	t.Parallel()
 	policy := HTTPPolicy()
 
 	if policy.MaxRetries != 3 {
@@ -60,6 +62,7 @@ func TestHTTPPolicy(t *testing.T) {
 
 // TestFileIOPolicy tests the file I/O specific retry policy
 func TestFileIOPolicy(t *testing.T) {
+	t.Parallel()
 	policy := FileIOPolicy()
 
 	if policy.MaxRetries != 2 {
@@ -85,6 +88,7 @@ func TestFileIOPolicy(t *testing.T) {
 
 // TestPolicyBuilder_Default tests the default policy builder
 func TestPolicyBuilder_Default(t *testing.T) {
+	t.Parallel()
 	builder := NewPolicyBuilder()
 	policy := builder.Build()
 
@@ -112,6 +116,7 @@ func TestPolicyBuilder_Default(t *testing.T) {
 
 // TestPolicyBuilder_FluentAPI tests the fluent API of PolicyBuilder
 func TestPolicyBuilder_FluentAPI(t *testing.T) {
+	t.Parallel()
 	policy := NewPolicyBuilder().
 		WithMaxRetries(10).
 		WithInitialDelay(200 * time.Millisecond).
@@ -143,6 +148,7 @@ func TestPolicyBuilder_FluentAPI(t *testing.T) {
 
 // TestPolicyBuilder_PartialConfiguration tests partial configuration via fluent API
 func TestPolicyBuilder_PartialConfiguration(t *testing.T) {
+	t.Parallel()
 	// Only set MaxRetries, others should be default
 	policy := NewPolicyBuilder().
 		WithMaxRetries(7).
@@ -164,6 +170,7 @@ func TestPolicyBuilder_PartialConfiguration(t *testing.T) {
 
 // TestPolicyConfig_ToConfig tests converting Policy to PolicyConfig
 func TestPolicyConfig_ToConfig(t *testing.T) {
+	t.Parallel()
 	policy := &Policy{
 		MaxRetries:   5,
 		InitialDelay: 100 * time.Millisecond,
@@ -197,6 +204,7 @@ func TestPolicyConfig_ToConfig(t *testing.T) {
 
 // TestPolicyConfig_FromConfig tests converting PolicyConfig to Policy
 func TestPolicyConfig_FromConfig(t *testing.T) {
+	t.Parallel()
 	config := PolicyConfig{
 		MaxRetries:     7,
 		InitialDelayMs: 250,
@@ -230,6 +238,7 @@ func TestPolicyConfig_FromConfig(t *testing.T) {
 
 // TestPolicyConfig_TOMLRoundtrip tests TOML serialization and deserialization
 func TestPolicyConfig_TOMLRoundtrip(t *testing.T) {
+	t.Parallel()
 	original := &Policy{
 		MaxRetries:   5,
 		InitialDelay: 150 * time.Millisecond,
@@ -285,6 +294,7 @@ func TestPolicyConfig_TOMLRoundtrip(t *testing.T) {
 
 // TestPolicyConfig_TOMLFormat tests the actual TOML format
 func TestPolicyConfig_TOMLFormat(t *testing.T) {
+	t.Parallel()
 	policy := DatabasePolicy()
 	config := policy.ToConfig()
 
@@ -317,6 +327,7 @@ func TestPolicyConfig_TOMLFormat(t *testing.T) {
 
 // TestAllPredefinedPolicies tests that all predefined policies can be created
 func TestAllPredefinedPolicies(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		name   string
 		policy *Policy
@@ -328,6 +339,7 @@ func TestAllPredefinedPolicies(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			if tt.policy == nil {
 				t.Errorf("%s returned nil", tt.name)
 			}
@@ -353,6 +365,7 @@ func TestAllPredefinedPolicies(t *testing.T) {
 
 // TestPolicyBuilder_Chainability tests that all builder methods return the builder
 func TestPolicyBuilder_Chainability(t *testing.T) {
+	t.Parallel()
 	builder := NewPolicyBuilder()
 
 	// All methods should return the builder for chaining
@@ -370,6 +383,7 @@ func TestPolicyBuilder_Chainability(t *testing.T) {
 
 // TestPolicyConfig_EdgeCases tests edge cases in config conversion
 func TestPolicyConfig_EdgeCases(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		name   string
 		config PolicyConfig
@@ -408,6 +422,7 @@ func TestPolicyConfig_EdgeCases(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			// Convert to Policy and back
 			policy := FromConfig(tt.config)
 			roundtrip := policy.ToConfig()
