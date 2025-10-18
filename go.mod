@@ -5,6 +5,7 @@ go 1.24.7
 require (
 	github.com/BurntSushi/toml v1.5.0
 	github.com/jmoiron/sqlx v1.4.0
+	github.com/leanovate/gopter v0.2.11
 	github.com/mattn/go-colorable v0.1.13
 	github.com/mattn/go-isatty v0.0.20
 	github.com/mattn/go-sqlite3 v1.14.32
