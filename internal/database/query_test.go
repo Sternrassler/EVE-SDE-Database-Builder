@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"strings"
 	"testing"
 	"time"
 
@@ -604,5 +605,272 @@ func TestQueryAll_ContextTimeout(t *testing.T) {
 
 	if !errors.Is(err, context.DeadlineExceeded) {
 		t.Errorf("Expected context.DeadlineExceeded error, got: %v", err)
+	}
+}
+
+// mockQueryer implements sqlx.QueryerContext for testing fallback paths
+type mockQueryer struct {
+	db *sqlx.DB
+}
+
+func (m *mockQueryer) QueryContext(ctx context.Context, query string, args ...interface{}) (*sql.Rows, error) {
+	return m.db.QueryContext(ctx, query, args...)
+}
+
+func (m *mockQueryer) QueryxContext(ctx context.Context, query string, args ...interface{}) (*sqlx.Rows, error) {
+	return m.db.QueryxContext(ctx, query, args...)
+}
+
+func (m *mockQueryer) QueryRowxContext(ctx context.Context, query string, args ...interface{}) *sqlx.Row {
+	return m.db.QueryRowxContext(ctx, query, args...)
+}
+
+// TestQueryRow_FallbackPath tests QueryRow with a custom QueryerContext (not *sqlx.DB or *sqlx.Tx)
+func TestQueryRow_FallbackPath(t *testing.T) {
+	// Create a real database to get actual rows
+	db, err := NewDB(":memory:")
+	if err != nil {
+		t.Fatalf("Failed to create database: %v", err)
+	}
+	defer func() {
+		_ = Close(db)
+	}()
+
+	// Create test table and insert data
+	_, err = db.Exec(`CREATE TABLE test (value INTEGER)`)
+	if err != nil {
+		t.Fatalf("Failed to create table: %v", err)
+	}
+	_, err = db.Exec("INSERT INTO test (value) VALUES (?)", 42)
+	if err != nil {
+		t.Fatalf("Failed to insert data: %v", err)
+	}
+
+	// Use mock queryer that wraps the db to trigger fallback path
+	ctx := context.Background()
+	mock := &mockQueryer{db: db}
+	value, err := QueryRow[int](ctx, mock, "SELECT value FROM test")
+	if err != nil {
+		t.Fatalf("QueryRow with fallback path failed: %v", err)
+	}
+
+	if value != 42 {
+		t.Errorf("Expected value 42, got %d", value)
+	}
+}
+
+// TestQueryRow_FallbackPath_NoRows tests QueryRow fallback path with no rows
+func TestQueryRow_FallbackPath_NoRows(t *testing.T) {
+	db, err := NewDB(":memory:")
+	if err != nil {
+		t.Fatalf("Failed to create database: %v", err)
+	}
+	defer func() {
+		_ = Close(db)
+	}()
+
+	// Create empty table
+	_, err = db.Exec(`CREATE TABLE test (value INTEGER)`)
+	if err != nil {
+		t.Fatalf("Failed to create table: %v", err)
+	}
+
+	// Use mock queryer with empty table
+	ctx := context.Background()
+	mock := &mockQueryer{db: db}
+	_, err = QueryRow[int](ctx, mock, "SELECT value FROM test")
+	if err == nil {
+		t.Fatal("Expected error for no rows, got nil")
+	}
+
+	if !apperrors.IsValidation(err) {
+		t.Errorf("Expected validation error, got: %v", err)
+	}
+}
+
+// mockQueryerError implements sqlx.QueryerContext for testing error paths
+type mockQueryerError struct {
+	err error
+}
+
+func (m *mockQueryerError) QueryContext(ctx context.Context, query string, args ...interface{}) (*sql.Rows, error) {
+	return nil, m.err
+}
+
+func (m *mockQueryerError) QueryxContext(ctx context.Context, query string, args ...interface{}) (*sqlx.Rows, error) {
+	return nil, m.err
+}
+
+func (m *mockQueryerError) QueryRowxContext(ctx context.Context, query string, args ...interface{}) *sqlx.Row {
+	return nil
+}
+
+// TestQueryRow_FallbackPath_QueryError tests QueryRow fallback path with query error
+func TestQueryRow_FallbackPath_QueryError(t *testing.T) {
+	ctx := context.Background()
+	mock := &mockQueryerError{err: sql.ErrConnDone}
+
+	_, err := QueryRow[int](ctx, mock, "SELECT value FROM test")
+	if err == nil {
+		t.Fatal("Expected error, got nil")
+	}
+
+	if !errors.Is(err, sql.ErrConnDone) {
+		t.Errorf("Expected sql.ErrConnDone in error chain, got: %v", err)
+	}
+}
+
+// TestQueryAll_FallbackPath tests QueryAll with a custom QueryerContext
+func TestQueryAll_FallbackPath(t *testing.T) {
+	db, err := NewDB(":memory:")
+	if err != nil {
+		t.Fatalf("Failed to create database: %v", err)
+	}
+	defer func() {
+		_ = Close(db)
+	}()
+
+	// Create test table and insert data
+	_, err = db.Exec(`CREATE TABLE test (value INTEGER)`)
+	if err != nil {
+		t.Fatalf("Failed to create table: %v", err)
+	}
+	_, err = db.Exec("INSERT INTO test (value) VALUES (1), (2), (3)")
+	if err != nil {
+		t.Fatalf("Failed to insert data: %v", err)
+	}
+
+	// Use mock queryer to trigger fallback path
+	ctx := context.Background()
+	mock := &mockQueryer{db: db}
+	values, err := QueryAll[int](ctx, mock, "SELECT value FROM test ORDER BY value")
+	if err != nil {
+		t.Fatalf("QueryAll with fallback path failed: %v", err)
+	}
+
+	if len(values) != 3 {
+		t.Fatalf("Expected 3 values, got %d", len(values))
+	}
+
+	for i, v := range values {
+		if v != i+1 {
+			t.Errorf("Expected value %d, got %d", i+1, v)
+		}
+	}
+}
+
+// TestQueryAll_FallbackPath_EmptyResult tests QueryAll fallback path with no rows
+func TestQueryAll_FallbackPath_EmptyResult(t *testing.T) {
+	db, err := NewDB(":memory:")
+	if err != nil {
+		t.Fatalf("Failed to create database: %v", err)
+	}
+	defer func() {
+		_ = Close(db)
+	}()
+
+	// Create empty table
+	_, err = db.Exec(`CREATE TABLE test (value INTEGER)`)
+	if err != nil {
+		t.Fatalf("Failed to create table: %v", err)
+	}
+
+	// Use mock queryer with empty table
+	ctx := context.Background()
+	mock := &mockQueryer{db: db}
+	values, err := QueryAll[int](ctx, mock, "SELECT value FROM test")
+	if err != nil {
+		t.Fatalf("QueryAll failed: %v", err)
+	}
+
+	if values == nil {
+		t.Fatal("Expected empty slice, got nil")
+	}
+
+	if len(values) != 0 {
+		t.Errorf("Expected 0 values, got %d", len(values))
+	}
+}
+
+// TestQueryAll_FallbackPath_QueryError tests QueryAll fallback path with query error
+func TestQueryAll_FallbackPath_QueryError(t *testing.T) {
+	ctx := context.Background()
+	mock := &mockQueryerError{err: sql.ErrConnDone}
+
+	_, err := QueryAll[int](ctx, mock, "SELECT value FROM test")
+	if err == nil {
+		t.Fatal("Expected error, got nil")
+	}
+
+	if !errors.Is(err, sql.ErrConnDone) {
+		t.Errorf("Expected sql.ErrConnDone in error chain, got: %v", err)
+	}
+}
+
+// TestQueryRow_FallbackPath_ScanError tests QueryRow fallback path with scan error
+func TestQueryRow_FallbackPath_ScanError(t *testing.T) {
+	db, err := NewDB(":memory:")
+	if err != nil {
+		t.Fatalf("Failed to create database: %v", err)
+	}
+	defer func() {
+		_ = Close(db)
+	}()
+
+	// Create test table with string column
+	_, err = db.Exec(`CREATE TABLE test (value TEXT)`)
+	if err != nil {
+		t.Fatalf("Failed to create table: %v", err)
+	}
+	_, err = db.Exec("INSERT INTO test (value) VALUES (?)", "not_an_int")
+	if err != nil {
+		t.Fatalf("Failed to insert data: %v", err)
+	}
+
+	// Try to scan string into int - should fail with scan error in fallback path
+	ctx := context.Background()
+	mock := &mockQueryer{db: db}
+	_, err = QueryRow[int](ctx, mock, "SELECT value FROM test")
+	if err == nil {
+		t.Fatal("Expected scan error, got nil")
+	}
+
+	// Should contain "scan" in error message
+	if !strings.Contains(err.Error(), "failed to scan row") {
+		t.Errorf("Expected scan error, got: %v", err)
+	}
+}
+
+// TestQueryAll_FallbackPath_ScanError tests QueryAll fallback path with scan error
+func TestQueryAll_FallbackPath_ScanError(t *testing.T) {
+	db, err := NewDB(":memory:")
+	if err != nil {
+		t.Fatalf("Failed to create database: %v", err)
+	}
+	defer func() {
+		_ = Close(db)
+	}()
+
+	// Create test table with string column
+	_, err = db.Exec(`CREATE TABLE test (value TEXT)`)
+	if err != nil {
+		t.Fatalf("Failed to create table: %v", err)
+	}
+	_, err = db.Exec("INSERT INTO test (value) VALUES (?)", "not_an_int")
+	if err != nil {
+		t.Fatalf("Failed to insert data: %v", err)
+	}
+
+	// Try to scan string into int - should fail with scan error in fallback path
+	ctx := context.Background()
+	mock := &mockQueryer{db: db}
+	_, err = QueryAll[int](ctx, mock, "SELECT value FROM test")
+	if err == nil {
+		t.Fatal("Expected scan error, got nil")
+	}
+
+	// Should contain "scan" in error message
+	if !strings.Contains(err.Error(), "failed to scan row") {
+		t.Errorf("Expected scan error, got: %v", err)
 	}
 }
