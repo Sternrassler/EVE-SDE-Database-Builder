@@ -14,7 +14,7 @@
 # Environment Variables:
 #   FUZZ_TIME - Fuzzing duration (e.g., "30s", "5m") overrides iteration count
 
-set -euo pipefail
+set -uo pipefail
 
 # Configuration
 ITERATIONS="${1:-100000}"
@@ -66,13 +66,18 @@ for fuzz_test in "${FUZZ_TESTS[@]}"; do
     echo "Running: $fuzz_test"
     echo "----------------------------------------"
     
-    # Run the fuzz test
-    if go test -v "$PACKAGE" -fuzz="^${fuzz_test}$" "$FUZZ_ARG"; then
+    # Run the fuzz test (capture exit code without exiting on error)
+    set +e
+    go test -v "$PACKAGE" -fuzz="^${fuzz_test}$" "$FUZZ_ARG"
+    TEST_EXIT_CODE=$?
+    set -e
+    
+    if [ $TEST_EXIT_CODE -eq 0 ]; then
         echo -e "${GREEN}✓ $fuzz_test PASSED${NC}"
-        ((PASSED++))
+        PASSED=$((PASSED + 1))
     else
         echo -e "${RED}✗ $fuzz_test FAILED${NC}"
-        ((FAILED++))
+        FAILED=$((FAILED + 1))
     fi
     echo ""
 done
