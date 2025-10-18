@@ -64,9 +64,9 @@ func TestLoadJSONLFile(t *testing.T) {
 
 func TestLoadJSONLFileAsRecords(t *testing.T) {
 	type InvType struct {
-		TypeID   int     `json:"typeID"`
-		TypeName string  `json:"typeName"`
-		GroupID  *int    `json:"groupID"`
+		TypeID   int      `json:"typeID"`
+		TypeName string   `json:"typeName"`
+		GroupID  *int     `json:"groupID"`
 		Mass     *float64 `json:"mass"`
 	}
 

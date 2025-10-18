@@ -10,7 +10,7 @@ import (
 // Example demonstrates basic usage of testutil for loading test data.
 func Example() {
 	// Normally you'd use testing.T, but for example purposes we'll handle errors differently
-	
+
 	// Get the path to test data directory
 	testDataPath := testutil.GetTestDataPath()
 	fmt.Printf("Test data directory: %s\n", testDataPath)
@@ -40,17 +40,17 @@ func Example() {
 func ExampleLoadJSONLFileAsRecords() {
 	// This would normally be in a test function with *testing.T
 	// For demonstration, we'll use a mock that panics on error
-	
+
 	type InvType struct {
-		TypeID   int     `json:"typeID"`
-		TypeName string  `json:"typeName"`
-		GroupID  *int    `json:"groupID"`
+		TypeID   int      `json:"typeID"`
+		TypeName string   `json:"typeName"`
+		GroupID  *int     `json:"groupID"`
 		Mass     *float64 `json:"mass"`
 	}
 
 	// In a real test, you'd pass testing.T:
 	// records := testutil.LoadJSONLFileAsRecords[InvType](t, "invTypes")
-	
+
 	// For this example, we'll just show the concept
 	fmt.Println("Example: Loading invTypes records")
 	fmt.Println("Records would contain TypeID, TypeName, GroupID, Mass, etc.")
@@ -65,11 +65,11 @@ func ExampleLoadJSONLFileAsRecords() {
 // ExampleTableNames demonstrates getting all available test table names.
 func ExampleTableNames() {
 	tables := testutil.TableNames()
-	
+
 	// Show a few example tables
 	fmt.Printf("Total tables: %d\n", len(tables))
 	fmt.Println("Sample tables:")
-	
+
 	sampleTables := []string{"invTypes", "invGroups", "mapSolarSystems", "dogmaAttributes", "chrRaces"}
 	for _, tableName := range sampleTables {
 		// Check if table exists in our list
@@ -99,7 +99,7 @@ func ExampleTableNames() {
 func Example_withParser() {
 	// This example shows the conceptual usage with parser
 	// In real tests, you'd import the parser package
-	
+
 	fmt.Println("Example workflow:")
 	fmt.Println("1. Load test data using testutil.LoadJSONLFileAsRecords")
 	fmt.Println("2. Create parser instance")
@@ -125,7 +125,7 @@ func Example_withParser() {
 // ExampleCreateTempDir demonstrates creating temporary test directories.
 func ExampleCreateTempDir() {
 	// This would normally be in a test function with *testing.T
-	
+
 	fmt.Println("Creating temporary directory for test files")
 	fmt.Println("Directory is automatically cleaned up after test")
 	fmt.Println("Typical usage:")
@@ -147,7 +147,7 @@ func ExampleCreateTempDir() {
 // Example_integrationTest demonstrates a full integration test pattern.
 func Example_integrationTest() {
 	// This shows a complete integration test workflow
-	
+
 	fmt.Println("Integration Test Pattern:")
 	fmt.Println()
 	fmt.Println("func TestParserIntegration(t *testing.T) {")
