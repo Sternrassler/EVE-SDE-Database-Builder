@@ -138,9 +138,9 @@ func ApplyMigrationsFromCLI(dbPath string) error {
 
 	// Find migrations directory - look for it relative to executable or common locations
 	migrationsDirs := []string{
-		"./migrations/sqlite",          // Current directory
-		"../migrations/sqlite",         // Parent directory
-		"../../migrations/sqlite",      // Two levels up
+		"./migrations/sqlite",                          // Current directory
+		"../migrations/sqlite",                         // Parent directory
+		"../../migrations/sqlite",                      // Two levels up
 		"./EVE-SDE-Database-Builder/migrations/sqlite", // In case we're in a subdirectory
 	}
 
