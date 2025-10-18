@@ -1,0 +1,3 @@
+{"asteroidBeltID":40000201,"solarSystemID":30000001,"asteroidBeltName":"Tanoo I - Asteroid Belt 1","typeID":15,"x":1.5e11,"y":1.0e9,"z":0.0,"celestialIndex":1,"orbitIndex":1,"planetID":40000001}
+{"asteroidBeltID":40000202,"solarSystemID":30000142,"asteroidBeltName":"Jita IV - Asteroid Belt 1","typeID":15,"x":2.0e11,"y":1.0e10,"z":-5.0e10,"celestialIndex":4,"orbitIndex":1,"planetID":40000002}
+{"asteroidBeltID":40000203,"solarSystemID":30000003,"asteroidBeltName":"H-PA29 III - Asteroid Belt 1","typeID":15,"x":-3.0e11,"y":2.0e11,"z":1.0e11,"celestialIndex":3,"orbitIndex":1,"planetID":40000003}

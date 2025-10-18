@@ -1,0 +1,3 @@
+{"factionID":500001,"typeID":3775,"standingLoss":0.8,"confiscateMinSec":0.5,"fineByValue":1.0,"attackMinSec":0.0}
+{"factionID":500002,"typeID":3776,"standingLoss":0.6,"confiscateMinSec":0.5,"fineByValue":0.8,"attackMinSec":0.0}
+{"factionID":500003,"typeID":3777,"standingLoss":1.0,"confiscateMinSec":0.5,"fineByValue":1.2,"attackMinSec":0.0}

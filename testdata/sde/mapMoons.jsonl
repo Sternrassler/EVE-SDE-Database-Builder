@@ -1,0 +1,3 @@
+{"moonID":40000101,"solarSystemID":30000001,"moonName":"Tanoo I - Moon 1","typeID":14,"x":1.5e11,"y":5.0e8,"z":0.0,"celestialIndex":1,"orbitIndex":1,"planetID":40000001,"radius":300000.0}
+{"moonID":40000102,"solarSystemID":30000142,"moonName":"Jita IV - Moon 4","typeID":14,"x":2.0e11,"y":1.0e10,"z":-5.0e10,"celestialIndex":4,"orbitIndex":4,"planetID":40000002,"radius":350000.0}
+{"moonID":40000103,"solarSystemID":30000003,"moonName":"H-PA29 III - Moon 1","typeID":14,"x":-3.0e11,"y":2.0e11,"z":1.0e11,"celestialIndex":3,"orbitIndex":1,"planetID":40000003,"radius":280000.0}

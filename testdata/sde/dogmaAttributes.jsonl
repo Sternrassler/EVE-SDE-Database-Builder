@@ -1,0 +1,3 @@
+{"attributeID":4,"attributeName":"agility","description":"Agility of ship","iconID":null,"defaultValue":0.0,"published":1,"displayName":"Inertia Modifier","unitID":null,"stackable":1,"highIsGood":0}
+{"attributeID":9,"attributeName":"structureUniformity","description":"Structure uniformity","iconID":null,"defaultValue":1.0,"published":0,"displayName":"Structure Hitpoints","unitID":null,"stackable":1,"highIsGood":1}
+{"attributeID":37,"attributeName":"maxVelocity","description":"Maximum velocity","iconID":null,"defaultValue":0.0,"published":1,"displayName":"Max Velocity","unitID":1,"stackable":0,"highIsGood":1}

@@ -1,0 +1,3 @@
+{"constellationID":20000001,"constellationName":"Tanoo","regionID":10000001,"x":4.5e16,"y":2.0e16,"z":-1.8e17,"xMin":4.4e16,"xMax":4.6e16,"yMin":1.9e16,"yMax":2.1e16,"zMin":-1.9e17,"zMax":-1.7e17,"factionID":null,"radius":1.0e16,"descriptionID":null}
+{"constellationID":20000002,"constellationName":"Kimotoro","regionID":10000002,"x":1.2e17,"y":5.0e16,"z":-3.0e16,"xMin":1.15e17,"xMax":1.25e17,"yMin":4.8e16,"yMax":5.2e16,"zMin":-3.5e16,"zMax":-2.5e16,"factionID":500001,"radius":1.2e16,"descriptionID":null}
+{"constellationID":20000003,"constellationName":"H-PA29","regionID":10000003,"x":-8.0e16,"y":1.5e17,"z":5.0e16,"xMin":-8.5e16,"xMax":-7.5e16,"yMin":1.45e17,"yMax":1.55e17,"zMin":4.5e16,"zMax":5.5e16,"factionID":null,"radius":1.1e16,"descriptionID":null}
