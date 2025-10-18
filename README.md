@@ -2,7 +2,7 @@
 
 [![Test](https://github.com/Sternrassler/EVE-SDE-Database-Builder/workflows/Test/badge.svg)](https://github.com/Sternrassler/EVE-SDE-Database-Builder/actions/workflows/test.yml)
 [![Lint](https://github.com/Sternrassler/EVE-SDE-Database-Builder/workflows/Lint/badge.svg)](https://github.com/Sternrassler/EVE-SDE-Database-Builder/actions/workflows/lint.yml)
-[![Coverage](https://github.com/Sternrassler/EVE-SDE-Database-Builder/workflows/Coverage/badge.svg)](https://github.com/Sternrassler/EVE-SDE-Database-Builder/actions/workflows/coverage.yml)
+[![codecov](https://codecov.io/gh/Sternrassler/EVE-SDE-Database-Builder/branch/main/graph/badge.svg)](https://codecov.io/gh/Sternrassler/EVE-SDE-Database-Builder)
 [![Release](https://img.shields.io/github/v/release/Sternrassler/EVE-SDE-Database-Builder)](https://github.com/Sternrassler/EVE-SDE-Database-Builder/releases/latest)
 [![License](https://img.shields.io/github/license/Sternrassler/EVE-SDE-Database-Builder)](LICENSE)
 
