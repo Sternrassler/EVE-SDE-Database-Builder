@@ -1,5 +1,11 @@
 # EVE SDE Database Builder (Go Edition)
 
+[![Test](https://github.com/Sternrassler/EVE-SDE-Database-Builder/workflows/Test/badge.svg)](https://github.com/Sternrassler/EVE-SDE-Database-Builder/actions/workflows/test.yml)
+[![Lint](https://github.com/Sternrassler/EVE-SDE-Database-Builder/workflows/Lint/badge.svg)](https://github.com/Sternrassler/EVE-SDE-Database-Builder/actions/workflows/lint.yml)
+[![Coverage](https://github.com/Sternrassler/EVE-SDE-Database-Builder/workflows/Coverage/badge.svg)](https://github.com/Sternrassler/EVE-SDE-Database-Builder/actions/workflows/coverage.yml)
+[![Release](https://img.shields.io/github/v/release/Sternrassler/EVE-SDE-Database-Builder)](https://github.com/Sternrassler/EVE-SDE-Database-Builder/releases/latest)
+[![License](https://img.shields.io/github/license/Sternrassler/EVE-SDE-Database-Builder)](LICENSE)
+
 **Status:** 🚀 Core Implementation Complete (51/51 Parsers Ready)
 
 Modernes CLI-Tool für den Import von EVE Online Static Data Export (SDE) JSONL-Dateien in eine SQLite-Datenbank. Komplettes Refactoring der VB.NET Legacy-Version mit Fokus auf Performance, Wartbarkeit und Testbarkeit.
@@ -160,6 +166,36 @@ esdedb completion fish > ~/.config/fish/completions/esdedb.fish
 ├── migrations/sqlite/       # Schema Migrations
 ├── tools/                   # Code Generation Tools
 └── docs/                    # Documentation & ADRs
+```
+
+---
+
+## CI/CD Pipeline
+
+Vollständig automatisierte CI/CD-Pipeline mit GitHub Actions:
+
+- **🔍 Lint:** Automatische Code-Qualitätsprüfung mit golangci-lint
+- **✅ Test:** Alle Tests mit Race Detector auf PRs und Main
+- **📊 Coverage:** Automatische Coverage-Reports und Trend-Tracking
+- **🚀 Release:** Multi-Platform Builds (Linux, macOS, Windows) bei Git Tags
+
+**Workflows:**
+- [`pr-check.yml`](.github/workflows/pr-check.yml) - PR Quality Gates (Lint + Test + Coverage)
+- [`coverage.yml`](.github/workflows/coverage.yml) - Detaillierte Coverage-Reports
+- [`release.yml`](.github/workflows/release.yml) - Automatisierte Release-Erstellung
+
+**Dokumentation:** Siehe [docs/ci-cd/README.md](docs/ci-cd/README.md)
+
+**Lokale Validierung:**
+```bash
+# Vor dem Push ausführen:
+make lint          # Code-Qualität
+make test          # Unit Tests
+make coverage      # Coverage Report
+make build         # Kompilierung
+
+# Release-Bereitschaft prüfen:
+make release-check
 ```
 
 ---

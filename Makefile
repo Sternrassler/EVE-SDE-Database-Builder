@@ -129,4 +129,32 @@ migrate-clean: ## Delete database file (WARNING: destructive)
 
 migrate-reset: migrate-clean migrate-up ## Reset database (clean + migrate-up)
 
-.PHONY: migrate-status migrate-up migrate-down migrate-clean migrate-reset
+# Release Targets
+release-check: ## Check if repository is ready for release
+	@echo "Checking release readiness..."
+	@echo ""
+	@echo "1. Checking VERSION file..."
+	@if [ ! -f VERSION ]; then echo "❌ VERSION file not found"; exit 1; fi
+	@cat VERSION
+	@echo ""
+	@echo "2. Checking CHANGELOG.md..."
+	@if [ ! -f CHANGELOG.md ]; then echo "❌ CHANGELOG.md not found"; exit 1; fi
+	@if ! grep -q "\[Unreleased\]" CHANGELOG.md; then echo "⚠️  Warning: No [Unreleased] section in CHANGELOG.md"; fi
+	@echo "✅ CHANGELOG.md exists"
+	@echo ""
+	@echo "3. Running tests..."
+	@$(MAKE) test
+	@echo ""
+	@echo "4. Running lint..."
+	@$(MAKE) lint
+	@echo ""
+	@echo "✅ Release check passed!"
+	@echo ""
+	@echo "To create a release:"
+	@echo "  1. Update VERSION file with new version"
+	@echo "  2. Update CHANGELOG.md [Unreleased] → [X.Y.Z] - YYYY-MM-DD"
+	@echo "  3. Commit changes: git commit -am 'chore: Release vX.Y.Z'"
+	@echo "  4. Create tag: git tag vX.Y.Z"
+	@echo "  5. Push: git push origin main && git push origin vX.Y.Z"
+
+.PHONY: migrate-status migrate-up migrate-down migrate-clean migrate-reset release-check

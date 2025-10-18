@@ -36,3 +36,6 @@ vendor/
 
 # Generated code (regenerated via make generate-parsers)
 internal/parser/generated/
+
+# Build artifacts
+dist/
